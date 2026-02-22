@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { soundManager } from '@/utils/sound-manager';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
 import { LearningBuddy } from '@/components/learning-buddy';
@@ -248,6 +249,7 @@ export default function EnglishScreen() {
     setAlphabetQuizAnswered(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -262,6 +264,7 @@ export default function EnglishScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimeout(() => {
         setGameResults({ score, total: alphabetQuizQuestions.length, correct: alphabetQuizIndex });
@@ -316,6 +319,7 @@ export default function EnglishScreen() {
         }
       }, 2000);
     } else if (newInput.length === spellingGame.word.length && newInput.join('') !== spellingGame.word) {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setSpellingTimerActive(false);
       setTimeout(() => {

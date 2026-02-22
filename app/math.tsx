@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { soundManager } from '@/utils/sound-manager';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
 import { LearningBuddy } from '@/components/learning-buddy';
@@ -324,6 +325,7 @@ export default function MathScreen() {
     setShowAnswerFeedback(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -342,6 +344,7 @@ export default function MathScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimerActive(false);
       setTimeout(() => {
@@ -476,6 +479,7 @@ export default function MathScreen() {
     setShowAnswerFeedback(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -494,6 +498,7 @@ export default function MathScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimerActive(false);
       setTimeout(() => {
@@ -841,6 +846,7 @@ export default function MathScreen() {
           <TouchableOpacity
             key={game.id}
             onPress={() => {
+              soundManager.playSound('click');
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setSelectedGame(game.id);
             }}

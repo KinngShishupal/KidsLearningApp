@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { soundManager } from '@/utils/sound-manager';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -66,7 +67,10 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
   return (
     <Animated.View style={[styles.cardWrapper, animatedStyle]}>
       <TouchableOpacity
-        onPress={() => router.push(subject.route)}
+        onPress={() => {
+          soundManager.playSound('click');
+          router.push(subject.route);
+        }}
         activeOpacity={0.9}
       >
         <LinearGradient

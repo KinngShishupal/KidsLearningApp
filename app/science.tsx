@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { soundManager } from '@/utils/sound-manager';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
 import { LearningBuddy } from '@/components/learning-buddy';
@@ -302,6 +303,7 @@ export default function ScienceScreen() {
     setShowAnswerFeedback(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -320,6 +322,7 @@ export default function ScienceScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimerActive(false);
       setTimeout(() => {
@@ -338,6 +341,7 @@ export default function ScienceScreen() {
     setShowAnswerFeedback(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -356,6 +360,7 @@ export default function ScienceScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimerActive(false);
       setTimeout(() => {
@@ -477,6 +482,7 @@ export default function ScienceScreen() {
     setNatureSelectedAnswers(newAnswers);
 
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -501,6 +507,7 @@ export default function ScienceScreen() {
       }
     } else {
       setNatureTimerActive(false);
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimeout(() => {
         const totalCorrect = (natureQuestionIndex * natureQuiz.options.filter(o => o.correct).length) + 

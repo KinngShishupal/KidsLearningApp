@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, Modal, Share } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { PersonalBestBadge } from '@/components/personal-best-badge';
 import { GameTracker } from '@/utils/game-tracker';
+import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -80,6 +81,8 @@ export function GameResultsModal({
 
   useEffect(() => {
     if (visible) {
+      const soundType = percentage >= 80 ? 'celebration' : percentage >= 50 ? 'achievement' : 'coin';
+      soundManager.playSound(soundType);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
       scale.value = withSpring(1, { damping: 12, stiffness: 100 });
@@ -228,6 +231,7 @@ export function GameResultsModal({
               <TouchableOpacity
                 style={[styles.button, styles.restartButton, { backgroundColor: color }]}
                 onPress={() => {
+                  soundManager.playSound('click');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   onRestart();
                 }}
@@ -239,6 +243,7 @@ export function GameResultsModal({
               <TouchableOpacity
                 style={[styles.button, styles.homeButton]}
                 onPress={() => {
+                  soundManager.playSound('whoosh');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   onHome();
                 }}
