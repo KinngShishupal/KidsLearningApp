@@ -38,7 +38,11 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - **Science Challenge**: Timed quiz about animals and nature (5 questions)
 
 ### 📚 English Section (7 Games!)
-- **Alphabet Fun**: Learn letters A-Z with fun words and emojis
+- **Alphabet Fun**: Complete A-Z learning experience!
+  - **Explore Mode**: All 26 letters with words, emojis, and phonetic sounds
+  - **Quiz Mode**: Test letter recognition with 8 picture-matching questions
+  - Interactive sound pronunciation guide
+  - Large display card shows selected letter details
 - **Spelling Bee**: Spell words by tapping letters
 - **Rhyme Time**: Find words that rhyme together
 - **Letter Memory**: Match letter symbol pairs

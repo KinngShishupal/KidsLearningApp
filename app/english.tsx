@@ -39,7 +39,7 @@ export default function EnglishScreen() {
     { 
       id: 'alphabet', 
       title: 'Alphabet Fun', 
-      description: 'Learn your ABCs', 
+      description: 'All 26 letters + Quiz mode!', 
       icon: 'alphabet-latin',
       difficulty: 'Easy',
       colors: ['#E8F5E9', '#C8E6C9']
@@ -106,17 +106,50 @@ export default function EnglishScreen() {
     { question: 'Opposite of "happy"?', options: ['Sad', 'Glad', 'Jolly', 'Merry'], correctAnswer: 'Sad', emoji: '😢' },
   ];
 
-  const alphabetGame = {
-    letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
-    words: {
-      A: { word: 'Apple', emoji: '🍎' },
-      B: { word: 'Ball', emoji: '⚽' },
-      C: { word: 'Cat', emoji: '🐱' },
-      D: { word: 'Dog', emoji: '🐕' },
-      E: { word: 'Elephant', emoji: '🐘' },
-      F: { word: 'Fish', emoji: '🐠' },
-    },
+  const alphabetData = {
+    A: { word: 'Apple', emoji: '🍎', sound: 'ah' },
+    B: { word: 'Ball', emoji: '⚽', sound: 'buh' },
+    C: { word: 'Cat', emoji: '🐱', sound: 'kuh' },
+    D: { word: 'Dog', emoji: '🐕', sound: 'duh' },
+    E: { word: 'Elephant', emoji: '🐘', sound: 'eh' },
+    F: { word: 'Fish', emoji: '🐠', sound: 'fuh' },
+    G: { word: 'Grapes', emoji: '🍇', sound: 'guh' },
+    H: { word: 'Hat', emoji: '🎩', sound: 'huh' },
+    I: { word: 'Ice Cream', emoji: '🍦', sound: 'ih' },
+    J: { word: 'Juice', emoji: '🧃', sound: 'juh' },
+    K: { word: 'Kite', emoji: '🪁', sound: 'kuh' },
+    L: { word: 'Lion', emoji: '🦁', sound: 'luh' },
+    M: { word: 'Moon', emoji: '🌙', sound: 'muh' },
+    N: { word: 'Nest', emoji: '🪺', sound: 'nuh' },
+    O: { word: 'Orange', emoji: '🍊', sound: 'oh' },
+    P: { word: 'Pizza', emoji: '🍕', sound: 'puh' },
+    Q: { word: 'Queen', emoji: '👸', sound: 'kwuh' },
+    R: { word: 'Rainbow', emoji: '🌈', sound: 'ruh' },
+    S: { word: 'Sun', emoji: '☀️', sound: 'sss' },
+    T: { word: 'Tree', emoji: '🌳', sound: 'tuh' },
+    U: { word: 'Umbrella', emoji: '☂️', sound: 'uh' },
+    V: { word: 'Volcano', emoji: '🌋', sound: 'vuh' },
+    W: { word: 'Watermelon', emoji: '🍉', sound: 'wuh' },
+    X: { word: 'Xylophone', emoji: '🎵', sound: 'ks' },
+    Y: { word: 'Yo-yo', emoji: '🪀', sound: 'yuh' },
+    Z: { word: 'Zebra', emoji: '🦓', sound: 'zuh' },
   };
+
+  const allLetters = Object.keys(alphabetData);
+  const [alphabetMode, setAlphabetMode] = useState<'explore' | 'quiz'>('explore');
+  const [alphabetQuizIndex, setAlphabetQuizIndex] = useState(0);
+  const [alphabetQuizAnswered, setAlphabetQuizAnswered] = useState(false);
+
+  const alphabetQuizQuestions = [
+    { letter: 'A', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🍎' },
+    { letter: 'B', options: ['🍎', '⚽', '🐱', '🐕'], answer: '⚽' },
+    { letter: 'C', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🐱' },
+    { letter: 'D', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🐕' },
+    { letter: 'E', options: ['🐘', '🐠', '🍇', '🎩'], answer: '🐘' },
+    { letter: 'F', options: ['🐘', '🐠', '🍇', '🎩'], answer: '🐠' },
+    { letter: 'L', options: ['🦁', '🌙', '🪺', '🍊'], answer: '🦁' },
+    { letter: 'S', options: ['☀️', '🌈', '🌳', '🍕'], answer: '☀️' },
+  ];
 
   const spellingGame = {
     image: '🐱',
@@ -136,8 +169,37 @@ export default function EnglishScreen() {
   };
 
   const handleLetterPress = (letter: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedLetter(letter);
+  };
+
+  const handleAlphabetQuizAnswer = (emoji: string) => {
+    const currentQuestion = alphabetQuizQuestions[alphabetQuizIndex];
+    const isCorrect = emoji === currentQuestion.answer;
+    
+    setAlphabetQuizAnswered(true);
+    
+    if (isCorrect) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const newScore = score + 10;
+      setScore(newScore);
+      
+      setTimeout(() => {
+        if (alphabetQuizIndex < alphabetQuizQuestions.length - 1) {
+          setAlphabetQuizIndex(alphabetQuizIndex + 1);
+          setAlphabetQuizAnswered(false);
+        } else {
+          setGameResults({ score: newScore, total: alphabetQuizQuestions.length, correct: alphabetQuizIndex + 1 });
+          setShowResultsModal(true);
+        }
+      }, 1500);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimeout(() => {
+        setGameResults({ score, total: alphabetQuizQuestions.length, correct: alphabetQuizIndex });
+        setShowResultsModal(true);
+      }, 1500);
+    }
   };
 
   const handleSpellingLetter = (letter: string) => {
@@ -189,6 +251,137 @@ export default function EnglishScreen() {
     }
   };
 
+  const renderAlphabetExplore = () => (
+    <>
+      <View style={styles.modeSelector}>
+        <TouchableOpacity
+          style={[styles.modeButton, alphabetMode === 'explore' && styles.modeButtonActive]}
+          onPress={() => setAlphabetMode('explore')}
+        >
+          <MaterialCommunityIcons name="book-open-page-variant" size={20} color={alphabetMode === 'explore' ? '#FFFFFF' : '#56C596'} />
+          <ThemedText style={[styles.modeButtonText, alphabetMode === 'explore' && styles.modeButtonTextActive]}>
+            Explore
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, alphabetMode === 'quiz' && styles.modeButtonActive]}
+          onPress={() => setAlphabetMode('quiz')}
+        >
+          <MaterialCommunityIcons name="head-question" size={20} color={alphabetMode === 'quiz' ? '#FFFFFF' : '#56C596'} />
+          <ThemedText style={[styles.modeButtonText, alphabetMode === 'quiz' && styles.modeButtonTextActive]}>
+            Quiz
+          </ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      {selectedLetter && (
+        <View style={styles.selectedLetterDisplay}>
+          <View style={styles.bigLetterCircle}>
+            <ThemedText style={styles.bigLetter}>{selectedLetter}</ThemedText>
+          </View>
+          <View style={styles.selectedLetterInfo}>
+            <ThemedText style={styles.selectedEmoji}>
+              {alphabetData[selectedLetter as keyof typeof alphabetData]?.emoji}
+            </ThemedText>
+            <ThemedText style={styles.selectedWord}>
+              {alphabetData[selectedLetter as keyof typeof alphabetData]?.word}
+            </ThemedText>
+            <View style={styles.soundBadge}>
+              <MaterialCommunityIcons name="volume-high" size={16} color="#56C596" />
+              <ThemedText style={styles.soundText}>
+                "{alphabetData[selectedLetter as keyof typeof alphabetData]?.sound}"
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <ScrollView style={styles.alphabetScroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.alphabetGrid}>
+          {allLetters.map((letter) => (
+            <TouchableOpacity
+              key={letter}
+              style={[
+                styles.letterCard,
+                selectedLetter === letter && styles.selectedLetterCard,
+              ]}
+              onPress={() => handleLetterPress(letter)}
+            >
+              <LinearGradient
+                colors={selectedLetter === letter ? ['#56C596', '#3AA76D'] : ['#FFFFFF', '#E8F8E8']}
+                style={styles.letterCardContent}
+              >
+                <ThemedText style={[
+                  styles.letterText,
+                  selectedLetter === letter && styles.selectedLetterText,
+                ]}>{letter}</ThemedText>
+                <ThemedText style={[styles.miniEmoji, selectedLetter === letter && styles.miniEmojiSelected]}>
+                  {alphabetData[letter as keyof typeof alphabetData]?.emoji}
+                </ThemedText>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </>
+  );
+
+  const renderAlphabetQuiz = () => {
+    const currentQuestion = alphabetQuizQuestions[alphabetQuizIndex];
+    const letterData = alphabetData[currentQuestion.letter as keyof typeof alphabetData];
+    
+    return (
+      <>
+        <View style={styles.questionHeader}>
+          <View style={styles.progressBadge}>
+            <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
+            <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
+              {alphabetQuizIndex + 1}/{alphabetQuizQuestions.length}
+            </ThemedText>
+          </View>
+          <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
+            <MaterialCommunityIcons name="school" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.categoryText}>Letter Quiz</ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.questionCard}>
+          <ThemedText style={styles.gameQuestion}>Which picture starts with letter:</ThemedText>
+          <View style={styles.quizLetterDisplay}>
+            <ThemedText style={styles.quizLetter}>{currentQuestion.letter}</ThemedText>
+            <View style={styles.soundBadge}>
+              <MaterialCommunityIcons name="volume-high" size={16} color="#56C596" />
+              <ThemedText style={styles.soundText}>"{letterData.sound}"</ThemedText>
+            </View>
+          </View>
+        </View>
+
+        <ThemedText style={styles.instructionText}>Tap the correct picture:</ThemedText>
+        <View style={styles.quizOptionsGrid}>
+          {currentQuestion.options.map((emoji, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.emojiQuizButton,
+                alphabetQuizAnswered && emoji === currentQuestion.answer && styles.correctEmojiButton,
+                alphabetQuizAnswered && emoji !== currentQuestion.answer && styles.incorrectEmojiButton,
+              ]}
+              onPress={() => handleAlphabetQuizAnswer(emoji)}
+              disabled={alphabetQuizAnswered}
+            >
+              <ThemedText style={styles.quizEmoji}>{emoji}</ThemedText>
+              {alphabetQuizAnswered && emoji === currentQuestion.answer && (
+                <View style={styles.emojiCheckBadge}>
+                  <MaterialCommunityIcons name="check" size={20} color="#FFFFFF" />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </>
+    );
+  };
+
   const renderAlphabetGame = () => (
     <View style={styles.gameContainer}>
       <View style={styles.questionHeader}>
@@ -202,47 +395,15 @@ export default function EnglishScreen() {
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
           <MaterialCommunityIcons name="format-letter-case" size={40} color="#56C596" />
         </View>
-        <ThemedText style={styles.gameQuestion}>Tap letters to learn!</ThemedText>
-        <ThemedText style={styles.instructionText}>Each letter has a fun word</ThemedText>
+        <ThemedText style={styles.gameQuestion}>
+          {alphabetMode === 'explore' ? 'Learn the Alphabet!' : 'Letter Recognition Quiz!'}
+        </ThemedText>
+        <ThemedText style={styles.instructionText}>
+          {alphabetMode === 'explore' ? 'Tap letters to see words and sounds' : 'Match letters to pictures'}
+        </ThemedText>
       </View>
 
-      <ScrollView style={styles.alphabetScroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.alphabetGrid}>
-          {alphabetGame.letters.map((letter) => (
-            <TouchableOpacity
-              key={letter}
-              style={[
-                styles.letterCard,
-                selectedLetter === letter && styles.selectedLetterCard,
-              ]}
-              onPress={() => handleLetterPress(letter)}
-            >
-              <LinearGradient
-                colors={selectedLetter === letter ? ['#56C596', '#3AA76D'] : ['#FFFFFF', '#F0F0F0']}
-                style={styles.letterCardContent}
-              >
-                <ThemedText style={[
-                  styles.letterText,
-                  selectedLetter === letter && styles.selectedLetterText,
-                ]}>{letter}</ThemedText>
-                {alphabetGame.words[letter as keyof typeof alphabetGame.words] && (
-                  <>
-                    <ThemedText style={styles.wordEmoji}>
-                      {alphabetGame.words[letter as keyof typeof alphabetGame.words].emoji}
-                    </ThemedText>
-                    <ThemedText style={[
-                      styles.wordText,
-                      selectedLetter === letter && styles.selectedWordText,
-                    ]}>
-                      {alphabetGame.words[letter as keyof typeof alphabetGame.words].word}
-                    </ThemedText>
-                  </>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+      {alphabetMode === 'explore' ? renderAlphabetExplore() : renderAlphabetQuiz()}
     </View>
   );
 
@@ -451,6 +612,9 @@ export default function EnglishScreen() {
     setScore(0);
     setSelectedLetter(null);
     setSpellingInput([]);
+    setAlphabetQuizIndex(0);
+    setAlphabetQuizAnswered(false);
+    setAlphabetMode('explore');
     setQuizCompleted(false);
     setRhymeAttempts(0);
     setRhymeCorrect(0);
@@ -908,15 +1072,113 @@ const styles = StyleSheet.create({
   alphabetScroll: {
     width: '100%',
   },
+  modeSelector: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: '#56C596',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  modeButtonActive: {
+    backgroundColor: '#56C596',
+  },
+  modeButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#56C596',
+  },
+  modeButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  selectedLetterDisplay: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+    borderColor: '#56C596',
+  },
+  bigLetterCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#56C596',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  bigLetter: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  selectedLetterInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  selectedEmoji: {
+    fontSize: 40,
+  },
+  selectedWord: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  soundBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E8F8E8',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  soundText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#56C596',
+  },
+  alphabetScroll: {
+    width: '100%',
+  },
   alphabetGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 12,
+    gap: 10,
   },
   letterCard: {
-    width: 100,
-    borderRadius: 20,
+    width: 70,
+    borderRadius: 16,
     overflow: 'hidden',
     elevation: 4,
     shadowColor: '#000',
@@ -925,36 +1187,93 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   letterCardContent: {
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#56C596',
-    borderRadius: 20,
+    borderRadius: 16,
+    minHeight: 85,
+    justifyContent: 'center',
   },
   selectedLetterCard: {
-    transform: [{ scale: 1.05 }],
+    transform: [{ scale: 1.1 }],
     elevation: 8,
   },
   letterText: {
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#56C596',
   },
   selectedLetterText: {
     color: '#FFFFFF',
   },
-  wordEmoji: {
-    fontSize: 32,
-    marginTop: 8,
-  },
-  wordText: {
-    fontSize: 13,
-    color: '#56C596',
+  miniEmoji: {
+    fontSize: 20,
     marginTop: 4,
-    fontWeight: '600',
+    opacity: 0.8,
   },
-  selectedWordText: {
-    color: '#FFFFFF',
+  miniEmojiSelected: {
+    opacity: 1,
+  },
+  quizLetterDisplay: {
+    backgroundColor: '#E8F8E8',
+    padding: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 3,
+    borderColor: '#56C596',
+  },
+  quizLetter: {
+    fontSize: 80,
+    fontWeight: 'bold',
+    color: '#56C596',
+  },
+  quizOptionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 14,
+    marginBottom: 20,
+  },
+  emojiQuizButton: {
+    width: 110,
+    height: 110,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#E8F8E8',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    position: 'relative',
+  },
+  correctEmojiButton: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
+    transform: [{ scale: 1.05 }],
+  },
+  incorrectEmojiButton: {
+    backgroundColor: '#FFFFFF',
+    opacity: 0.5,
+  },
+  quizEmoji: {
+    fontSize: 56,
+  },
+  emojiCheckBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#4CAF50',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   spellingEmoji: {
     fontSize: 100,
