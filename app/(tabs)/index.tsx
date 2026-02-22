@@ -2,6 +2,8 @@ import { StyleSheet, View, TouchableOpacity, ScrollView, Dimensions } from 'reac
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -18,15 +20,14 @@ const { width } = Dimensions.get('window');
 function AnimatedCard({ subject, index }: { subject: any; index: number }) {
   const router = useRouter();
   const scale = useSharedValue(0);
-  const rotate = useSharedValue(0);
+  const floatY = useSharedValue(0);
 
   useEffect(() => {
     scale.value = withSpring(1, { damping: 10, stiffness: 100 });
-    rotate.value = withRepeat(
+    floatY.value = withRepeat(
       withSequence(
-        withTiming(2, { duration: 1000 }),
-        withTiming(-2, { duration: 1000 }),
-        withTiming(0, { duration: 1000 })
+        withTiming(-8, { duration: 2000 }),
+        withTiming(0, { duration: 2000 })
       ),
       -1,
       false
@@ -36,25 +37,77 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
-      { rotate: `${rotate.value}deg` },
+      { translateY: floatY.value },
     ],
+  }));
+
+  const iconRotate = useSharedValue(0);
+
+  useEffect(() => {
+    iconRotate.value = withRepeat(
+      withSequence(
+        withSpring(15, { damping: 8 }),
+        withSpring(-15, { damping: 8 }),
+        withSpring(0, { damping: 8 })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${iconRotate.value}deg` }],
   }));
 
   return (
     <Animated.View style={[styles.cardWrapper, animatedStyle]}>
       <TouchableOpacity
         onPress={() => router.push(subject.route)}
-        activeOpacity={0.8}
+        activeOpacity={0.9}
       >
-        <View style={[styles.card, { backgroundColor: subject.colors[0] }]}>
-          <View style={styles.cardContent}>
+        <LinearGradient
+          colors={subject.colors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
+          <View style={styles.cardHeader}>
+            <View style={styles.badgeContainer}>
+              <ThemedText style={styles.badgeText}>{subject.gameCount} Games</ThemedText>
+            </View>
+            <Animated.View style={[styles.iconContainer, iconStyle]}>
+              <MaterialCommunityIcons 
+                name={subject.icon} 
+                size={64} 
+                color="rgba(255, 255, 255, 0.9)" 
+              />
+            </Animated.View>
+          </View>
+
+          <View style={styles.cardBody}>
             <ThemedText style={styles.cardTitle}>{subject.title}</ThemedText>
             <ThemedText style={styles.cardSubtitle}>{subject.subtitle}</ThemedText>
-            <View style={styles.playButton}>
-              <ThemedText style={styles.playText}>Play Now!</ThemedText>
+            
+            <View style={styles.featuresContainer}>
+              {subject.features.map((feature: string, idx: number) => (
+                <View key={idx} style={styles.featureRow}>
+                  <ThemedText style={styles.featureBullet}>•</ThemedText>
+                  <ThemedText style={styles.featureText}>{feature}</ThemedText>
+                </View>
+              ))}
             </View>
           </View>
-        </View>
+
+          <View style={styles.cardFooter}>
+            <View style={styles.playButton}>
+              <MaterialCommunityIcons name="play-circle" size={24} color="#FFFFFF" />
+              <ThemedText style={styles.playText}>Start Learning!</ThemedText>
+            </View>
+            <View style={styles.decorativeCircle1} />
+            <View style={styles.decorativeCircle2} />
+            <View style={styles.decorativeCircle3} />
+          </View>
+        </LinearGradient>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -74,24 +127,33 @@ export default function HomeScreen() {
   const subjects = [
     {
       id: 'math',
-      title: '🔢 Math',
-      subtitle: 'Numbers & Counting',
+      title: 'Math',
+      subtitle: 'Numbers & Problem Solving',
       colors: ['#FF6B6B', '#FF8E53'],
       route: '/math',
+      icon: 'calculator-variant',
+      gameCount: 6,
+      features: ['Counting', 'Addition', 'Patterns'],
     },
     {
       id: 'science',
-      title: '🔬 Science',
-      subtitle: 'Explore the World',
+      title: 'Science',
+      subtitle: 'Discover Nature & Animals',
       colors: ['#4ECDC4', '#44A08D'],
       route: '/science',
+      icon: 'flask',
+      gameCount: 5,
+      features: ['Animals', 'Planets', 'Nature'],
     },
     {
       id: 'english',
-      title: '📚 English',
-      subtitle: 'Letters & Words',
-      colors: ['#A8E6CF', '#56C596'],
+      title: 'English',
+      subtitle: 'Reading & Vocabulary',
+      colors: ['#56C596', '#3AA76D'],
       route: '/english',
+      icon: 'book-alphabet',
+      gameCount: 5,
+      features: ['Alphabet', 'Spelling', 'Rhymes'],
     },
   ];
 
@@ -142,44 +204,133 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   cardWrapper: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   card: {
-    borderRadius: 24,
-    padding: 24,
-    minHeight: 160,
-    justifyContent: 'center',
-    elevation: 8,
+    borderRadius: 28,
+    padding: 0,
+    minHeight: 240,
+    overflow: 'hidden',
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
-  cardContent: {
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 20,
+    paddingBottom: 12,
   },
-  cardTitle: {
-    fontSize: 48,
+  badgeContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  badgeText: {
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 8,
+  },
+  iconContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  cardBody: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+    letterSpacing: 0.5,
   },
   cardSubtitle: {
-    fontSize: 20,
-    color: '#FFFFFF',
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 16,
   },
+  featuresContainer: {
+    gap: 6,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  featureBullet: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  featureText: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontWeight: '600',
+  },
+  cardFooter: {
+    padding: 20,
+    paddingTop: 16,
+    position: 'relative',
+  },
   playButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    paddingVertical: 14,
+    borderRadius: 24,
+    gap: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   playText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#333',
+  },
+  decorativeCircle1: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    top: -30,
+    right: -20,
+  },
+  decorativeCircle2: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    bottom: -10,
+    left: 20,
+  },
+  decorativeCircle3: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    top: 30,
+    left: -10,
   },
 });
