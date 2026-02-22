@@ -289,6 +289,7 @@ export default function MathScreen() {
     setShowAnswerFeedback(true);
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
       setScore(newScore);
@@ -307,6 +308,7 @@ export default function MathScreen() {
         }
       }, 1500);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimerActive(false);
       setTimeout(() => {
