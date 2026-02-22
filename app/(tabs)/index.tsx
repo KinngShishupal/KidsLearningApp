@@ -1,98 +1,185 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
+import Animated, { 
+  useAnimatedStyle, 
+  useSharedValue, 
+  withSpring, 
+  withRepeat, 
+  withSequence,
+  withTiming 
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
+import { LearningBuddy } from '@/components/learning-buddy';
+
+const { width } = Dimensions.get('window');
+
+function AnimatedCard({ subject, index }: { subject: any; index: number }) {
+  const router = useRouter();
+  const scale = useSharedValue(0);
+  const rotate = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withSpring(1, { damping: 10, stiffness: 100 });
+    rotate.value = withRepeat(
+      withSequence(
+        withTiming(2, { duration: 1000 }),
+        withTiming(-2, { duration: 1000 }),
+        withTiming(0, { duration: 1000 })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotate.value}deg` },
+    ],
+  }));
+
+  return (
+    <Animated.View style={[styles.cardWrapper, animatedStyle]}>
+      <TouchableOpacity
+        onPress={() => router.push(subject.route)}
+        activeOpacity={0.8}
+      >
+        <View style={[styles.card, { backgroundColor: subject.colors[0] }]}>
+          <View style={styles.cardContent}>
+            <ThemedText style={styles.cardTitle}>{subject.title}</ThemedText>
+            <ThemedText style={styles.cardSubtitle}>{subject.subtitle}</ThemedText>
+            <View style={styles.playButton}>
+              <ThemedText style={styles.playText}>Play Now!</ThemedText>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const headerScale = useSharedValue(0);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    headerScale.value = withSpring(1, { damping: 8, stiffness: 80 });
+  }, []);
+
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: headerScale.value }],
+  }));
+
+  const subjects = [
+    {
+      id: 'math',
+      title: '🔢 Math',
+      subtitle: 'Numbers & Counting',
+      colors: ['#FF6B6B', '#FF8E53'],
+      route: '/math',
+    },
+    {
+      id: 'science',
+      title: '🔬 Science',
+      subtitle: 'Explore the World',
+      colors: ['#4ECDC4', '#44A08D'],
+      route: '/science',
+    },
+    {
+      id: 'english',
+      title: '📚 English',
+      subtitle: 'Letters & Words',
+      colors: ['#A8E6CF', '#56C596'],
+      route: '/english',
+    },
+  ];
+
+  return (
+    <ScrollView style={styles.container}>
+      <Animated.View style={[styles.header, headerAnimatedStyle]}>
+        <ThemedText style={styles.headerTitle}>Learn With Fun!</ThemedText>
+        <ThemedText style={styles.headerSubtitle}>Choose a subject to start learning</ThemedText>
+      </Animated.View>
+
+      <LearningBuddy 
+        message="Hi! I'm your learning buddy! Pick a subject to start playing!" 
+        buddy="robot"
+      />
+
+      <View style={styles.cardsContainer}>
+        {subjects.map((subject, index) => (
+          <AnimatedCard key={subject.id} subject={subject} index={index} />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF9E6',
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  headerSubtitle: {
+    fontSize: 18,
+    color: '#666',
+  },
+  cardsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  cardWrapper: {
+    marginBottom: 20,
+  },
+  card: {
+    borderRadius: 24,
+    padding: 24,
+    minHeight: 160,
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  cardContent: {
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  cardSubtitle: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  playButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  playText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 });

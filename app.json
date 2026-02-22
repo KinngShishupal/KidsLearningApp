@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "LearnWithFun",
+    "name": "Learn With Fun",
     "slug": "LearnWithFun",
+    "description": "An interactive learning app for kids with fun games for Math, Science, and English!",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,8 +13,9 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.learnwithfun.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFF9E6",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -33,9 +35,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FFF9E6",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#FFF9E6"
           }
         }
       ]
