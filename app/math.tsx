@@ -295,7 +295,6 @@ export default function MathScreen() {
     setAdditionQuestionIndex(0);
     setCountingAnswer(null);
     setAdditionAnswer(null);
-    setSelectedAnswer(null);
     setQuizCompleted(false);
   };
 
@@ -307,7 +306,6 @@ export default function MathScreen() {
     setAdditionQuestionIndex(0);
     setCountingAnswer(null);
     setAdditionAnswer(null);
-    setSelectedAnswer(null);
     setQuizCompleted(false);
   };
 
@@ -321,7 +319,6 @@ export default function MathScreen() {
       setAdditionQuestionIndex(0);
       setCountingAnswer(null);
       setAdditionAnswer(null);
-      setSelectedAnswer(null);
       setQuizCompleted(false);
     } else {
       handleGoHome();
