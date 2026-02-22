@@ -671,17 +671,31 @@ export default function MathScreen() {
         />
         <Confetti show={showConfetti} />
         <Celebration message={celebrationMessage} show={showCelebration} />
-        <View style={styles.topBar}>
+        <LinearGradient
+          colors={['#FF6B6B', '#FF8E53']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.topBar}
+        >
           <TouchableOpacity 
             onPress={handleGoHome}
             style={styles.backButton}
           >
-            <ThemedText style={styles.backText}>← Back</ThemedText>
+            <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
+            <ThemedText style={styles.backText}>Back</ThemedText>
           </TouchableOpacity>
-          <View style={styles.scoreContainer}>
-            <ThemedText style={styles.scoreText}>Score: {score}</ThemedText>
+
+          <View style={styles.gameHeaderCenter}>
+            <ThemedText style={styles.currentGameTitle}>
+              {games.find(g => g.id === selectedGame)?.title || 'Game'}
+            </ThemedText>
           </View>
-        </View>
+
+          <View style={styles.scoreContainer}>
+            <MaterialCommunityIcons name="trophy" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.scoreText}>{score}</ThemedText>
+          </View>
+        </LinearGradient>
         <ScrollView style={styles.gameScreen}>
           {selectedGame === 'counting' && renderCountingGame()}
           {selectedGame === 'addition' && renderAdditionGame()}
@@ -698,12 +712,30 @@ export default function MathScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.mathHeader}>
+      <LinearGradient
+        colors={['#FF6B6B', '#FF8E53']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.mathHeader}
+      >
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ThemedText style={styles.backText}>← Home</ThemedText>
+          <MaterialCommunityIcons name="home" size={24} color="#FFFFFF" />
+          <ThemedText style={styles.backText}>Home</ThemedText>
         </TouchableOpacity>
-        <ThemedText style={styles.mathTitle}>Math Games 🔢</ThemedText>
-      </View>
+        
+        <View style={styles.headerContent}>
+          <View style={styles.headerIconCircle}>
+            <MaterialCommunityIcons name="calculator-variant" size={36} color="#FF6B6B" />
+          </View>
+          <ThemedText style={styles.mathTitle}>Math Games</ThemedText>
+          <ThemedText style={styles.mathSubtitle}>Choose a game to play</ThemedText>
+        </View>
+
+        <View style={styles.headerDecoration}>
+          <View style={styles.decorativeCircleSmall} />
+          <View style={styles.decorativeCircleLarge} />
+        </View>
+      </LinearGradient>
       <ScrollView style={styles.gamesListContainer}>
         {games.map((game, idx) => (
           <TouchableOpacity
@@ -755,39 +787,109 @@ const styles = StyleSheet.create({
   },
   mathHeader: {
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerContent: {
     alignItems: 'center',
-    backgroundColor: '#FF6B6B',
+    zIndex: 1,
+  },
+  headerIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   mathTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginTop: 12,
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  mathSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontWeight: '600',
+  },
+  headerDecoration: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    flexDirection: 'row',
+    gap: 20,
+  },
+  decorativeCircleSmall: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    position: 'absolute',
+    top: 40,
+    right: 20,
+  },
+  decorativeCircleLarge: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    position: 'absolute',
+    top: -20,
+    right: -20,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
     paddingHorizontal: 20,
-    backgroundColor: '#FF6B6B',
   },
   backButton: {
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
   },
   backText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
+  gameHeaderCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  currentGameTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
   scoreContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 16,
+    gap: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   scoreText: {
     fontSize: 18,

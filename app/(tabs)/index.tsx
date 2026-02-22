@@ -159,9 +159,26 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Animated.View style={[styles.header, headerAnimatedStyle]}>
-        <ThemedText style={styles.headerTitle}>Learn With Fun!</ThemedText>
-        <ThemedText style={styles.headerSubtitle}>Choose a subject to start learning</ThemedText>
+      <Animated.View style={headerAnimatedStyle}>
+        <LinearGradient
+          colors={['#FF6B6B', '#4ECDC4', '#56C596']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.headerIconCircle}>
+              <MaterialCommunityIcons name="school" size={44} color="#FF6B6B" />
+            </View>
+            <ThemedText style={styles.headerTitle}>Learn With Fun!</ThemedText>
+            <ThemedText style={styles.headerSubtitle}>Choose a subject to start</ThemedText>
+          </View>
+
+          <View style={styles.headerDecoration}>
+            <View style={styles.decorativeCircleSmall} />
+            <View style={styles.decorativeCircleLarge} />
+          </View>
+        </LinearGradient>
       </Animated.View>
 
       <LearningBuddy 
@@ -187,17 +204,63 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerContent: {
     alignItems: 'center',
+    zIndex: 1,
+  },
+  headerIconCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   headerTitle: {
-    fontSize: 36,
+    fontSize: 38,
     fontWeight: 'bold',
-    color: '#FF6B6B',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   headerSubtitle: {
-    fontSize: 18,
-    color: '#666',
+    fontSize: 17,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontWeight: '600',
+  },
+  headerDecoration: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  decorativeCircleSmall: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    position: 'absolute',
+    top: 30,
+    right: 10,
+  },
+  decorativeCircleLarge: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    position: 'absolute',
+    top: -30,
+    right: -40,
   },
   cardsContainer: {
     paddingHorizontal: 20,

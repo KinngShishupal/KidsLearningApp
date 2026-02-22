@@ -1,5 +1,7 @@
 import { StyleSheet, ScrollView, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StickerCollection } from '@/components/sticker-collection';
 
 export default function ProgressScreen() {
@@ -43,10 +45,25 @@ export default function ProgressScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Your Progress</ThemedText>
-        <ThemedText style={styles.headerSubtitle}>Keep up the great work!</ThemedText>
-      </View>
+      <LinearGradient
+        colors={['#FFD93D', '#FFC107']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <View style={styles.headerIconCircle}>
+            <MaterialCommunityIcons name="trophy-award" size={40} color="#FFD93D" />
+          </View>
+          <ThemedText style={styles.headerTitle}>Your Progress</ThemedText>
+          <ThemedText style={styles.headerSubtitle}>Keep up the great work!</ThemedText>
+        </View>
+
+        <View style={styles.headerDecoration}>
+          <View style={styles.decorativeCircleSmall} />
+          <View style={styles.decorativeCircleLarge} />
+        </View>
+      </LinearGradient>
 
       <View style={styles.contentContainer}>
         <View style={styles.funFactCard}>
@@ -125,18 +142,63 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerContent: {
     alignItems: 'center',
-    backgroundColor: '#FFD93D',
+    zIndex: 1,
+  },
+  headerIconCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   headerTitle: {
     fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 8,
+    marginBottom: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   headerSubtitle: {
-    fontSize: 18,
-    color: '#FFFFFF',
+    fontSize: 17,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontWeight: '600',
+  },
+  headerDecoration: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  decorativeCircleSmall: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    position: 'absolute',
+    top: 30,
+    right: 10,
+  },
+  decorativeCircleLarge: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    position: 'absolute',
+    top: -30,
+    right: -40,
   },
   contentContainer: {
     paddingHorizontal: 20,
