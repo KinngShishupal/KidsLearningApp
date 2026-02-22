@@ -81,7 +81,7 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 npm install
 ```
 
-### Run the App
+### Run the App (Development)
 ```bash
 # For iOS
 npm run ios
@@ -92,6 +92,34 @@ npm run android
 # For Web
 npm run web
 ```
+
+### Build for Production
+
+#### Quick Builds
+```bash
+# Android APK (for testing)
+npm run build:android:apk
+
+# Android AAB (for Play Store)
+npm run build:android:aab
+
+# iOS (for App Store)
+npm run build:ios
+
+# Both platforms
+npm run build:all
+```
+
+#### Submit to Stores
+```bash
+# Submit to Google Play Store
+npm run submit:android
+
+# Submit to Apple App Store
+npm run submit:ios
+```
+
+For detailed build instructions, see [BUILD_GUIDE.md](./BUILD_GUIDE.md)
 
 ## Project Structure
 ```
