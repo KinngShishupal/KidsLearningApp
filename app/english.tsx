@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import { TimedQuiz } from '@/components/timed-quiz';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
 import { AnswerFeedback } from '@/components/answer-feedback';
+import { QuestionTimer } from '@/components/question-timer';
 
 export default function EnglishScreen() {
   const router = useRouter();
@@ -28,6 +29,9 @@ export default function EnglishScreen() {
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
   const [gameKey, setGameKey] = useState(0);
+  const [spellingQuestionIndex, setSpellingQuestionIndex] = useState(0);
+  const [spellingTimeLeft, setSpellingTimeLeft] = useState(20);
+  const [spellingTimerActive, setSpellingTimerActive] = useState(true);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -47,7 +51,7 @@ export default function EnglishScreen() {
     { 
       id: 'spelling', 
       title: 'Spelling Bee', 
-      description: 'Build words from letters', 
+      description: '8 words to spell!', 
       icon: 'pencil',
       difficulty: 'Medium',
       colors: ['#F1F8E9', '#DCEDC8']
@@ -151,11 +155,75 @@ export default function EnglishScreen() {
     { letter: 'S', options: ['☀️', '🌈', '🌳', '🍕'], answer: '☀️' },
   ];
 
-  const spellingGame = {
-    image: '🐱',
-    word: 'CAT',
-    scrambledLetters: ['T', 'A', 'C', 'B', 'D', 'E'],
-  };
+  const spellingWords = [
+    { 
+      word: 'CAT', 
+      image: '🐱', 
+      scrambledLetters: ['T', 'A', 'C', 'B', 'D', 'E'],
+      hint: 'A furry pet that meows',
+      difficulty: 'Easy',
+      time: 20
+    },
+    { 
+      word: 'DOG', 
+      image: '🐕', 
+      scrambledLetters: ['G', 'O', 'D', 'C', 'A', 'T'],
+      hint: 'A pet that barks',
+      difficulty: 'Easy',
+      time: 20
+    },
+    { 
+      word: 'SUN', 
+      image: '☀️', 
+      scrambledLetters: ['N', 'U', 'S', 'M', 'O', 'T'],
+      hint: 'Bright in the sky',
+      difficulty: 'Easy',
+      time: 20
+    },
+    { 
+      word: 'TREE', 
+      image: '🌳', 
+      scrambledLetters: ['E', 'T', 'R', 'E', 'A', 'S'],
+      hint: 'Has leaves and bark',
+      difficulty: 'Medium',
+      time: 25
+    },
+    { 
+      word: 'FISH', 
+      image: '🐠', 
+      scrambledLetters: ['H', 'I', 'S', 'F', 'D', 'K'],
+      hint: 'Swims in water',
+      difficulty: 'Medium',
+      time: 25
+    },
+    { 
+      word: 'BIRD', 
+      image: '🐦', 
+      scrambledLetters: ['R', 'B', 'I', 'D', 'P', 'T'],
+      hint: 'Can fly in the sky',
+      difficulty: 'Medium',
+      time: 25
+    },
+    { 
+      word: 'APPLE', 
+      image: '🍎', 
+      scrambledLetters: ['P', 'A', 'L', 'E', 'P', 'O', 'I', 'B'],
+      hint: 'Red fruit, keeps doctor away',
+      difficulty: 'Hard',
+      time: 30
+    },
+    { 
+      word: 'FLOWER', 
+      image: '🌸', 
+      scrambledLetters: ['W', 'F', 'L', 'O', 'E', 'R', 'T', 'S'],
+      hint: 'Beautiful plant that blooms',
+      difficulty: 'Hard',
+      time: 30
+    },
+  ];
+
+  const spellingGame = spellingWords[spellingQuestionIndex];
+  const [showSpellingHint, setShowSpellingHint] = useState(false);
 
   const rhymingGame = {
     word: 'CAT',
@@ -202,23 +270,71 @@ export default function EnglishScreen() {
     }
   };
 
+  useEffect(() => {
+    if (selectedGame === 'spelling' && spellingTimerActive && spellingGame && spellingInput.length < spellingGame.word.length) {
+      const timer = setInterval(() => {
+        setSpellingTimeLeft((prev) => {
+          if (prev <= 1) {
+            setSpellingTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: spellingWords.length, correct: spellingQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return spellingGame?.time || 20;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, spellingQuestionIndex, spellingTimerActive, spellingInput, spellingGame]);
+
   const handleSpellingLetter = (letter: string) => {
+    if (spellingInput.length >= spellingGame.word.length) return;
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const newInput = [...spellingInput, letter];
     setSpellingInput(newInput);
+    
     if (newInput.join('') === spellingGame.word) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setScore(score + 10);
+      setSpellingTimerActive(false);
+      const newScore = score + 15;
+      setScore(newScore);
       showCelebrationWithMessage('Perfect spelling!');
+      
       setTimeout(() => {
-        setSpellingInput([]);
+        if (spellingQuestionIndex < spellingWords.length - 1) {
+          setSpellingQuestionIndex(spellingQuestionIndex + 1);
+          setSpellingInput([]);
+          setShowSpellingHint(false);
+          setSpellingTimeLeft(spellingWords[spellingQuestionIndex + 1].time);
+          setSpellingTimerActive(true);
+        } else {
+          setGameResults({ score: newScore, total: spellingWords.length, correct: spellingQuestionIndex + 1 });
+          setShowResultsModal(true);
+        }
       }, 2000);
+    } else if (newInput.length === spellingGame.word.length && newInput.join('') !== spellingGame.word) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setSpellingTimerActive(false);
+      setTimeout(() => {
+        setGameResults({ score, total: spellingWords.length, correct: spellingQuestionIndex });
+        setShowResultsModal(true);
+      }, 1000);
     }
   };
 
   const clearSpelling = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSpellingInput([]);
+  };
+
+  const removeLastLetter = () => {
+    if (spellingInput.length > 0) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setSpellingInput(spellingInput.slice(0, -1));
+    }
   };
 
   const [rhymeAttempts, setRhymeAttempts] = useState(0);
@@ -405,53 +521,105 @@ export default function EnglishScreen() {
   const renderSpellingGame = () => (
     <View style={styles.gameContainer}>
       <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
+          <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
+            {spellingQuestionIndex + 1}/{spellingWords.length}
+          </ThemedText>
+        </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
           <MaterialCommunityIcons name="pencil" size={18} color="#FFFFFF" />
           <ThemedText style={styles.categoryText}>Spelling</ThemedText>
         </View>
       </View>
 
-      <View style={styles.questionCard}>
+      <QuestionTimer timeLeft={spellingTimeLeft} totalTime={spellingGame.time} color="#56C596" />
+
+      <View style={styles.spellingQuestionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
           <MaterialCommunityIcons name="spellcheck" size={40} color="#56C596" />
         </View>
-        <ThemedText style={styles.gameQuestion}>Spell this word:</ThemedText>
         
-        <View style={styles.imageCard}>
-          <ThemedText style={styles.spellingEmoji}>{spellingGame.image}</ThemedText>
+        <View style={styles.difficultyBadgeSpelling}>
+          <MaterialCommunityIcons 
+            name={spellingGame.difficulty === 'Easy' ? 'signal-cellular-1' : 
+                  spellingGame.difficulty === 'Medium' ? 'signal-cellular-2' : 'signal-cellular-3'} 
+            size={16} 
+            color="#FFFFFF" 
+          />
+          <ThemedText style={styles.difficultyTextWhite}>{spellingGame.difficulty}</ThemedText>
         </View>
 
-        <ThemedText style={styles.instructionText}>Build the word by tapping letters:</ThemedText>
-        <View style={styles.spellingWordContainer}>
-          {spellingInput.map((letter, index) => (
-            <View key={index} style={styles.spellingLetterBox}>
-              <ThemedText style={styles.spellingLetterText}>{letter}</ThemedText>
-            </View>
-          ))}
-          {Array.from({ length: spellingGame.word.length - spellingInput.length }).map((_, index) => (
-            <View key={`empty-${index}`} style={styles.emptyLetterBox}>
-              <ThemedText style={styles.emptyLetterText}>_</ThemedText>
-            </View>
-          ))}
+        <ThemedText style={styles.gameQuestion}>Spell this word:</ThemedText>
+      </View>
+
+      <View style={styles.imageCard}>
+        <View style={styles.emojiContainer}>
+          <ThemedText style={styles.spellingEmoji}>{spellingGame.image}</ThemedText>
         </View>
+        <ThemedText style={styles.wordLengthHint}>
+          {spellingGame.word.length} letters
+        </ThemedText>
+      </View>
+
+      {!showSpellingHint ? (
+        <TouchableOpacity 
+          style={styles.hintButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowSpellingHint(true);
+          }}
+        >
+          <MaterialCommunityIcons name="lightbulb-outline" size={18} color="#56C596" />
+          <ThemedText style={[styles.hintButtonText, { color: '#56C596' }]}>Need a Hint?</ThemedText>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.spellingHintCard}>
+          <MaterialCommunityIcons name="lightbulb-on" size={20} color="#FFD93D" />
+          <ThemedText style={styles.spellingHintText}>{spellingGame.hint}</ThemedText>
+        </View>
+      )}
+
+      <ThemedText style={styles.instructionText}>Tap letters to spell the word:</ThemedText>
+      <View style={styles.spellingWordContainer}>
+        {spellingInput.map((letter, index) => (
+          <View key={index} style={styles.spellingLetterBox}>
+            <ThemedText style={styles.spellingLetterText}>{letter}</ThemedText>
+          </View>
+        ))}
+        {Array.from({ length: spellingGame.word.length - spellingInput.length }).map((_, index) => (
+          <View key={`empty-${index}`} style={styles.emptyLetterBox}>
+            <ThemedText style={styles.emptyLetterText}>_</ThemedText>
+          </View>
+        ))}
       </View>
 
       <View style={styles.lettersGrid}>
         {spellingGame.scrambledLetters.map((letter, index) => (
           <TouchableOpacity
             key={`${letter}-${index}`}
-            style={styles.letterButton}
+            style={[
+              styles.letterButton,
+              spellingInput.length >= spellingGame.word.length && styles.letterButtonDisabled
+            ]}
             onPress={() => handleSpellingLetter(letter)}
+            disabled={spellingInput.length >= spellingGame.word.length}
           >
             <ThemedText style={styles.letterButtonText}>{letter}</ThemedText>
           </TouchableOpacity>
         ))}
       </View>
       
-      <TouchableOpacity style={styles.clearButton} onPress={clearSpelling}>
-        <MaterialCommunityIcons name="eraser" size={20} color="#FFFFFF" />
-        <ThemedText style={styles.clearText}>Clear</ThemedText>
-      </TouchableOpacity>
+      <View style={styles.spellingControls}>
+        <TouchableOpacity style={styles.backspaceButton} onPress={removeLastLetter}>
+          <MaterialCommunityIcons name="backspace-outline" size={22} color="#FFFFFF" />
+          <ThemedText style={styles.clearText}>Undo</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.clearButton} onPress={clearSpelling}>
+          <MaterialCommunityIcons name="eraser" size={22} color="#FFFFFF" />
+          <ThemedText style={styles.clearText}>Clear All</ThemedText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -607,6 +775,10 @@ export default function EnglishScreen() {
     setScore(0);
     setSelectedLetter(null);
     setSpellingInput([]);
+    setSpellingQuestionIndex(0);
+    setSpellingTimeLeft(20);
+    setSpellingTimerActive(true);
+    setShowSpellingHint(false);
     setAlphabetQuizIndex(0);
     setAlphabetQuizAnswered(false);
     setAlphabetMode('explore');
@@ -750,14 +922,14 @@ export default function EnglishScreen() {
             activeOpacity={0.9}
           >
             <LinearGradient
-              colors={game.colors}
+              colors={[game.colors[0], game.colors[1]]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.gameCard}
             >
               <View style={styles.gameCardLeft}>
                 <View style={[styles.gameIconContainer, { backgroundColor: '#56C596' }]}>
-                  <MaterialCommunityIcons name={game.icon} size={36} color="#FFFFFF" />
+                  <MaterialCommunityIcons name={game.icon as any} size={36} color="#FFFFFF" />
                 </View>
                 <View style={styles.gameInfo}>
                   <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>
@@ -1044,6 +1216,21 @@ const styles = StyleSheet.create({
     borderColor: '#E8F8E8',
     marginTop: 8,
   },
+  spellingQuestionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 16,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+    borderColor: '#E8F8E8',
+    marginTop: 8,
+  },
   questionIconCircle: {
     width: 80,
     height: 80,
@@ -1074,11 +1261,88 @@ const styles = StyleSheet.create({
   },
   imageCard: {
     backgroundColor: '#E8F8E8',
-    borderRadius: 20,
-    padding: 20,
-    marginVertical: 12,
-    borderWidth: 3,
+    borderRadius: 24,
+    paddingVertical: 40,
+    paddingHorizontal: 32,
+    marginVertical: 16,
+    marginHorizontal: 8,
+    borderWidth: 4,
     borderColor: '#56C596',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 200,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  emojiContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 120,
+    paddingVertical: 10,
+    width: '100%',
+  },
+  difficultyBadgeSpelling: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#56C596',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  difficultyTextWhite: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  wordLengthHint: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 12,
+    lineHeight: 20,
+  },
+  spellingHintCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FFF9E6',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 2,
+    borderColor: '#FFD93D',
+  },
+  spellingHintText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  hintButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    marginTop: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    borderWidth: 2,
+    borderColor: '#E8F8E8',
+  },
+  hintButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   alphabetScroll: {
     width: '100%',
@@ -1295,13 +1559,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   spellingEmoji: {
-    fontSize: 100,
+    fontSize: 88,
+    lineHeight: 100,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   spellingWordContainer: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 24,
     justifyContent: 'center',
+    flexWrap: 'wrap',
+    minHeight: 75,
   },
   spellingLetterBox: {
     backgroundColor: '#56C596',
@@ -1345,8 +1614,8 @@ const styles = StyleSheet.create({
   },
   letterButton: {
     backgroundColor: '#FFFFFF',
-    width: 65,
-    height: 65,
+    width: 68,
+    height: 68,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1358,17 +1627,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
   },
+  letterButtonDisabled: {
+    opacity: 0.5,
+    backgroundColor: '#F5F5F5',
+  },
   letterButtonText: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#56C596',
   },
-  clearButton: {
-    backgroundColor: '#FF6B6B',
+  spellingControls: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  backspaceButton: {
+    backgroundColor: '#FF9800',
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 20,
+    gap: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  clearButton: {
+    backgroundColor: '#FF6B6B',
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 20,
     gap: 8,
@@ -1379,7 +1674,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   clearText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },

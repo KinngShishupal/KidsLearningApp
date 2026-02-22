@@ -859,14 +859,14 @@ export default function ScienceScreen() {
             activeOpacity={0.9}
           >
             <LinearGradient
-              colors={game.colors}
+              colors={[game.colors[0], game.colors[1]]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.gameCard}
             >
               <View style={styles.gameCardLeft}>
                 <View style={[styles.gameIconContainer, { backgroundColor: '#4ECDC4' }]}>
-                  <MaterialCommunityIcons name={game.icon} size={36} color="#FFFFFF" />
+                  <MaterialCommunityIcons name={game.icon as any} size={36} color="#FFFFFF" />
                 </View>
                 <View style={styles.gameInfo}>
                   <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>

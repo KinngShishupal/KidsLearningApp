@@ -43,7 +43,14 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
   - **Quiz Mode**: Test letter recognition with 8 picture-matching questions
   - Interactive sound pronunciation guide
   - Large display card shows selected letter details
-- **Spelling Bee**: Spell words by tapping letters
+- **Spelling Bee**: Progressive spelling challenge with 8 words!
+  - 3 Easy words (CAT, DOG, SUN - 20 seconds each)
+  - 3 Medium words (TREE, FISH, BIRD - 25 seconds each)
+  - 2 Hard words (APPLE, FLOWER - 30 seconds each)
+  - Hint system for each word
+  - Undo and Clear buttons
+  - Word length indicators
+  - 15 points per correct word
 - **Rhyme Time**: Find words that rhyme together
 - **Letter Memory**: Match letter symbol pairs
 - **Emoji Memory**: Match fun emoji face pairs
