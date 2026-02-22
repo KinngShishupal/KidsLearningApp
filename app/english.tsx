@@ -510,10 +510,13 @@ export default function EnglishScreen() {
           style={styles.topBar}
         >
           <TouchableOpacity 
-            onPress={handleGoHome}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleGoHome();
+            }}
             style={styles.backButton}
           >
-            <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
+            <MaterialCommunityIcons name="arrow-left-circle" size={26} color="#FFFFFF" />
             <ThemedText style={styles.backText}>Back</ThemedText>
           </TouchableOpacity>
 
@@ -549,9 +552,15 @@ export default function EnglishScreen() {
         end={{ x: 1, y: 0 }}
         style={styles.englishHeader}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialCommunityIcons name="home" size={24} color="#FFFFFF" />
-          <ThemedText style={styles.backText}>Home</ThemedText>
+        <TouchableOpacity 
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }} 
+          style={styles.backButton}
+        >
+          <MaterialCommunityIcons name="arrow-left-circle" size={26} color="#FFFFFF" />
+          <ThemedText style={styles.backText}>Back</ThemedText>
         </TouchableOpacity>
         
         <View style={styles.headerContent}>
