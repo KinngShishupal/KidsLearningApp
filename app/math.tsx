@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
@@ -67,12 +69,54 @@ export default function MathScreen() {
   ];
 
   const games = [
-    { id: 'counting', title: '⭐ Counting Stars', description: 'Count the stars!' },
-    { id: 'addition', title: '➕ Addition Fun', description: 'Add numbers together!' },
-    { id: 'matching', title: '🔢 Number Matching', description: 'Match numbers to words!' },
-    { id: 'memory', title: '🧠 Memory Match', description: 'Match the numbers!' },
-    { id: 'patterns', title: '🔷 Pattern Puzzle', description: 'Complete the patterns!' },
-    { id: 'speedmath', title: '⚡ Speed Math', description: 'Quick math challenge!' },
+    { 
+      id: 'counting', 
+      title: 'Counting Stars', 
+      description: 'Learn to count objects', 
+      icon: 'star-outline',
+      difficulty: 'Easy',
+      colors: ['#FFE5E5', '#FFB3B3']
+    },
+    { 
+      id: 'addition', 
+      title: 'Addition Fun', 
+      description: 'Add numbers together', 
+      icon: 'plus-circle-outline',
+      difficulty: 'Easy',
+      colors: ['#FFE5E5', '#FFB3B3']
+    },
+    { 
+      id: 'matching', 
+      title: 'Number Matching', 
+      description: 'Match numbers to words', 
+      icon: 'link-variant',
+      difficulty: 'Medium',
+      colors: ['#FFF0E5', '#FFDAB3']
+    },
+    { 
+      id: 'memory', 
+      title: 'Memory Match', 
+      description: 'Find matching pairs', 
+      icon: 'brain',
+      difficulty: 'Medium',
+      colors: ['#FFF0E5', '#FFDAB3']
+    },
+    { 
+      id: 'patterns', 
+      title: 'Pattern Puzzle', 
+      description: 'Complete the sequence', 
+      icon: 'shape-outline',
+      difficulty: 'Hard',
+      colors: ['#FFE5F0', '#FFB3D9']
+    },
+    { 
+      id: 'speedmath', 
+      title: 'Speed Math', 
+      description: 'Beat the clock!', 
+      icon: 'lightning-bolt',
+      difficulty: 'Hard',
+      colors: ['#FFE5F0', '#FFB3D9']
+    },
   ];
 
   const memoryCards = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
@@ -164,29 +208,51 @@ export default function MathScreen() {
 
   const renderCountingGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.questionProgress}>
-        Question {countingQuestionIndex + 1} of {countingGames.length}
-      </ThemedText>
-      <ThemedText style={styles.gameQuestion}>{countingGame.question}</ThemedText>
-      <View style={styles.starsContainer}>
-        {Array.from({ length: countingGame.stars }).map((_, index) => (
-          <ThemedText key={index} style={styles.star}>
-            {countingGame.emoji || '⭐'}
+      <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
+          <ThemedText style={styles.questionProgress}>
+            {countingQuestionIndex + 1}/{countingGames.length}
           </ThemedText>
-        ))}
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <ThemedText style={styles.categoryText}>Counting</ThemedText>
+        </View>
       </View>
-      <View style={styles.optionsContainer}>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
+          <MaterialCommunityIcons name="counter" size={40} color="#FF6B6B" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>{countingGame.question}</ThemedText>
+        
+        <View style={styles.itemsDisplayCard}>
+          <View style={styles.starsContainer}>
+            {Array.from({ length: countingGame.stars }).map((_, index) => (
+              <ThemedText key={index} style={styles.star}>
+                {countingGame.emoji || '⭐'}
+              </ThemedText>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Tap the correct answer:</ThemedText>
+      <View style={styles.optionsGrid}>
         {countingGame.options.map((option) => (
           <TouchableOpacity
             key={option}
             style={[
-              styles.optionButton,
-              countingAnswer === option && styles.selectedOption,
+              styles.modernOptionButton,
+              countingAnswer === option && (option === countingGame.stars ? styles.correctOptionButton : styles.incorrectOptionButton),
             ]}
             onPress={() => handleCountingAnswer(option)}
             disabled={countingAnswer !== null}
           >
-            <ThemedText style={styles.optionText}>{option}</ThemedText>
+            <ThemedText style={[
+              styles.modernOptionText,
+              countingAnswer === option && styles.selectedOptionText,
+            ]}>{option}</ThemedText>
           </TouchableOpacity>
         ))}
       </View>
@@ -195,29 +261,57 @@ export default function MathScreen() {
 
   const renderAdditionGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.questionProgress}>
-        Question {additionQuestionIndex + 1} of {additionGames.length}
-      </ThemedText>
-      <ThemedText style={styles.gameQuestion}>What is the answer?</ThemedText>
-      <View style={styles.equationContainer}>
-        <ThemedText style={styles.equationText}>{additionGame.num1}</ThemedText>
-        <ThemedText style={styles.equationText}>+</ThemedText>
-        <ThemedText style={styles.equationText}>{additionGame.num2}</ThemedText>
-        <ThemedText style={styles.equationText}>=</ThemedText>
-        <ThemedText style={styles.equationText}>?</ThemedText>
+      <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
+          <ThemedText style={styles.questionProgress}>
+            {additionQuestionIndex + 1}/{additionGames.length}
+          </ThemedText>
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <ThemedText style={styles.categoryText}>Addition</ThemedText>
+        </View>
       </View>
-      <View style={styles.optionsContainer}>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
+          <MaterialCommunityIcons name="plus-circle" size={40} color="#FF6B6B" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>Solve this problem:</ThemedText>
+        
+        <View style={styles.equationCard}>
+          <View style={styles.equationContainer}>
+            <View style={styles.numberBubble}>
+              <ThemedText style={styles.equationNumber}>{additionGame.num1}</ThemedText>
+            </View>
+            <ThemedText style={styles.equationOperator}>+</ThemedText>
+            <View style={styles.numberBubble}>
+              <ThemedText style={styles.equationNumber}>{additionGame.num2}</ThemedText>
+            </View>
+            <ThemedText style={styles.equationOperator}>=</ThemedText>
+            <View style={styles.numberBubbleMissing}>
+              <ThemedText style={styles.equationNumber}>?</ThemedText>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Choose your answer:</ThemedText>
+      <View style={styles.optionsGrid}>
         {additionGame.options.map((option) => (
           <TouchableOpacity
             key={option}
             style={[
-              styles.optionButton,
-              additionAnswer === option && styles.selectedOption,
+              styles.modernOptionButton,
+              additionAnswer === option && (option === additionGame.answer ? styles.correctOptionButton : styles.incorrectOptionButton),
             ]}
             onPress={() => handleAdditionAnswer(option)}
             disabled={additionAnswer !== null}
           >
-            <ThemedText style={styles.optionText}>{option}</ThemedText>
+            <ThemedText style={[
+              styles.modernOptionText,
+              additionAnswer === option && styles.selectedOptionText,
+            ]}>{option}</ThemedText>
           </TouchableOpacity>
         ))}
       </View>
@@ -374,15 +468,42 @@ export default function MathScreen() {
         <ThemedText style={styles.mathTitle}>Math Games 🔢</ThemedText>
       </View>
       <ScrollView style={styles.gamesListContainer}>
-        {games.map((game) => (
+        {games.map((game, idx) => (
           <TouchableOpacity
             key={game.id}
-            style={styles.gameCard}
-            onPress={() => setSelectedGame(game.id)}
-            activeOpacity={0.8}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedGame(game.id);
+            }}
+            activeOpacity={0.9}
           >
-            <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>
-            <ThemedText style={styles.gameCardDescription}>{game.description}</ThemedText>
+            <LinearGradient
+              colors={game.colors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gameCard}
+            >
+              <View style={styles.gameCardLeft}>
+                <View style={[styles.gameIconContainer, { backgroundColor: '#FF6B6B' }]}>
+                  <MaterialCommunityIcons name={game.icon} size={36} color="#FFFFFF" />
+                </View>
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>
+                  <ThemedText style={styles.gameCardDescription}>{game.description}</ThemedText>
+                </View>
+              </View>
+              
+              <View style={styles.gameCardRight}>
+                <View style={[styles.difficultyBadge, 
+                  game.difficulty === 'Easy' && styles.easyBadge,
+                  game.difficulty === 'Medium' && styles.mediumBadge,
+                  game.difficulty === 'Hard' && styles.hardBadge
+                ]}>
+                  <ThemedText style={styles.difficultyText}>{game.difficulty}</ThemedText>
+                </View>
+                <MaterialCommunityIcons name="chevron-right" size={28} color="#FF6B6B" />
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -441,9 +562,138 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   gameCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    minHeight: 110,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  gameCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 16,
+  },
+  gameIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  gameInfo: {
+    flex: 1,
+  },
+  gameCardTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  gameCardDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  gameCardRight: {
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  easyBadge: {
+    backgroundColor: '#4CAF50',
+  },
+  mediumBadge: {
+    backgroundColor: '#FF9800',
+  },
+  hardBadge: {
+    backgroundColor: '#F44336',
+  },
+  difficultyText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  gameScreen: {
+    flex: 1,
+    padding: 20,
+  },
+  gameContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  questionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  progressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  questionProgress: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
+  },
+  categoryBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  questionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     padding: 24,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+    borderColor: '#FFE5E5',
+  },
+  questionIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 16,
     elevation: 4,
     shadowColor: '#000',
@@ -451,82 +701,120 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  gameCardTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF6B6B',
-    marginBottom: 8,
-  },
-  gameCardDescription: {
-    fontSize: 16,
-    color: '#666',
-  },
-  gameScreen: {
-    flex: 1,
-    padding: 20,
-  },
-  gameContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
-  },
-  questionProgress: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#999',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
   gameQuestion: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#FF6B6B',
-    marginBottom: 24,
+    color: '#333',
+    marginBottom: 20,
     textAlign: 'center',
+  },
+  itemsDisplayCard: {
+    backgroundColor: '#FFF9E6',
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    borderWidth: 2,
+    borderColor: '#FFE5E5',
+    borderStyle: 'dashed',
   },
   starsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 24,
-    gap: 8,
+    gap: 12,
   },
   star: {
-    fontSize: 36,
+    fontSize: 40,
   },
-  optionsContainer: {
+  instructionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  optionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 12,
   },
-  optionButton: {
-    backgroundColor: '#FFE5E5',
-    width: 80,
-    height: 80,
-    borderRadius: 16,
+  modernOptionButton: {
+    backgroundColor: '#FFFFFF',
+    width: 85,
+    height: 85,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FF6B6B',
+    borderWidth: 4,
+    borderColor: '#FFE5E5',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
-  selectedOption: {
+  correctOptionButton: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
+  },
+  incorrectOptionButton: {
     backgroundColor: '#FF6B6B',
+    borderColor: '#D32F2F',
   },
-  optionText: {
-    fontSize: 32,
+  modernOptionText: {
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#FF6B6B',
+  },
+  selectedOptionText: {
+    color: '#FFFFFF',
+  },
+  equationCard: {
+    backgroundColor: '#FFF9E6',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    borderWidth: 2,
+    borderColor: '#FFE5E5',
   },
   equationContainer: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 24,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  equationText: {
-    fontSize: 48,
+  numberBubble: {
+    backgroundColor: '#FF6B6B',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  numberBubbleMissing: {
+    backgroundColor: '#FFE5E5',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FF6B6B',
+    borderStyle: 'dashed',
+  },
+  equationNumber: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  equationOperator: {
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#FF6B6B',
   },

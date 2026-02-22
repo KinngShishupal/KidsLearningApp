@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
@@ -34,11 +36,46 @@ export default function ScienceScreen() {
   };
 
   const games = [
-    { id: 'animals', title: '🦁 Animal Sounds', description: 'Match animals to their sounds!' },
-    { id: 'planets', title: '🌍 Solar System', description: 'Learn about planets!' },
-    { id: 'nature', title: '🌺 Nature Quiz', description: 'Explore plants and nature!' },
-    { id: 'memory', title: '🧠 Animal Memory', description: 'Match the animals!' },
-    { id: 'speedscience', title: '⚡ Science Challenge', description: 'Quick science quiz!' },
+    { 
+      id: 'animals', 
+      title: 'Animal Sounds', 
+      description: 'Match animals to sounds', 
+      icon: 'dog',
+      difficulty: 'Easy',
+      colors: ['#E0F7FA', '#B2EBF2']
+    },
+    { 
+      id: 'planets', 
+      title: 'Solar System', 
+      description: 'Explore the planets', 
+      icon: 'earth',
+      difficulty: 'Medium',
+      colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'nature', 
+      title: 'Nature Quiz', 
+      description: 'Learn about plants', 
+      icon: 'flower',
+      difficulty: 'Easy',
+      colors: ['#E0F7FA', '#B2EBF2']
+    },
+    { 
+      id: 'memory', 
+      title: 'Animal Memory', 
+      description: 'Find matching pairs', 
+      icon: 'brain',
+      difficulty: 'Medium',
+      colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'speedscience', 
+      title: 'Science Challenge', 
+      description: 'Beat the clock!', 
+      icon: 'lightning-bolt',
+      difficulty: 'Hard',
+      colors: ['#E1F5FE', '#B3E5FC']
+    },
   ];
 
   const animalMemoryCards = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'];
@@ -170,23 +207,50 @@ export default function ScienceScreen() {
 
   const renderAnimalGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.questionProgress}>
-        Question {animalQuestionIndex + 1} of {animalQuizzes.length}
-      </ThemedText>
-      <ThemedText style={styles.gameQuestion}>{animalQuiz.question}</ThemedText>
-      <ThemedText style={styles.animalEmoji}>{animalQuiz.animal}</ThemedText>
+      <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
+          <ThemedText style={styles.questionProgress}>
+            {animalQuestionIndex + 1}/{animalQuizzes.length}
+          </ThemedText>
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <ThemedText style={styles.categoryText}>Animals</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
+          <MaterialCommunityIcons name="paw" size={40} color="#4ECDC4" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>{animalQuiz.question}</ThemedText>
+        
+        <View style={styles.animalDisplayCard}>
+          <ThemedText style={styles.animalEmoji}>{animalQuiz.animal}</ThemedText>
+        </View>
+      </View>
+
+      <ThemedText style={styles.instructionText}>What sound does it make?</ThemedText>
       <View style={styles.optionsGrid}>
         {animalQuiz.options.map((option) => (
           <TouchableOpacity
             key={option}
             style={[
-              styles.soundButton,
-              selectedAnswer === option && styles.selectedSoundButton,
+              styles.modernSoundButton,
+              selectedAnswer === option && (option === animalQuiz.answer ? styles.correctSoundButton : styles.incorrectSoundButton),
             ]}
             onPress={() => handleAnimalAnswer(option)}
             disabled={selectedAnswer !== null}
           >
-            <ThemedText style={styles.soundText}>{option}</ThemedText>
+            <MaterialCommunityIcons 
+              name="volume-high" 
+              size={24} 
+              color={selectedAnswer === option ? '#FFFFFF' : '#4ECDC4'} 
+            />
+            <ThemedText style={[
+              styles.soundText,
+              selectedAnswer === option && styles.selectedSoundText,
+            ]}>{option}</ThemedText>
           </TouchableOpacity>
         ))}
       </View>
@@ -195,10 +259,26 @@ export default function ScienceScreen() {
 
   const renderPlanetGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.questionProgress}>
-        Question {planetQuestionIndex + 1} of {planetQuizzes.length}
-      </ThemedText>
-      <ThemedText style={styles.gameQuestion}>{planetQuiz.question}</ThemedText>
+      <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
+          <ThemedText style={styles.questionProgress}>
+            {planetQuestionIndex + 1}/{planetQuizzes.length}
+          </ThemedText>
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <ThemedText style={styles.categoryText}>Planets</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
+          <MaterialCommunityIcons name="space-station" size={40} color="#4ECDC4" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>{planetQuiz.question}</ThemedText>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Select the correct planet:</ThemedText>
       <View style={styles.planetsContainer}>
         {planetQuiz.options.map((planet) => (
           <TouchableOpacity
@@ -213,6 +293,11 @@ export default function ScienceScreen() {
           >
             <ThemedText style={styles.planetEmoji}>{planet.emoji}</ThemedText>
             <ThemedText style={styles.planetName}>{planet.name}</ThemedText>
+            {selectedAnswer === planet.name && planet.name === planetQuiz.answer && (
+              <View style={styles.checkMark}>
+                <MaterialCommunityIcons name="check-circle" size={28} color="#4CAF50" />
+              </View>
+            )}
           </TouchableOpacity>
         ))}
       </View>
@@ -353,15 +438,42 @@ export default function ScienceScreen() {
         <ThemedText style={styles.scienceTitle}>Science Adventures 🔬</ThemedText>
       </View>
       <ScrollView style={styles.gamesListContainer}>
-        {games.map((game) => (
+        {games.map((game, idx) => (
           <TouchableOpacity
             key={game.id}
-            style={styles.gameCard}
-            onPress={() => setSelectedGame(game.id)}
-            activeOpacity={0.8}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedGame(game.id);
+            }}
+            activeOpacity={0.9}
           >
-            <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>
-            <ThemedText style={styles.gameCardDescription}>{game.description}</ThemedText>
+            <LinearGradient
+              colors={game.colors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gameCard}
+            >
+              <View style={styles.gameCardLeft}>
+                <View style={[styles.gameIconContainer, { backgroundColor: '#4ECDC4' }]}>
+                  <MaterialCommunityIcons name={game.icon} size={36} color="#FFFFFF" />
+                </View>
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameCardTitle}>{game.title}</ThemedText>
+                  <ThemedText style={styles.gameCardDescription}>{game.description}</ThemedText>
+                </View>
+              </View>
+              
+              <View style={styles.gameCardRight}>
+                <View style={[styles.difficultyBadge, 
+                  game.difficulty === 'Easy' && styles.easyBadge,
+                  game.difficulty === 'Medium' && styles.mediumBadge,
+                  game.difficulty === 'Hard' && styles.hardBadge
+                ]}>
+                  <ThemedText style={styles.difficultyText}>{game.difficulty}</ThemedText>
+                </View>
+                <MaterialCommunityIcons name="chevron-right" size={28} color="#4ECDC4" />
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -420,9 +532,138 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   gameCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    minHeight: 110,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  gameCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 16,
+  },
+  gameIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  gameInfo: {
+    flex: 1,
+  },
+  gameCardTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  gameCardDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  gameCardRight: {
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  easyBadge: {
+    backgroundColor: '#4CAF50',
+  },
+  mediumBadge: {
+    backgroundColor: '#FF9800',
+  },
+  hardBadge: {
+    backgroundColor: '#F44336',
+  },
+  difficultyText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  gameScreen: {
+    flex: 1,
+    padding: 20,
+  },
+  gameContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  questionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  progressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  questionProgress: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4ECDC4',
+  },
+  categoryBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  questionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     padding: 24,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+    borderColor: '#E8F8F5',
+  },
+  questionIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 16,
     elevation: 4,
     shadowColor: '#000',
@@ -430,43 +671,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  gameCardTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4ECDC4',
-    marginBottom: 8,
-  },
-  gameCardDescription: {
-    fontSize: 16,
-    color: '#666',
-  },
-  gameScreen: {
-    flex: 1,
-    padding: 20,
-  },
-  gameContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
-  },
-  questionProgress: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#999',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
   gameQuestion: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#4ECDC4',
-    marginBottom: 24,
+    color: '#333',
+    marginBottom: 20,
     textAlign: 'center',
+  },
+  animalDisplayCard: {
+    backgroundColor: '#E8F8F5',
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#4ECDC4',
   },
   animalEmoji: {
-    fontSize: 80,
-    marginBottom: 24,
+    fontSize: 100,
+  },
+  instructionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   optionsGrid: {
     flexDirection: 'row',
@@ -474,57 +703,85 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
   },
-  soundButton: {
-    backgroundColor: '#E8F8F5',
+  modernSoundButton: {
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
     paddingHorizontal: 24,
     paddingVertical: 16,
-    borderRadius: 16,
-    minWidth: 120,
+    borderRadius: 20,
+    minWidth: 140,
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#4ECDC4',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 4,
+    borderColor: '#E8F8F5',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
-  selectedSoundButton: {
-    backgroundColor: '#4ECDC4',
+  correctSoundButton: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
+  },
+  incorrectSoundButton: {
+    backgroundColor: '#FF6B6B',
+    borderColor: '#D32F2F',
   },
   soundText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#4ECDC4',
+  },
+  selectedSoundText: {
+    color: '#FFFFFF',
   },
   planetsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 12,
+    gap: 16,
     marginBottom: 20,
   },
   planetButton: {
-    width: 140,
-    height: 140,
-    borderRadius: 20,
+    width: 150,
+    height: 150,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    elevation: 4,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 6,
+    position: 'relative',
   },
   selectedPlanetButton: {
     borderColor: '#FFD700',
-    borderWidth: 5,
+    borderWidth: 6,
+    transform: [{ scale: 1.05 }],
   },
   planetEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 56,
+    marginBottom: 12,
   },
   planetName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  checkMark: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
   },
   natureGrid: {
     width: '100%',
