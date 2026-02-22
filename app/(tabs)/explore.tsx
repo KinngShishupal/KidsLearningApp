@@ -1,23 +1,47 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, View, TouchableOpacity, RefreshControl, TextInput, Modal } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StickerCollection } from '@/components/sticker-collection';
 import { GameTracker, GameStats, GameResult } from '@/utils/game-tracker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+
+const USER_NAME_KEY = '@learn_with_fun_username';
 
 export default function ProgressScreen() {
   const [stats, setStats] = useState<GameStats | null>(null);
   const [recentGames, setRecentGames] = useState<GameResult[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [showNameEdit, setShowNameEdit] = useState(false);
+  const [newName, setNewName] = useState('');
 
   const loadData = async () => {
     const gameStats = await GameTracker.getStats();
     const recent = await GameTracker.getRecentGames(5);
+    const savedName = await AsyncStorage.getItem(USER_NAME_KEY);
     setStats(gameStats);
     setRecentGames(recent);
+    setUserName(savedName || '');
+  };
+
+  const handleEditName = () => {
+    setNewName(userName);
+    setShowNameEdit(true);
+  };
+
+  const handleSaveName = async () => {
+    const trimmedName = newName.trim();
+    if (trimmedName.length >= 2) {
+      await AsyncStorage.setItem(USER_NAME_KEY, trimmedName);
+      setUserName(trimmedName);
+      setShowNameEdit(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
   };
 
   useEffect(() => {
@@ -117,6 +141,42 @@ export default function ProgressScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      <Modal
+        visible={showNameEdit}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNameEdit(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.nameEditCard}>
+            <MaterialCommunityIcons name="account-edit" size={48} color="#FFD93D" />
+            <ThemedText style={styles.modalTitle}>Edit Your Name</ThemedText>
+            <TextInput
+              style={styles.nameInput}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Enter your name"
+              maxLength={20}
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton} 
+                onPress={() => setShowNameEdit(false)}
+              >
+                <ThemedText style={styles.modalCancelText}>Cancel</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalSaveButton} 
+                onPress={handleSaveName}
+              >
+                <ThemedText style={styles.modalSaveText}>Save</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <LinearGradient
         colors={['#FFD93D', '#FFC107']}
         start={{ x: 0, y: 0 }}
@@ -127,8 +187,16 @@ export default function ProgressScreen() {
           <View style={styles.headerIconCircle}>
             <MaterialCommunityIcons name="trophy-award" size={40} color="#FFD93D" />
           </View>
-          <ThemedText style={styles.headerTitle}>Your Progress</ThemedText>
+          <ThemedText style={styles.headerTitle}>
+            {userName ? `${userName}'s Progress` : 'Your Progress'}
+          </ThemedText>
           <ThemedText style={styles.headerSubtitle}>Keep up the great work!</ThemedText>
+          {userName && (
+            <TouchableOpacity style={styles.editNameButton} onPress={handleEditName}>
+              <MaterialCommunityIcons name="pencil" size={14} color="#FFFFFF" />
+              <ThemedText style={styles.editNameText}>Edit Name</ThemedText>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.headerDecoration}>
@@ -314,6 +382,92 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '600',
+    marginBottom: 8,
+  },
+  editNameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 8,
+  },
+  editNameText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  nameEditCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    padding: 32,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  nameInput: {
+    width: '100%',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    backgroundColor: '#F8F8F8',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: '#E0E0E0',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  modalSaveButton: {
+    flex: 1,
+    backgroundColor: '#FFD93D',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  modalSaveText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   headerDecoration: {
     position: 'absolute',

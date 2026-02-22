@@ -4,6 +4,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -12,10 +13,13 @@ import Animated, {
   withSequence,
   withTiming 
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { LearningBuddy } from '@/components/learning-buddy';
 
 const { width } = Dimensions.get('window');
+const USER_NAME_KEY = '@learn_with_fun_username';
 
 function AnimatedCard({ subject, index }: { subject: any; index: number }) {
   const router = useRouter();
@@ -115,10 +119,29 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
 
 export default function HomeScreen() {
   const headerScale = useSharedValue(0);
+  const [userName, setUserName] = useState('');
+
+  const loadUserName = async () => {
+    try {
+      const savedName = await AsyncStorage.getItem(USER_NAME_KEY);
+      if (savedName) {
+        setUserName(savedName);
+      }
+    } catch (error) {
+      console.error('Error loading username:', error);
+    }
+  };
 
   useEffect(() => {
     headerScale.value = withSpring(1, { damping: 8, stiffness: 80 });
+    loadUserName();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUserName();
+    }, [])
+  );
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: headerScale.value }],
@@ -170,8 +193,12 @@ export default function HomeScreen() {
             <View style={styles.headerIconCircle}>
               <MaterialCommunityIcons name="school" size={44} color="#FF6B6B" />
             </View>
-            <ThemedText style={styles.headerTitle}>Learn With Fun!</ThemedText>
-            <ThemedText style={styles.headerSubtitle}>Choose a subject to start</ThemedText>
+            <ThemedText style={styles.headerTitle}>
+              {userName ? `Hi, ${userName}!` : 'Learn With Fun!'}
+            </ThemedText>
+            <ThemedText style={styles.headerSubtitle}>
+              {userName ? 'Ready to learn today?' : 'Choose a subject to start'}
+            </ThemedText>
           </View>
 
           <View style={styles.headerDecoration}>
@@ -182,7 +209,10 @@ export default function HomeScreen() {
       </Animated.View>
 
       <LearningBuddy 
-        message="Hi! I'm your learning buddy! Pick a subject to start playing!" 
+        message={userName 
+          ? `Great to see you, ${userName}! Ready for some fun games?` 
+          : "Hi! I'm your learning buddy! Pick a subject to start playing!"
+        }
         buddy="robot"
       />
 
@@ -202,14 +232,14 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 30,
+    paddingBottom: 36,
     paddingHorizontal: 20,
     position: 'relative',
-    overflow: 'hidden',
   },
   headerContent: {
     alignItems: 'center',
     zIndex: 1,
+    paddingVertical: 8,
   },
   headerIconCircle: {
     width: 90,
@@ -218,26 +248,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    overflow: 'visible',
   },
   headerTitle: {
-    fontSize: 38,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 6,
+    marginBottom: 8,
+    paddingVertical: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+    lineHeight: 44,
+    includeFontPadding: false,
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 17,
     color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '600',
+    lineHeight: 24,
+    includeFontPadding: false,
+    textAlign: 'center',
+    paddingVertical: 2,
   },
   headerDecoration: {
     position: 'absolute',
