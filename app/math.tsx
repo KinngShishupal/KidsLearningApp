@@ -784,7 +784,11 @@ export default function MathScreen() {
             <ThemedText style={styles.scoreText}>{score}</ThemedText>
           </View>
         </LinearGradient>
-        <ScrollView style={styles.gameScreen}>
+        <ScrollView 
+          style={styles.gameScreen} 
+          contentContainerStyle={styles.gameScreenContent}
+          showsVerticalScrollIndicator={false}
+        >
           {selectedGame === 'counting' && renderCountingGame()}
           {selectedGame === 'addition' && renderAdditionGame()}
           {selectedGame === 'matching' && renderMatchingGame()}
@@ -1066,7 +1070,9 @@ const styles = StyleSheet.create({
   },
   gameScreen: {
     flex: 1,
-    padding: 20,
+  },
+  gameScreenContent: {
+    paddingBottom: 40,
   },
   gameContainer: {
     flex: 1,

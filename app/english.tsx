@@ -296,7 +296,7 @@ export default function EnglishScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.alphabetScroll} showsVerticalScrollIndicator={false}>
+      <View style={styles.alphabetGridContainer}>
         <View style={styles.alphabetGrid}>
           {allLetters.map((letter) => (
             <TouchableOpacity
@@ -322,7 +322,7 @@ export default function EnglishScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </ScrollView>
+      </View>
     </>
   );
 
@@ -331,22 +331,9 @@ export default function EnglishScreen() {
     const letterData = alphabetData[currentQuestion.letter as keyof typeof alphabetData];
     
     return (
-      <>
-        <View style={styles.questionHeader}>
-          <View style={styles.progressBadge}>
-            <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
-            <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
-              {alphabetQuizIndex + 1}/{alphabetQuizQuestions.length}
-            </ThemedText>
-          </View>
-          <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
-            <MaterialCommunityIcons name="school" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.categoryText}>Letter Quiz</ThemedText>
-          </View>
-        </View>
-
+      <View style={styles.quizContentContainer}>
         <View style={styles.questionCard}>
-          <ThemedText style={styles.gameQuestion}>Which picture starts with letter:</ThemedText>
+          <ThemedText style={styles.gameQuestion}>Which picture starts with:</ThemedText>
           <View style={styles.quizLetterDisplay}>
             <ThemedText style={styles.quizLetter}>{currentQuestion.letter}</ThemedText>
             <View style={styles.soundBadge}>
@@ -378,17 +365,25 @@ export default function EnglishScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </>
+      </View>
     );
   };
 
   const renderAlphabetGame = () => (
-    <View style={styles.gameContainer}>
+    <View style={styles.alphabetGameContainer}>
       <View style={styles.questionHeader}>
         <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
           <MaterialCommunityIcons name="alphabet-latin" size={18} color="#FFFFFF" />
           <ThemedText style={styles.categoryText}>Alphabet</ThemedText>
         </View>
+        {alphabetMode === 'quiz' && (
+          <View style={styles.progressBadge}>
+            <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
+            <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
+              {alphabetQuizIndex + 1}/{alphabetQuizQuestions.length}
+            </ThemedText>
+          </View>
+        )}
       </View>
 
       <View style={styles.questionCard}>
@@ -695,7 +690,11 @@ export default function EnglishScreen() {
             <ThemedText style={styles.scoreText}>{score}</ThemedText>
           </View>
         </LinearGradient>
-        <ScrollView style={styles.gameScreen}>
+        <ScrollView 
+          style={styles.gameScreen} 
+          contentContainerStyle={styles.gameScreenContent}
+          showsVerticalScrollIndicator={false}
+        >
           {selectedGame === 'alphabet' && renderAlphabetGame()}
           {selectedGame === 'spelling' && renderSpellingGame()}
           {selectedGame === 'rhyming' && renderRhymingGame()}
@@ -976,11 +975,21 @@ const styles = StyleSheet.create({
   },
   gameScreen: {
     flex: 1,
-    padding: 20,
+  },
+  gameScreenContent: {
+    paddingBottom: 40,
   },
   gameContainer: {
     flex: 1,
     padding: 20,
+  },
+  alphabetGameContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  quizContentContainer: {
+    paddingBottom: 40,
+    minHeight: 600,
   },
   questionHeader: {
     flexDirection: 'row',
@@ -1033,6 +1042,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     borderWidth: 3,
     borderColor: '#E8F8E8',
+    marginTop: 8,
   },
   questionIconCircle: {
     width: 80,
@@ -1059,6 +1069,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
     marginBottom: 16,
+    marginTop: 8,
     textAlign: 'center',
   },
   imageCard: {
@@ -1111,6 +1122,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     marginBottom: 20,
+    marginTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
@@ -1167,14 +1179,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#56C596',
   },
-  alphabetScroll: {
+  alphabetGridContainer: {
     width: '100%',
+    marginBottom: 20,
   },
   alphabetGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 10,
+    paddingVertical: 10,
   },
   letterCard: {
     width: 70,
@@ -1217,30 +1231,33 @@ const styles = StyleSheet.create({
   },
   quizLetterDisplay: {
     backgroundColor: '#E8F8E8',
-    padding: 20,
+    padding: 24,
     borderRadius: 20,
     alignItems: 'center',
     gap: 12,
     borderWidth: 3,
     borderColor: '#56C596',
+    marginVertical: 16,
   },
   quizLetter: {
-    fontSize: 80,
+    fontSize: 72,
     fontWeight: 'bold',
     color: '#56C596',
+    lineHeight: 80,
   },
   quizOptionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 14,
-    marginBottom: 20,
+    justifyContent: 'space-around',
+    gap: 16,
+    marginBottom: 40,
+    paddingVertical: 10,
   },
   emojiQuizButton: {
-    width: 110,
-    height: 110,
+    width: 140,
+    height: 140,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
@@ -1251,18 +1268,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     position: 'relative',
+    marginVertical: 8,
   },
   correctEmojiButton: {
     backgroundColor: '#4CAF50',
     borderColor: '#2E7D32',
-    transform: [{ scale: 1.05 }],
   },
   incorrectEmojiButton: {
-    backgroundColor: '#FFFFFF',
-    opacity: 0.5,
+    backgroundColor: '#F5F5F5',
+    opacity: 0.6,
+    borderColor: '#CCCCCC',
   },
   quizEmoji: {
-    fontSize: 56,
+    fontSize: 64,
+    lineHeight: 70,
   },
   emojiCheckBadge: {
     position: 'absolute',
