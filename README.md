@@ -11,7 +11,15 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - **Number Memory**: Match number emoji pairs
 - **Shape Memory**: Match colorful shape pairs
 - **Fruit Memory**: Match delicious fruit pairs
-- **Pattern Puzzle**: Complete visual patterns with shapes and numbers
+- **Pattern Puzzle**: Complete 8 diverse patterns with hints and explanations
+  - Alternating patterns (red-blue-red-blue)
+  - Repeating patterns (star-star-moon)
+  - Growing sequences (1-2-3-4-5)
+  - Rainbow sequences
+  - Animal patterns
+  - Shape patterns
+  - Built-in hint system
+  - Pattern type badges (Repeating, Growing, Sequence, Alternating)
 - **Speed Math**: Timed quiz to test quick math skills
 
 ### 🔬 Science Section (7 Games!)

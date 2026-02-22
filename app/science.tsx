@@ -29,6 +29,7 @@ export default function ScienceScreen() {
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
   const [natureSelectedAnswers, setNatureSelectedAnswers] = useState<Set<number>>(new Set());
+  const [gameKey, setGameKey] = useState(0);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -420,6 +421,7 @@ export default function ScienceScreen() {
       </View>
 
       <MemoryGame
+        key={`animalmemory-${gameKey}`}
         cards={animalMemoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -449,6 +451,7 @@ export default function ScienceScreen() {
       </View>
 
       <MemoryGame
+        key={`insectmemory-${gameKey}`}
         cards={insectMemoryCards}
         onComplete={() => {
           const finalScore = score + 25;
@@ -478,6 +481,7 @@ export default function ScienceScreen() {
       </View>
 
       <MemoryGame
+        key={`seamemory-${gameKey}`}
         cards={seaCreatureMemoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -494,6 +498,7 @@ export default function ScienceScreen() {
     <View style={styles.gameContainer}>
       <LearningBuddy message="Test your science knowledge!" buddy="robot" />
       <TimedQuiz
+        key={`speedscience-${gameKey}`}
         questions={scienceQuestions}
         timePerQuestion={12}
         onComplete={(finalScore, correctAnswers) => {
@@ -513,6 +518,7 @@ export default function ScienceScreen() {
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
     setQuizCompleted(false);
+    setGameKey(gameKey + 1);
   };
 
   const handleGoHome = () => {
@@ -524,6 +530,7 @@ export default function ScienceScreen() {
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
     setQuizCompleted(false);
+    setGameKey(0);
   };
 
   const handleNextGame = () => {
@@ -537,6 +544,7 @@ export default function ScienceScreen() {
       setSelectedAnswer(null);
       setNatureSelectedAnswers(new Set());
       setQuizCompleted(false);
+      setGameKey(gameKey + 1);
     } else {
       handleGoHome();
     }

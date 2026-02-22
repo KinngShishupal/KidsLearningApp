@@ -27,6 +27,7 @@ export default function EnglishScreen() {
   const [gameResults, setGameResults] = useState({ score: 0, total: 0, correct: 0 });
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -356,6 +357,7 @@ export default function EnglishScreen() {
       </View>
 
       <MemoryGame
+        key={`lettermemory-${gameKey}`}
         cards={letterMemoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -385,6 +387,7 @@ export default function EnglishScreen() {
       </View>
 
       <MemoryGame
+        key={`emojimemory-${gameKey}`}
         cards={emojiMemoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -414,6 +417,7 @@ export default function EnglishScreen() {
       </View>
 
       <MemoryGame
+        key={`foodmemory-${gameKey}`}
         cards={foodMemoryCards}
         onComplete={() => {
           const finalScore = score + 25;
@@ -430,6 +434,7 @@ export default function EnglishScreen() {
     <View style={styles.gameContainer}>
       <LearningBuddy message="Show off your word skills!" buddy="robot" />
       <TimedQuiz
+        key={`vocabulary-${gameKey}`}
         questions={vocabularyQuestions}
         timePerQuestion={12}
         onComplete={(finalScore, correctAnswers) => {
@@ -449,6 +454,7 @@ export default function EnglishScreen() {
     setQuizCompleted(false);
     setRhymeAttempts(0);
     setRhymeCorrect(0);
+    setGameKey(gameKey + 1);
   };
 
   const handleGoHome = () => {
@@ -460,6 +466,7 @@ export default function EnglishScreen() {
     setQuizCompleted(false);
     setRhymeAttempts(0);
     setRhymeCorrect(0);
+    setGameKey(0);
   };
 
   const handleNextGame = () => {
@@ -473,6 +480,7 @@ export default function EnglishScreen() {
       setQuizCompleted(false);
       setRhymeAttempts(0);
       setRhymeCorrect(0);
+      setGameKey(gameKey + 1);
     } else {
       handleGoHome();
     }

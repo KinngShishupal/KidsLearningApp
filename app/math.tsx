@@ -42,6 +42,7 @@ export default function MathScreen() {
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
   const [matchingQuestionIndex, setMatchingQuestionIndex] = useState(0);
   const [matchingAnswer, setMatchingAnswer] = useState<string | null>(null);
+  const [gameKey, setGameKey] = useState(0);
 
   const countingGames = [
     { question: 'How many stars?', stars: 5, options: [4, 5, 6, 7] },
@@ -152,10 +153,62 @@ export default function MathScreen() {
   ];
 
   const patterns = [
-    { sequence: ['🔴', '🔵', '🔴', '🔵'], options: ['🔴', '🔵', '🟡'], missingIndex: 2 },
-    { sequence: ['⭐', '⭐', '🌟', '⭐', '⭐'], options: ['⭐', '🌟', '💫'], missingIndex: 2 },
-    { sequence: ['🟥', '🟦', '🟦', '🟥', '🟦'], options: ['🟥', '🟦', '🟩'], missingIndex: 4 },
-    { sequence: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], options: ['3️⃣', '4️⃣', '5️⃣'], missingIndex: 3 },
+    { 
+      sequence: ['🔴', '🔵', '🔴', '🔵', '🔴'], 
+      options: ['🔴', '🔵', '🟡', '🟢'], 
+      missingIndex: 4,
+      hint: 'Alternating pattern',
+      type: 'Repeating'
+    },
+    { 
+      sequence: ['⭐', '⭐', '🌟', '⭐', '⭐', '🌟'], 
+      options: ['⭐', '🌟', '💫', '✨'], 
+      missingIndex: 5,
+      hint: 'Two then one pattern',
+      type: 'Repeating'
+    },
+    { 
+      sequence: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'], 
+      options: ['4️⃣', '5️⃣', '6️⃣', '7️⃣'], 
+      missingIndex: 4,
+      hint: 'Counting up',
+      type: 'Growing'
+    },
+    { 
+      sequence: ['🟥', '🟧', '🟨', '🟩', '🟦'], 
+      options: ['🟪', '🟦', '🟩', '⬛'], 
+      missingIndex: 4,
+      hint: 'Rainbow order',
+      type: 'Sequence'
+    },
+    { 
+      sequence: ['🔺', '🔺', '🔻', '🔺', '🔺', '🔻'], 
+      options: ['🔺', '🔻', '⬜', '🔶'], 
+      missingIndex: 5,
+      hint: 'Up, up, down pattern',
+      type: 'Repeating'
+    },
+    { 
+      sequence: ['🍎', '🍎', '🍊', '🍎', '🍎', '🍊'], 
+      options: ['🍎', '🍊', '🍋', '🍇'], 
+      missingIndex: 5,
+      hint: 'Apple, apple, orange',
+      type: 'Repeating'
+    },
+    { 
+      sequence: ['⬜', '⬛', '⬜', '⬛', '⬜'], 
+      options: ['⬜', '⬛', '🟦', '🟥'], 
+      missingIndex: 4,
+      hint: 'Light and dark',
+      type: 'Alternating'
+    },
+    { 
+      sequence: ['🐶', '🐱', '🐶', '🐱', '🐶'], 
+      options: ['🐶', '🐱', '🐭', '🐹'], 
+      missingIndex: 4,
+      hint: 'Dog, cat pattern',
+      type: 'Alternating'
+    },
   ];
 
   const showCelebrationWithMessage = (message: string) => {
@@ -442,6 +495,7 @@ export default function MathScreen() {
       </View>
 
       <MemoryGame
+        key={`memory-${gameKey}`}
         cards={memoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -471,6 +525,7 @@ export default function MathScreen() {
       </View>
 
       <MemoryGame
+        key={`shapememory-${gameKey}`}
         cards={shapeMemoryCards}
         onComplete={() => {
           const finalScore = score + 25;
@@ -500,6 +555,7 @@ export default function MathScreen() {
       </View>
 
       <MemoryGame
+        key={`fruitmemory-${gameKey}`}
         cards={fruitMemoryCards}
         onComplete={() => {
           const finalScore = score + 20;
@@ -514,8 +570,18 @@ export default function MathScreen() {
 
   const renderPatternGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Find the missing piece!" buddy="star" />
+      <View style={styles.patternIntroCard}>
+        <MaterialCommunityIcons name="school" size={32} color="#FF6B6B" />
+        <View style={styles.patternIntroContent}>
+          <ThemedText style={styles.patternIntroTitle}>Pattern Challenge!</ThemedText>
+          <ThemedText style={styles.patternIntroText}>
+            Look at the sequence carefully. Find what comes next! Use hints if you need help.
+          </ThemedText>
+        </View>
+      </View>
+
       <PatternGame
+        key={`pattern-${gameKey}`}
         patterns={patterns}
         onComplete={(finalScore, correctAnswers) => {
           setGameResults({ score: finalScore, total: patterns.length, correct: correctAnswers });
@@ -530,6 +596,7 @@ export default function MathScreen() {
     <View style={styles.gameContainer}>
       <LearningBuddy message="Answer as fast as you can!" buddy="robot" />
       <TimedQuiz
+        key={`speedmath-${gameKey}`}
         questions={speedMathQuestions}
         timePerQuestion={10}
         onComplete={(finalScore, correctAnswers) => {
@@ -551,6 +618,7 @@ export default function MathScreen() {
     setAdditionAnswer(null);
     setMatchingAnswer(null);
     setQuizCompleted(false);
+    setGameKey(gameKey + 1);
   };
 
   const handleGoHome = () => {
@@ -564,6 +632,7 @@ export default function MathScreen() {
     setAdditionAnswer(null);
     setMatchingAnswer(null);
     setQuizCompleted(false);
+    setGameKey(0);
   };
 
   const handleNextGame = () => {
@@ -579,6 +648,7 @@ export default function MathScreen() {
       setAdditionAnswer(null);
       setMatchingAnswer(null);
       setQuizCompleted(false);
+      setGameKey(gameKey + 1);
     } else {
       handleGoHome();
     }
@@ -1079,5 +1149,35 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
     lineHeight: 22,
+  },
+  patternIntroCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 20,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#FFE5E5',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  patternIntroContent: {
+    flex: 1,
+  },
+  patternIntroTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
+    marginBottom: 4,
+  },
+  patternIntroText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
   },
 });
