@@ -4,26 +4,32 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 
 ## Features
 
-### 🔢 Math Section (6 Games!)
+### 🔢 Math Section (8 Games!)
 - **Counting Stars**: Learn to count by counting stars
 - **Addition Fun**: Practice simple addition with visual equations
 - **Number Matching**: Match numbers to their word forms
-- **Memory Match**: Match number pairs in a memory game
+- **Number Memory**: Match number emoji pairs
+- **Shape Memory**: Match colorful shape pairs
+- **Fruit Memory**: Match delicious fruit pairs
 - **Pattern Puzzle**: Complete visual patterns with shapes and numbers
 - **Speed Math**: Timed quiz to test quick math skills
 
-### 🔬 Science Section (5 Games!)
+### 🔬 Science Section (7 Games!)
 - **Animal Sounds**: Match animals to their sounds
 - **Solar System**: Learn about planets and their order
 - **Nature Quiz**: Discover what plants need to grow
-- **Animal Memory**: Match animal pairs in a memory game
+- **Animal Memory**: Match cute animal pairs
+- **Insect Memory**: Match tiny creature pairs
+- **Ocean Memory**: Match amazing sea creature pairs
 - **Science Challenge**: Timed quiz about animals and nature
 
-### 📚 English Section (5 Games!)
+### 📚 English Section (7 Games!)
 - **Alphabet Fun**: Learn letters A-Z with fun words and emojis
 - **Spelling Bee**: Spell words by tapping letters
 - **Rhyme Time**: Find words that rhyme together
-- **Letter Memory**: Match letter pairs in a memory game
+- **Letter Memory**: Match letter symbol pairs
+- **Emoji Memory**: Match fun emoji face pairs
+- **Food Memory**: Match yummy food pairs
 - **Vocabulary Quiz**: Timed quiz to test word knowledge
 
 ## Key Features
@@ -36,7 +42,8 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - 🤖 Animated learning buddy mascot
 - 🧠 Memory matching games
 - ⏱️ Timed quiz challenges
-- 🎮 16 different games across all subjects!
+- 🎮 22 different games across all subjects!
+- 🧠 9 memory matching games with different themes
 - 🏆 Achievement badges and stats
 - 🎁 Collectible sticker rewards
 - 🔷 Pattern recognition games

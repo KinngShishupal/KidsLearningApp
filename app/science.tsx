@@ -64,10 +64,26 @@ export default function ScienceScreen() {
     { 
       id: 'memory', 
       title: 'Animal Memory', 
-      description: 'Find matching pairs', 
+      description: 'Match cute animals', 
       icon: 'brain',
       difficulty: 'Medium',
       colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'insectmemory', 
+      title: 'Insect Memory', 
+      description: 'Match tiny creatures', 
+      icon: 'butterfly',
+      difficulty: 'Medium',
+      colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'seamemory', 
+      title: 'Ocean Memory', 
+      description: 'Match sea creatures', 
+      icon: 'fish',
+      difficulty: 'Easy',
+      colors: ['#E0F7FA', '#B2EBF2']
     },
     { 
       id: 'speedscience', 
@@ -80,6 +96,8 @@ export default function ScienceScreen() {
   ];
 
   const animalMemoryCards = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'];
+  const insectMemoryCards = ['🐝', '🦋', '🐞', '🦗', '🐛', '🦟'];
+  const seaCreatureMemoryCards = ['🐠', '🐙', '🦈', '🐬', '🦀', '🐡'];
 
   const scienceQuestions = [
     { question: 'Which animal lives in water?', options: ['Cat', 'Fish', 'Dog', 'Bird'], correctAnswer: 'Fish', emoji: '🐠' },
@@ -390,14 +408,14 @@ export default function ScienceScreen() {
       <View style={styles.questionHeader}>
         <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
           <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
-          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+          <ThemedText style={styles.categoryText}>Animal Memory</ThemedText>
         </View>
       </View>
 
       <View style={styles.memoryInstructionCard}>
         <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
         <ThemedText style={styles.memoryInstruction}>
-          Tap cards to flip them. Match the animals!
+          Tap cards to flip them. Match the cute animals!
         </ThemedText>
       </View>
 
@@ -410,6 +428,64 @@ export default function ScienceScreen() {
         }}
         cardBackColor="#E8F8F5"
         cardFrontColors={['#4ECDC4', '#44A08D']}
+      />
+    </View>
+  );
+
+  const renderInsectMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="butterfly" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Insect Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Match tiny creatures! Explore the insect world!
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={insectMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 25;
+          setGameResults({ score: finalScore, total: insectMemoryCards.length, correct: insectMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#E8F5E9"
+        cardFrontColors={['#8BC34A', '#689F38']}
+      />
+    </View>
+  );
+
+  const renderSeaMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="fish" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Ocean Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Dive deep! Match amazing sea creatures!
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={seaCreatureMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 20;
+          setGameResults({ score: finalScore, total: seaCreatureMemoryCards.length, correct: seaCreatureMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#E0F7FA"
+        cardFrontColors={['#00BCD4', '#0097A7']}
       />
     </View>
   );
@@ -499,6 +575,8 @@ export default function ScienceScreen() {
           {selectedGame === 'planets' && renderPlanetGame()}
           {selectedGame === 'nature' && renderNatureGame()}
           {selectedGame === 'memory' && renderMemoryGame()}
+          {selectedGame === 'insectmemory' && renderInsectMemoryGame()}
+          {selectedGame === 'seamemory' && renderSeaMemoryGame()}
           {selectedGame === 'speedscience' && renderSpeedScienceGame()}
         </ScrollView>
       </View>

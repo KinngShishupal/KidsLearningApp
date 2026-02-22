@@ -99,11 +99,27 @@ export default function MathScreen() {
     },
     { 
       id: 'memory', 
-      title: 'Memory Match', 
-      description: 'Find matching pairs', 
+      title: 'Number Memory', 
+      description: 'Match number pairs', 
       icon: 'brain',
       difficulty: 'Medium',
       colors: ['#FFF0E5', '#FFDAB3']
+    },
+    { 
+      id: 'shapememory', 
+      title: 'Shape Memory', 
+      description: 'Match colorful shapes', 
+      icon: 'shape',
+      difficulty: 'Medium',
+      colors: ['#FFF0E5', '#FFDAB3']
+    },
+    { 
+      id: 'fruitmemory', 
+      title: 'Fruit Memory', 
+      description: 'Match delicious fruits', 
+      icon: 'fruit-cherries',
+      difficulty: 'Easy',
+      colors: ['#FFE5E5', '#FFB3B3']
     },
     { 
       id: 'patterns', 
@@ -124,6 +140,8 @@ export default function MathScreen() {
   ];
 
   const memoryCards = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
+  const shapeMemoryCards = ['🔴', '🔵', '🟡', '🟢', '🟣', '🟠'];
+  const fruitMemoryCards = ['🍎', '🍌', '🍊', '🍇', '🍓', '🍉'];
 
   const speedMathQuestions = [
     { question: 'What is 2 + 3?', options: ['4', '5', '6', '7'], correctAnswer: '5', emoji: '➕' },
@@ -412,14 +430,14 @@ export default function MathScreen() {
       <View style={styles.questionHeader}>
         <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
           <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
-          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+          <ThemedText style={styles.categoryText}>Number Memory</ThemedText>
         </View>
       </View>
 
       <View style={styles.memoryInstructionCard}>
         <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
         <ThemedText style={styles.memoryInstruction}>
-          Tap cards to flip them. Find matching pairs!
+          Tap cards to flip them. Find matching number pairs!
         </ThemedText>
       </View>
 
@@ -432,6 +450,64 @@ export default function MathScreen() {
         }}
         cardBackColor="#FFE5E5"
         cardFrontColors={['#FF6B6B', '#FF8E53']}
+      />
+    </View>
+  );
+
+  const renderShapeMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <MaterialCommunityIcons name="shape" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Shape Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Match colorful shapes! Test your visual memory!
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={shapeMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 25;
+          setGameResults({ score: finalScore, total: shapeMemoryCards.length, correct: shapeMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#FFF0E5"
+        cardFrontColors={['#9C27B0', '#7B1FA2']}
+      />
+    </View>
+  );
+
+  const renderFruitMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <MaterialCommunityIcons name="fruit-cherries" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Fruit Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Match delicious fruits! Can you remember them all?
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={fruitMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 20;
+          setGameResults({ score: finalScore, total: fruitMemoryCards.length, correct: fruitMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#FFE5E5"
+        cardFrontColors={['#E91E63', '#C2185B']}
       />
     </View>
   );
@@ -541,6 +617,8 @@ export default function MathScreen() {
           {selectedGame === 'addition' && renderAdditionGame()}
           {selectedGame === 'matching' && renderMatchingGame()}
           {selectedGame === 'memory' && renderMemoryGame()}
+          {selectedGame === 'shapememory' && renderShapeMemoryGame()}
+          {selectedGame === 'fruitmemory' && renderFruitMemoryGame()}
           {selectedGame === 'patterns' && renderPatternGame()}
           {selectedGame === 'speedmath' && renderSpeedMathGame()}
         </ScrollView>

@@ -31,11 +31,17 @@ Learn With Fun is a comprehensive educational app designed specifically for chil
 
 ## Game Types
 
-### Memory Games 🧠
-- Card flip animations
-- Match pairs gameplay
-- Move counter
-- Different themes per subject (numbers, animals, letters)
+### Memory Games 🧠 (9 Total Games!)
+- Card flip animations with 3D rotation
+- Match pairs gameplay with gradient cards
+- Move counter and pairs tracker
+- Different themes:
+  - **Math**: Numbers, Shapes, Fruits
+  - **Science**: Animals, Insects, Sea Creatures
+  - **English**: Letters, Emojis, Foods
+- Score bonuses: 20-25 points per completion
+- Beautiful gradient card fronts
+- Checkmarks on matched pairs
 
 ### Timed Quiz Challenges ⏱️
 - Countdown timer with progress bar
@@ -143,10 +149,10 @@ Learn With Fun is a comprehensive educational app designed specifically for chil
 - Motivational messages
 - Sticker rewards
 
-## Total Game Count: 16 Interactive Games
-- Math: 6 games
-- Science: 5 games
-- English: 5 games
+## Total Game Count: 22 Interactive Games
+- Math: 8 games (including 3 memory variations)
+- Science: 7 games (including 3 memory variations)
+- English: 7 games (including 3 memory variations)
 
 Every game includes:
 - Score tracking

@@ -62,10 +62,26 @@ export default function EnglishScreen() {
     { 
       id: 'memory', 
       title: 'Letter Memory', 
-      description: 'Match letter pairs', 
+      description: 'Match letter symbols', 
       icon: 'brain',
       difficulty: 'Easy',
       colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'emojimemory', 
+      title: 'Emoji Memory', 
+      description: 'Match fun emojis', 
+      icon: 'emoticon',
+      difficulty: 'Easy',
+      colors: ['#E8F5E9', '#C8E6C9']
+    },
+    { 
+      id: 'foodmemory', 
+      title: 'Food Memory', 
+      description: 'Match yummy foods', 
+      icon: 'food',
+      difficulty: 'Medium',
+      colors: ['#F1F8E9', '#DCEDC8']
     },
     { 
       id: 'vocabulary', 
@@ -78,6 +94,8 @@ export default function EnglishScreen() {
   ];
 
   const letterMemoryCards = ['🅰️', '🅱️', '🆎', '🅾️', '🆑', '🆒'];
+  const emojiMemoryCards = ['😀', '😎', '🥳', '🤓', '😴', '🤩'];
+  const foodMemoryCards = ['🍕', '🍔', '🌮', '🍰', '🍪', '🥤'];
 
   const vocabularyQuestions = [
     { question: 'Which word means "big"?', options: ['Small', 'Large', 'Tiny', 'Little'], correctAnswer: 'Large', emoji: '📏' },
@@ -326,14 +344,14 @@ export default function EnglishScreen() {
       <View style={styles.questionHeader}>
         <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
           <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
-          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+          <ThemedText style={styles.categoryText}>Letter Memory</ThemedText>
         </View>
       </View>
 
       <View style={styles.memoryInstructionCard}>
         <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
         <ThemedText style={styles.memoryInstruction}>
-          Tap cards to flip them. Match the letters!
+          Tap cards to flip them. Match the letter symbols!
         </ThemedText>
       </View>
 
@@ -346,6 +364,64 @@ export default function EnglishScreen() {
         }}
         cardBackColor="#E8F8E8"
         cardFrontColors={['#56C596', '#3AA76D']}
+      />
+    </View>
+  );
+
+  const renderEmojiMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
+          <MaterialCommunityIcons name="emoticon" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Emoji Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Match happy faces! Remember the emotions!
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={emojiMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 20;
+          setGameResults({ score: finalScore, total: emojiMemoryCards.length, correct: emojiMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#FFF9E6"
+        cardFrontColors={['#FFC107', '#FFA000']}
+      />
+    </View>
+  );
+
+  const renderFoodMemoryGame = () => (
+    <View style={styles.gameContainer}>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
+          <MaterialCommunityIcons name="food" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Food Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Match yummy foods! Don't get hungry!
+        </ThemedText>
+      </View>
+
+      <MemoryGame
+        cards={foodMemoryCards}
+        onComplete={() => {
+          const finalScore = score + 25;
+          setGameResults({ score: finalScore, total: foodMemoryCards.length, correct: foodMemoryCards.length });
+          setShowResultsModal(true);
+        }}
+        cardBackColor="#FFF3E0"
+        cardFrontColors={['#FF9800', '#F57C00']}
       />
     </View>
   );
@@ -435,6 +511,8 @@ export default function EnglishScreen() {
           {selectedGame === 'spelling' && renderSpellingGame()}
           {selectedGame === 'rhyming' && renderRhymingGame()}
           {selectedGame === 'memory' && renderMemoryGame()}
+          {selectedGame === 'emojimemory' && renderEmojiMemoryGame()}
+          {selectedGame === 'foodmemory' && renderFoodMemoryGame()}
           {selectedGame === 'vocabulary' && renderVocabularyGame()}
         </ScrollView>
       </View>

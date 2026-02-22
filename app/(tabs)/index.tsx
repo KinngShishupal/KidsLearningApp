@@ -132,8 +132,8 @@ export default function HomeScreen() {
       colors: ['#FF6B6B', '#FF8E53'],
       route: '/math',
       icon: 'calculator-variant',
-      gameCount: 6,
-      features: ['Counting', 'Addition', 'Patterns'],
+      gameCount: 8,
+      features: ['Counting', 'Addition', 'Memory'],
     },
     {
       id: 'science',
@@ -142,8 +142,8 @@ export default function HomeScreen() {
       colors: ['#4ECDC4', '#44A08D'],
       route: '/science',
       icon: 'flask',
-      gameCount: 5,
-      features: ['Animals', 'Planets', 'Nature'],
+      gameCount: 7,
+      features: ['Animals', 'Planets', 'Memory'],
     },
     {
       id: 'english',
@@ -152,8 +152,8 @@ export default function HomeScreen() {
       colors: ['#56C596', '#3AA76D'],
       route: '/english',
       icon: 'book-alphabet',
-      gameCount: 5,
-      features: ['Alphabet', 'Spelling', 'Rhymes'],
+      gameCount: 7,
+      features: ['Alphabet', 'Spelling', 'Memory'],
     },
   ];
 
