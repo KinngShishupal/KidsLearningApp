@@ -271,9 +271,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 28,
-    padding: 0,
-    minHeight: 240,
-    overflow: 'hidden',
+    minHeight: 280,
     elevation: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
@@ -285,7 +283,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingBottom: 12,
+    paddingBottom: 16,
+    paddingTop: 24,
   },
   badgeContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
@@ -309,22 +308,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 3,
     borderColor: 'rgba(255, 255, 255, 0.3)',
+    overflow: 'visible',
   },
   cardBody: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingVertical: 16,
   },
   cardTitle: {
     fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 6,
     letterSpacing: 0.5,
+    lineHeight: 42,
+    includeFontPadding: false,
   },
   cardSubtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 16,
+    lineHeight: 22,
+    includeFontPadding: false,
   },
   featuresContainer: {
     gap: 6,
@@ -343,10 +347,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '600',
+    lineHeight: 20,
+    includeFontPadding: false,
   },
   cardFooter: {
     padding: 20,
-    paddingTop: 16,
+    paddingBottom: 24,
     position: 'relative',
   },
   playButton: {
@@ -368,6 +374,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    lineHeight: 24,
+    includeFontPadding: false,
   },
   decorativeCircle1: {
     position: 'absolute',
