@@ -30,14 +30,15 @@ npm run build:android:apk
 - Good for testing and sharing with testers
 - Smaller file size
 
-#### Production AAB (for Play Store)
+#### Production App Bundle (for Play Store)
 ```bash
 npm run build:android:aab
 ```
-- Creates Android App Bundle
+- Creates Android App Bundle (AAB format)
 - Required for Google Play Store
 - Optimized for distribution
 - Auto-increments version
+- Note: EAS uses "app-bundle" buildType internally
 
 #### Local Android Build
 ```bash
