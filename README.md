@@ -5,9 +5,9 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 ## Features
 
 ### 🔢 Math Section (8 Games!)
-- **Counting Stars**: Learn to count by counting stars
-- **Addition Fun**: Practice simple addition with visual equations
-- **Number Matching**: Match numbers to their word forms
+- **Counting Stars**: Learn to count by counting stars (15 seconds - Easy)
+- **Addition Fun**: Practice simple addition with visual equations (15 seconds - Easy)
+- **Number Matching**: Match numbers to their word forms (12 seconds - Medium)
 - **Number Memory**: Match number emoji pairs
 - **Shape Memory**: Match colorful shape pairs
 - **Fruit Memory**: Match delicious fruit pairs
@@ -23,8 +23,8 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - **Speed Math**: Timed quiz to test quick math skills
 
 ### 🔬 Science Section (7 Games!)
-- **Animal Sounds**: Match animals to their sounds (4 questions)
-- **Solar System**: Learn about planets and their order (3 questions)
+- **Animal Sounds**: Match animals to their sounds (15 seconds - Easy, 4 questions)
+- **Solar System**: Learn about planets and their order (12 seconds - Medium, 3 questions)
 - **Nature Quiz**: Timed multi-select challenge! (5 questions, 10 seconds each)
   - What plants need to grow
   - Identifying trees

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,7 @@ import { Confetti } from '@/components/confetti';
 import { PatternGame } from '@/components/pattern-game';
 import { GameResultsModal } from '@/components/game-results-modal';
 import { AnswerFeedback } from '@/components/answer-feedback';
+import { QuestionTimer } from '@/components/question-timer';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -43,6 +44,11 @@ export default function MathScreen() {
   const [matchingQuestionIndex, setMatchingQuestionIndex] = useState(0);
   const [matchingAnswer, setMatchingAnswer] = useState<string | null>(null);
   const [gameKey, setGameKey] = useState(0);
+  
+  const [countingTimeLeft, setCountingTimeLeft] = useState(15);
+  const [additionTimeLeft, setAdditionTimeLeft] = useState(15);
+  const [matchingTimeLeft, setMatchingTimeLeft] = useState(12);
+  const [timerActive, setTimerActive] = useState(true);
 
   const countingGames = [
     { question: 'How many stars?', stars: 5, options: [4, 5, 6, 7] },
@@ -63,6 +69,63 @@ export default function MathScreen() {
   const countingGame = countingGames[countingQuestionIndex];
   const additionGame = additionGames[additionQuestionIndex];
 
+  useEffect(() => {
+    if (selectedGame === 'counting' && timerActive && countingAnswer === null) {
+      const timer = setInterval(() => {
+        setCountingTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: countingGames.length, correct: countingQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return 15;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, countingQuestionIndex, timerActive, countingAnswer]);
+
+  useEffect(() => {
+    if (selectedGame === 'addition' && timerActive && additionAnswer === null) {
+      const timer = setInterval(() => {
+        setAdditionTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: additionGames.length, correct: additionQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return 15;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, additionQuestionIndex, timerActive, additionAnswer]);
+
+  useEffect(() => {
+    if (selectedGame === 'matching' && timerActive && matchingAnswer === null) {
+      const timer = setInterval(() => {
+        setMatchingTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: matchingGames.length, correct: matchingQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return 12;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, matchingQuestionIndex, timerActive, matchingAnswer]);
+
   const matchingGames = [
     { number: 1, word: 'one', options: ['one', 'two', 'three', 'four'] },
     { number: 2, word: 'two', options: ['one', 'two', 'three', 'five'] },
@@ -77,7 +140,7 @@ export default function MathScreen() {
     { 
       id: 'counting', 
       title: 'Counting Stars', 
-      description: 'Learn to count objects', 
+      description: '15 seconds per question', 
       icon: 'star-outline',
       difficulty: 'Easy',
       colors: ['#FFE5E5', '#FFB3B3']
@@ -85,7 +148,7 @@ export default function MathScreen() {
     { 
       id: 'addition', 
       title: 'Addition Fun', 
-      description: 'Add numbers together', 
+      description: '15 seconds per question', 
       icon: 'plus-circle-outline',
       difficulty: 'Easy',
       colors: ['#FFE5E5', '#FFB3B3']
@@ -93,7 +156,7 @@ export default function MathScreen() {
     { 
       id: 'matching', 
       title: 'Number Matching', 
-      description: 'Match numbers to words', 
+      description: '12 seconds per question', 
       icon: 'link-variant',
       difficulty: 'Medium',
       colors: ['#FFF0E5', '#FFDAB3']
@@ -234,13 +297,17 @@ export default function MathScreen() {
         if (countingQuestionIndex < countingGames.length - 1) {
           setCountingQuestionIndex(countingQuestionIndex + 1);
           setCountingAnswer(null);
+          setCountingTimeLeft(15);
+          setTimerActive(true);
         } else {
           setGameResults({ score: newScore, total: countingGames.length, correct: countingQuestionIndex + 1 });
           setShowResultsModal(true);
+          setTimerActive(false);
         }
       }, 1500);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
         setGameResults({ score, total: countingGames.length, correct: countingQuestionIndex });
@@ -266,13 +333,17 @@ export default function MathScreen() {
         if (additionQuestionIndex < additionGames.length - 1) {
           setAdditionQuestionIndex(additionQuestionIndex + 1);
           setAdditionAnswer(null);
+          setAdditionTimeLeft(15);
+          setTimerActive(true);
         } else {
           setGameResults({ score: newScore, total: additionGames.length, correct: additionQuestionIndex + 1 });
           setShowResultsModal(true);
+          setTimerActive(false);
         }
       }, 1500);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
         setGameResults({ score, total: additionGames.length, correct: additionQuestionIndex });
@@ -294,6 +365,8 @@ export default function MathScreen() {
           <ThemedText style={styles.categoryText}>Counting</ThemedText>
         </View>
       </View>
+
+      <QuestionTimer timeLeft={countingTimeLeft} totalTime={15} color="#FF6B6B" />
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
@@ -347,6 +420,8 @@ export default function MathScreen() {
           <ThemedText style={styles.categoryText}>Addition</ThemedText>
         </View>
       </View>
+
+      <QuestionTimer timeLeft={additionTimeLeft} totalTime={15} color="#FF6B6B" />
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
@@ -410,13 +485,17 @@ export default function MathScreen() {
         if (matchingQuestionIndex < matchingGames.length - 1) {
           setMatchingQuestionIndex(matchingQuestionIndex + 1);
           setMatchingAnswer(null);
+          setMatchingTimeLeft(12);
+          setTimerActive(true);
         } else {
           setGameResults({ score: newScore, total: matchingGames.length, correct: matchingQuestionIndex + 1 });
           setShowResultsModal(true);
+          setTimerActive(false);
         }
       }, 1500);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
         setGameResults({ score, total: matchingGames.length, correct: matchingQuestionIndex });
@@ -438,6 +517,8 @@ export default function MathScreen() {
           <ThemedText style={styles.categoryText}>Matching</ThemedText>
         </View>
       </View>
+
+      <QuestionTimer timeLeft={matchingTimeLeft} totalTime={12} color="#FF6B6B" />
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
@@ -617,6 +698,10 @@ export default function MathScreen() {
     setCountingAnswer(null);
     setAdditionAnswer(null);
     setMatchingAnswer(null);
+    setCountingTimeLeft(15);
+    setAdditionTimeLeft(15);
+    setMatchingTimeLeft(12);
+    setTimerActive(true);
     setQuizCompleted(false);
     setGameKey(gameKey + 1);
   };

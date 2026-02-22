@@ -17,6 +17,7 @@ import { TimedQuiz } from '@/components/timed-quiz';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
 import { AnswerFeedback } from '@/components/answer-feedback';
+import { QuestionTimer } from '@/components/question-timer';
 
 export default function ScienceScreen() {
   const router = useRouter();
@@ -38,6 +39,9 @@ export default function ScienceScreen() {
   const [natureQuestionIndex, setNatureQuestionIndex] = useState(0);
   const [natureTimeLeft, setNatureTimeLeft] = useState(10);
   const [natureTimerActive, setNatureTimerActive] = useState(true);
+  const [animalTimeLeft, setAnimalTimeLeft] = useState(15);
+  const [planetTimeLeft, setPlanetTimeLeft] = useState(12);
+  const [timerActive, setTimerActive] = useState(true);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -49,7 +53,7 @@ export default function ScienceScreen() {
     { 
       id: 'animals', 
       title: 'Animal Sounds', 
-      description: 'Match animals to sounds', 
+      description: '15 seconds per question', 
       icon: 'dog',
       difficulty: 'Easy',
       colors: ['#E0F7FA', '#B2EBF2']
@@ -57,7 +61,7 @@ export default function ScienceScreen() {
     { 
       id: 'planets', 
       title: 'Solar System', 
-      description: 'Explore the planets', 
+      description: '12 seconds per question', 
       icon: 'earth',
       difficulty: 'Medium',
       colors: ['#E8F5E9', '#C8E6C9']
@@ -252,6 +256,44 @@ export default function ScienceScreen() {
     width: `${timerProgress.value}%`,
   }));
 
+  useEffect(() => {
+    if (selectedGame === 'animals' && timerActive && selectedAnswer === null) {
+      const timer = setInterval(() => {
+        setAnimalTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: animalQuizzes.length, correct: animalQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return 15;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, animalQuestionIndex, timerActive, selectedAnswer]);
+
+  useEffect(() => {
+    if (selectedGame === 'planets' && timerActive && selectedAnswer === null) {
+      const timer = setInterval(() => {
+        setPlanetTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            setTimeout(() => {
+              setGameResults({ score, total: planetQuizzes.length, correct: planetQuestionIndex });
+              setShowResultsModal(true);
+            }, 100);
+            return 12;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, planetQuestionIndex, timerActive, selectedAnswer]);
+
   const handleAnimalAnswer = (answer: string) => {
     setSelectedAnswer(answer);
     const isCorrect = answer === animalQuiz.answer;
@@ -269,13 +311,17 @@ export default function ScienceScreen() {
         if (animalQuestionIndex < animalQuizzes.length - 1) {
           setAnimalQuestionIndex(animalQuestionIndex + 1);
           setSelectedAnswer(null);
+          setAnimalTimeLeft(15);
+          setTimerActive(true);
         } else {
           setGameResults({ score: newScore, total: animalQuizzes.length, correct: animalQuestionIndex + 1 });
           setShowResultsModal(true);
+          setTimerActive(false);
         }
       }, 1500);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
         setGameResults({ score, total: animalQuizzes.length, correct: animalQuestionIndex });
@@ -301,13 +347,17 @@ export default function ScienceScreen() {
         if (planetQuestionIndex < planetQuizzes.length - 1) {
           setPlanetQuestionIndex(planetQuestionIndex + 1);
           setSelectedAnswer(null);
+          setPlanetTimeLeft(12);
+          setTimerActive(true);
         } else {
           setGameResults({ score: newScore, total: planetQuizzes.length, correct: planetQuestionIndex + 1 });
           setShowResultsModal(true);
+          setTimerActive(false);
         }
       }, 1500);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
         setGameResults({ score, total: planetQuizzes.length, correct: planetQuestionIndex });
@@ -326,9 +376,12 @@ export default function ScienceScreen() {
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="paw" size={18} color="#FFFFFF" />
           <ThemedText style={styles.categoryText}>Animals</ThemedText>
         </View>
       </View>
+
+      <QuestionTimer timeLeft={animalTimeLeft} totalTime={15} color="#4ECDC4" />
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
@@ -378,9 +431,12 @@ export default function ScienceScreen() {
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="earth" size={18} color="#FFFFFF" />
           <ThemedText style={styles.categoryText}>Planets</ThemedText>
         </View>
       </View>
+
+      <QuestionTimer timeLeft={planetTimeLeft} totalTime={12} color="#4ECDC4" />
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
@@ -648,7 +704,10 @@ export default function ScienceScreen() {
     setNatureQuestionIndex(0);
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
+    setAnimalTimeLeft(15);
+    setPlanetTimeLeft(12);
     setNatureTimeLeft(10);
+    setTimerActive(true);
     setNatureTimerActive(true);
     setQuizCompleted(false);
     setGameKey(gameKey + 1);
@@ -663,7 +722,10 @@ export default function ScienceScreen() {
     setNatureQuestionIndex(0);
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
+    setAnimalTimeLeft(15);
+    setPlanetTimeLeft(12);
     setNatureTimeLeft(10);
+    setTimerActive(false);
     setNatureTimerActive(false);
     setQuizCompleted(false);
     setGameKey(0);
@@ -680,8 +742,11 @@ export default function ScienceScreen() {
       setNatureQuestionIndex(0);
       setSelectedAnswer(null);
       setNatureSelectedAnswers(new Set());
+      setAnimalTimeLeft(15);
+      setPlanetTimeLeft(12);
       setNatureTimeLeft(10);
-      setNatureTimerActive(false);
+      setTimerActive(true);
+      setNatureTimerActive(true);
       setQuizCompleted(false);
       setGameKey(gameKey + 1);
     } else {
