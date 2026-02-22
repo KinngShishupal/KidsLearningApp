@@ -23,13 +23,19 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - **Speed Math**: Timed quiz to test quick math skills
 
 ### 🔬 Science Section (7 Games!)
-- **Animal Sounds**: Match animals to their sounds
-- **Solar System**: Learn about planets and their order
-- **Nature Quiz**: Discover what plants need to grow
+- **Animal Sounds**: Match animals to their sounds (4 questions)
+- **Solar System**: Learn about planets and their order (3 questions)
+- **Nature Quiz**: Timed multi-select challenge! (5 questions, 10 seconds each)
+  - What plants need to grow
+  - Identifying trees
+  - What bees make
+  - Animals that can fly
+  - What comes from clouds
+  - Select ALL correct answers before time runs out!
 - **Animal Memory**: Match cute animal pairs
 - **Insect Memory**: Match tiny creature pairs
 - **Ocean Memory**: Match amazing sea creature pairs
-- **Science Challenge**: Timed quiz about animals and nature
+- **Science Challenge**: Timed quiz about animals and nature (5 questions)
 
 ### 📚 English Section (7 Games!)
 - **Alphabet Fun**: Learn letters A-Z with fun words and emojis

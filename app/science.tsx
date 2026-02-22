@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Celebration } from '@/components/celebration';
 import { MemoryGame } from '@/components/memory-game';
@@ -30,6 +35,9 @@ export default function ScienceScreen() {
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
   const [natureSelectedAnswers, setNatureSelectedAnswers] = useState<Set<number>>(new Set());
   const [gameKey, setGameKey] = useState(0);
+  const [natureQuestionIndex, setNatureQuestionIndex] = useState(0);
+  const [natureTimeLeft, setNatureTimeLeft] = useState(10);
+  const [natureTimerActive, setNatureTimerActive] = useState(true);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -57,9 +65,9 @@ export default function ScienceScreen() {
     { 
       id: 'nature', 
       title: 'Nature Quiz', 
-      description: 'Learn about plants', 
+      description: '10 seconds per question!', 
       icon: 'flower',
-      difficulty: 'Easy',
+      difficulty: 'Medium',
       colors: ['#E0F7FA', '#B2EBF2']
     },
     { 
@@ -151,15 +159,98 @@ export default function ScienceScreen() {
   const animalQuiz = animalQuizzes[animalQuestionIndex];
   const planetQuiz = planetQuizzes[planetQuestionIndex];
 
-  const natureQuiz = {
-    question: 'What does a plant need to grow?',
-    options: [
-      { text: '☀️ Sunlight', correct: true },
-      { text: '💧 Water', correct: true },
-      { text: '🍕 Pizza', correct: false },
-      { text: '🌱 Soil', correct: true },
-    ],
-  };
+  const natureQuizzes = [
+    {
+      question: 'What does a plant need to grow?',
+      options: [
+        { text: '☀️ Sunlight', correct: true },
+        { text: '💧 Water', correct: true },
+        { text: '🍕 Pizza', correct: false },
+        { text: '🌱 Soil', correct: true },
+      ],
+    },
+    {
+      question: 'Which of these are trees?',
+      options: [
+        { text: '🌲 Pine Tree', correct: true },
+        { text: '🌻 Sunflower', correct: false },
+        { text: '🌳 Oak Tree', correct: true },
+        { text: '🌹 Rose', correct: false },
+      ],
+    },
+    {
+      question: 'What do bees make?',
+      options: [
+        { text: '🍯 Honey', correct: true },
+        { text: '🥛 Milk', correct: false },
+        { text: '🌼 Flowers', correct: false },
+        { text: '🐝 More Bees', correct: true },
+      ],
+    },
+    {
+      question: 'Which animals can fly?',
+      options: [
+        { text: '🐦 Bird', correct: true },
+        { text: '🐟 Fish', correct: false },
+        { text: '🦋 Butterfly', correct: true },
+        { text: '🐘 Elephant', correct: false },
+      ],
+    },
+    {
+      question: 'What comes from clouds?',
+      options: [
+        { text: '🌧️ Rain', correct: true },
+        { text: '🍔 Burgers', correct: false },
+        { text: '❄️ Snow', correct: true },
+        { text: '🎈 Balloons', correct: false },
+      ],
+    },
+  ];
+
+  const natureQuiz = natureQuizzes[natureQuestionIndex];
+  const timerProgress = useSharedValue(100);
+
+  useEffect(() => {
+    if (selectedGame === 'nature') {
+      setNatureTimeLeft(10);
+      setNatureTimerActive(true);
+      setNatureSelectedAnswers(new Set());
+    }
+  }, [selectedGame, natureQuestionIndex]);
+
+  useEffect(() => {
+    if (selectedGame === 'nature' && natureTimerActive) {
+      const timer = setInterval(() => {
+        setNatureTimeLeft((prev) => {
+          if (prev <= 1) {
+            setNatureTimerActive(false);
+            const correctCount = natureQuiz.options.filter(o => o.correct).length;
+            const correctAnswered = Array.from(natureSelectedAnswers).filter(idx => natureQuiz.options[idx].correct).length;
+            const totalCorrect = (natureQuestionIndex * correctCount) + correctAnswered;
+            const totalQuestions = natureQuizzes.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
+            setTimeout(() => {
+              setGameResults({ score, total: totalQuestions, correct: totalCorrect });
+              setShowResultsModal(true);
+            }, 100);
+            return 10;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, natureQuestionIndex, natureTimerActive, natureSelectedAnswers]);
+
+  useEffect(() => {
+    if (selectedGame === 'nature') {
+      timerProgress.value = withTiming((natureTimeLeft / 10) * 100, { duration: 1000 });
+    }
+  }, [natureTimeLeft, selectedGame]);
+
+  const timerProgressStyle = useAnimatedStyle(() => ({
+    width: `${timerProgress.value}%`,
+  }));
 
   const handleAnimalAnswer = (answer: string) => {
     setSelectedAnswer(answer);
@@ -338,37 +429,74 @@ export default function ScienceScreen() {
       const correctAnswered = Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
       
       if (correctAnswered === correctCount) {
+        setNatureTimerActive(false);
         setTimeout(() => {
-          setGameResults({ score: newScore, total: correctCount, correct: correctCount });
-          setShowResultsModal(true);
-        }, 1000);
+          if (natureQuestionIndex < natureQuizzes.length - 1) {
+            setNatureQuestionIndex(natureQuestionIndex + 1);
+            setNatureSelectedAnswers(new Set());
+            setScore(newScore);
+            setNatureTimeLeft(10);
+            setNatureTimerActive(true);
+          } else {
+            setGameResults({ score: newScore, total: natureQuizzes.length * correctCount, correct: natureQuizzes.length * correctCount });
+            setShowResultsModal(true);
+          }
+        }, 1200);
       }
     } else {
+      setNatureTimerActive(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimeout(() => {
-        const correctCount = natureQuiz.options.filter(o => o.correct).length;
-        const correctAnswered = Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
-        setGameResults({ score, total: correctCount, correct: correctAnswered });
+        const totalCorrect = (natureQuestionIndex * natureQuiz.options.filter(o => o.correct).length) + 
+                             Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
+        const totalQuestions = natureQuizzes.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
+        setGameResults({ score, total: totalQuestions, correct: totalCorrect });
         setShowResultsModal(true);
-      }, 500);
+      }, 800);
     }
   };
 
   const renderNatureGame = () => (
     <View style={styles.gameContainer}>
       <View style={styles.questionHeader}>
-        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
-          <MaterialCommunityIcons name="flower" size={18} color="#FFFFFF" />
-          <ThemedText style={styles.categoryText}>Nature</ThemedText>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
+          <ThemedText style={styles.questionProgress}>
+            {natureQuestionIndex + 1}/{natureQuizzes.length}
+          </ThemedText>
         </View>
+        <View style={styles.timerBadge}>
+          <MaterialCommunityIcons 
+            name={natureTimeLeft <= 3 ? "clock-alert" : "clock-outline"} 
+            size={18} 
+            color={natureTimeLeft <= 3 ? "#F44336" : "#4ECDC4"} 
+          />
+          <ThemedText style={[
+            styles.timerText,
+            { color: natureTimeLeft <= 3 ? "#F44336" : "#4ECDC4" }
+          ]}>{natureTimeLeft}s</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.timerProgressBarContainer}>
+        <Animated.View 
+          style={[
+            styles.timerProgressBar, 
+            { backgroundColor: natureTimeLeft <= 3 ? "#F44336" : "#4ECDC4" },
+            timerProgressStyle
+          ]} 
+        />
       </View>
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
-          <MaterialCommunityIcons name="sprout" size={40} color="#4ECDC4" />
+          <MaterialCommunityIcons name="leaf" size={40} color="#4ECDC4" />
         </View>
         <ThemedText style={styles.gameQuestion}>{natureQuiz.question}</ThemedText>
-        <ThemedText style={styles.instructionText}>Select ALL that apply!</ThemedText>
+        <View style={styles.multiSelectBadge}>
+          <MaterialCommunityIcons name="checkbox-multiple-marked" size={20} color="#4ECDC4" />
+          <ThemedText style={styles.multiSelectText}>Select ALL correct answers!</ThemedText>
+        </View>
       </View>
 
       <View style={styles.natureGrid}>
@@ -399,7 +527,9 @@ export default function ScienceScreen() {
         ))}
       </View>
       <ThemedText style={styles.hintText}>
-        Tap to check! Green = correct, Red = wrong 🌱
+        {natureSelectedAnswers.size === 0 
+          ? 'Tap your answers! You can select multiple.' 
+          : `Selected ${natureSelectedAnswers.size}/${natureQuiz.options.filter(o => o.correct).length} correct answers`}
       </ThemedText>
     </View>
   );
@@ -515,8 +645,11 @@ export default function ScienceScreen() {
     setScore(0);
     setAnimalQuestionIndex(0);
     setPlanetQuestionIndex(0);
+    setNatureQuestionIndex(0);
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
+    setNatureTimeLeft(10);
+    setNatureTimerActive(true);
     setQuizCompleted(false);
     setGameKey(gameKey + 1);
   };
@@ -527,8 +660,11 @@ export default function ScienceScreen() {
     setScore(0);
     setAnimalQuestionIndex(0);
     setPlanetQuestionIndex(0);
+    setNatureQuestionIndex(0);
     setSelectedAnswer(null);
     setNatureSelectedAnswers(new Set());
+    setNatureTimeLeft(10);
+    setNatureTimerActive(false);
     setQuizCompleted(false);
     setGameKey(0);
   };
@@ -541,8 +677,11 @@ export default function ScienceScreen() {
       setScore(0);
       setAnimalQuestionIndex(0);
       setPlanetQuestionIndex(0);
+      setNatureQuestionIndex(0);
       setSelectedAnswer(null);
       setNatureSelectedAnswers(new Set());
+      setNatureTimeLeft(10);
+      setNatureTimerActive(false);
       setQuizCompleted(false);
       setGameKey(gameKey + 1);
     } else {
@@ -1098,9 +1237,29 @@ const styles = StyleSheet.create({
   hintText: {
     fontSize: 14,
     color: '#999',
-    fontStyle: 'italic',
+    fontWeight: '600',
     textAlign: 'center',
     marginTop: 12,
+    backgroundColor: '#FFF9E6',
+    padding: 12,
+    borderRadius: 12,
+  },
+  multiSelectBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#E8F8F5',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginTop: 8,
+    borderWidth: 2,
+    borderColor: '#4ECDC4',
+  },
+  multiSelectText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4ECDC4',
   },
   natureButtonContent: {
     flexDirection: 'row',
@@ -1125,5 +1284,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
     lineHeight: 22,
+  },
+  timerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  timerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  timerProgressBarContainer: {
+    height: 10,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 5,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  timerProgressBar: {
+    height: '100%',
+    borderRadius: 5,
   },
 });
