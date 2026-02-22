@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -106,101 +107,177 @@ export function TimedQuiz({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText style={[styles.questionNumber, { color }]}>
-          Question {currentQuestionIndex + 1} of {questions.length}
-        </ThemedText>
-        <View style={styles.timerContainer}>
-          <ThemedText style={styles.timerText}>⏱️ {timeLeft}s</ThemedText>
-          <View style={styles.progressBarContainer}>
-            <Animated.View 
-              style={[
-                styles.progressBar, 
-                { backgroundColor: color },
-                progressStyle
-              ]} 
-            />
-          </View>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color={color} />
+          <ThemedText style={[styles.questionNumber, { color }]}>
+            {currentQuestionIndex + 1}/{questions.length}
+          </ThemedText>
+        </View>
+        <View style={styles.timerBadge}>
+          <MaterialCommunityIcons name="clock-outline" size={18} color={color} />
+          <ThemedText style={[styles.timerText, { color }]}>{timeLeft}s</ThemedText>
         </View>
       </View>
 
-      {currentQuestion.emoji && (
-        <ThemedText style={styles.questionEmoji}>{currentQuestion.emoji}</ThemedText>
-      )}
+      <View style={styles.progressBarContainer}>
+        <Animated.View 
+          style={[
+            styles.progressBar, 
+            { backgroundColor: color },
+            progressStyle
+          ]} 
+        />
+      </View>
 
-      <ThemedText style={[styles.question, { color }]}>
-        {currentQuestion.question}
-      </ThemedText>
+      <View style={[styles.questionCard, { borderColor: color + '40' }]}>
+        {currentQuestion.emoji && (
+          <View style={[styles.emojiCircle, { backgroundColor: color + '15' }]}>
+            <ThemedText style={styles.questionEmoji}>{currentQuestion.emoji}</ThemedText>
+          </View>
+        )}
+
+        <ThemedText style={styles.question}>
+          {currentQuestion.question}
+        </ThemedText>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Choose your answer:</ThemedText>
 
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
-          let buttonStyle = styles.optionButton;
+          let buttonStyle = [styles.optionButton];
           if (answered && option === currentQuestion.correctAnswer) {
-            buttonStyle = styles.correctButton;
+            buttonStyle.push(styles.correctButton);
           } else if (answered && option === selectedAnswer && option !== currentQuestion.correctAnswer) {
-            buttonStyle = styles.incorrectButton;
+            buttonStyle.push(styles.incorrectButton);
           }
 
           return (
             <TouchableOpacity
               key={index}
-              style={[buttonStyle, { borderColor: color }]}
+              style={buttonStyle}
               onPress={() => handleAnswer(option)}
               disabled={answered}
             >
-              <ThemedText style={styles.optionText}>{option}</ThemedText>
+              <ThemedText style={[
+                styles.optionText,
+                answered && option === selectedAnswer && styles.selectedOptionText
+              ]}>{option}</ThemedText>
+              {answered && option === currentQuestion.correctAnswer && (
+                <MaterialCommunityIcons name="check-circle" size={24} color="#FFFFFF" style={styles.checkIcon} />
+              )}
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <ThemedText style={styles.scoreText}>Score: {score}</ThemedText>
+      <View style={[styles.scoreBox, { backgroundColor: color + '15', borderColor: color }]}>
+        <MaterialCommunityIcons name="trophy" size={20} color={color} />
+        <ThemedText style={[styles.scoreText, { color }]}>Score: {score}</ThemedText>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
     width: '100%',
   },
   header: {
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  progressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
   questionNumber: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 12,
   },
-  timerContainer: {
-    marginBottom: 8,
+  timerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
   timerText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
   },
   progressBarContainer: {
-    height: 8,
+    height: 10,
     backgroundColor: '#F0F0F0',
-    borderRadius: 4,
+    borderRadius: 5,
     overflow: 'hidden',
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   progressBar: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 5,
   },
-  questionEmoji: {
-    fontSize: 64,
-    textAlign: 'center',
+  questionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+  },
+  emojiCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 16,
   },
+  questionEmoji: {
+    fontSize: 60,
+    textAlign: 'center',
+  },
   question: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 24,
+    color: '#333',
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+  instructionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 16,
     textAlign: 'center',
   },
   optionsContainer: {
@@ -208,28 +285,57 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   optionButton: {
-    backgroundColor: '#F8F8F8',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    padding: 18,
+    borderRadius: 18,
     borderWidth: 3,
+    borderColor: '#F0F0F0',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
   },
   correctButton: {
-    backgroundColor: '#D4EDDA',
-    borderColor: '#28A745',
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
   },
   incorrectButton: {
-    backgroundColor: '#F8D7DA',
-    borderColor: '#DC3545',
+    backgroundColor: '#FF6B6B',
+    borderColor: '#D32F2F',
   },
   optionText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#333',
+  },
+  selectedOptionText: {
+    color: '#FFFFFF',
+  },
+  checkIcon: {
+    marginLeft: 4,
+  },
+  scoreBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    gap: 8,
+    borderWidth: 2,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
   scoreText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#666',
   },
 });

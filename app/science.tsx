@@ -28,6 +28,7 @@ export default function ScienceScreen() {
   const [gameResults, setGameResults] = useState({ score: 0, total: 0, correct: 0 });
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
+  const [natureSelectedAnswers, setNatureSelectedAnswers] = useState<Set<number>>(new Set());
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -304,31 +305,102 @@ export default function ScienceScreen() {
     </View>
   );
 
+  const handleNatureAnswer = (index: number, isCorrect: boolean) => {
+    const newAnswers = new Set(natureSelectedAnswers);
+    newAnswers.add(index);
+    setNatureSelectedAnswers(newAnswers);
+
+    if (isCorrect) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const newScore = score + 10;
+      setScore(newScore);
+      
+      const correctCount = natureQuiz.options.filter(o => o.correct).length;
+      const correctAnswered = Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
+      
+      if (correctAnswered === correctCount) {
+        setTimeout(() => {
+          setGameResults({ score: newScore, total: correctCount, correct: correctCount });
+          setShowResultsModal(true);
+        }, 1000);
+      }
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimeout(() => {
+        const correctCount = natureQuiz.options.filter(o => o.correct).length;
+        const correctAnswered = Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
+        setGameResults({ score, total: correctCount, correct: correctAnswered });
+        setShowResultsModal(true);
+      }, 500);
+    }
+  };
+
   const renderNatureGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.gameQuestion}>{natureQuiz.question}</ThemedText>
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="flower" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Nature</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
+          <MaterialCommunityIcons name="sprout" size={40} color="#4ECDC4" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>{natureQuiz.question}</ThemedText>
+        <ThemedText style={styles.instructionText}>Select ALL that apply!</ThemedText>
+      </View>
+
       <View style={styles.natureGrid}>
         {natureQuiz.options.map((option, index) => (
           <TouchableOpacity
             key={index}
             style={[
               styles.natureButton,
-              option.correct ? styles.correctNature : styles.incorrectNature,
+              natureSelectedAnswers.has(index) && (option.correct ? styles.correctNature : styles.incorrectNature),
             ]}
+            onPress={() => handleNatureAnswer(index, option.correct)}
+            disabled={natureSelectedAnswers.has(index)}
           >
-            <ThemedText style={styles.natureText}>{option.text}</ThemedText>
+            <View style={styles.natureButtonContent}>
+              <ThemedText style={[
+                styles.natureText,
+                natureSelectedAnswers.has(index) && styles.natureTextSelected,
+              ]}>{option.text}</ThemedText>
+              {natureSelectedAnswers.has(index) && (
+                <MaterialCommunityIcons 
+                  name={option.correct ? "check-circle" : "close-circle"} 
+                  size={24} 
+                  color="#FFFFFF" 
+                />
+              )}
+            </View>
           </TouchableOpacity>
         ))}
       </View>
       <ThemedText style={styles.hintText}>
-        Tap each one to learn! Green means correct! 🌱
+        Tap to check! Green = correct, Red = wrong 🌱
       </ThemedText>
     </View>
   );
 
   const renderMemoryGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Match the cute animals!" buddy="cat" />
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
+          <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Tap cards to flip them. Match the animals!
+        </ThemedText>
+      </View>
+
       <MemoryGame
         cards={animalMemoryCards}
         onComplete={() => {
@@ -337,6 +409,7 @@ export default function ScienceScreen() {
           setShowResultsModal(true);
         }}
         cardBackColor="#E8F8F5"
+        cardFrontColors={['#4ECDC4', '#44A08D']}
       />
     </View>
   );
@@ -362,6 +435,7 @@ export default function ScienceScreen() {
     setAnimalQuestionIndex(0);
     setPlanetQuestionIndex(0);
     setSelectedAnswer(null);
+    setNatureSelectedAnswers(new Set());
     setQuizCompleted(false);
   };
 
@@ -372,6 +446,7 @@ export default function ScienceScreen() {
     setAnimalQuestionIndex(0);
     setPlanetQuestionIndex(0);
     setSelectedAnswer(null);
+    setNatureSelectedAnswers(new Set());
     setQuizCompleted(false);
   };
 
@@ -384,6 +459,7 @@ export default function ScienceScreen() {
       setAnimalQuestionIndex(0);
       setPlanetQuestionIndex(0);
       setSelectedAnswer(null);
+      setNatureSelectedAnswers(new Set());
       setQuizCompleted(false);
     } else {
       handleGoHome();
@@ -785,31 +861,72 @@ const styles = StyleSheet.create({
   },
   natureGrid: {
     width: '100%',
-    gap: 12,
+    gap: 14,
     marginBottom: 20,
   },
   natureButton: {
-    padding: 20,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  natureButtonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
     borderWidth: 3,
+    borderColor: '#E8F8F5',
+    borderRadius: 20,
   },
   correctNature: {
-    backgroundColor: '#D4EDDA',
-    borderColor: '#28A745',
+    backgroundColor: '#4CAF50',
   },
   incorrectNature: {
-    backgroundColor: '#F8D7DA',
-    borderColor: '#DC3545',
+    backgroundColor: '#FF6B6B',
   },
   natureText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
+  },
+  natureTextSelected: {
+    color: '#FFFFFF',
   },
   hintText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#999',
     fontStyle: 'italic',
     textAlign: 'center',
+    marginTop: 12,
+  },
+  natureButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  memoryInstructionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 20,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#FFD93D',
+  },
+  memoryInstruction: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    lineHeight: 22,
   },
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
 interface Pattern {
@@ -52,30 +53,48 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
 
   return (
     <View style={styles.container}>
-      <ThemedText style={[styles.title, { color }]}>Complete the Pattern!</ThemedText>
-      <ThemedText style={styles.questionNumber}>
-        Pattern {currentPattern + 1} of {patterns.length}
-      </ThemedText>
-
-      <View style={styles.patternContainer}>
-        {pattern.sequence.map((item, index) => (
-          <View key={index} style={styles.patternItemContainer}>
-            {index === pattern.missingIndex ? (
-              <View style={[styles.missingBox, { borderColor: color }]}>
-                <ThemedText style={styles.questionMark}>?</ThemedText>
-              </View>
-            ) : (
-              <View style={[styles.patternBox, { backgroundColor: color }]}>
-                <ThemedText style={styles.patternItem}>{item}</ThemedText>
-              </View>
-            )}
-          </View>
-        ))}
+      <View style={styles.header}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color={color} />
+          <ThemedText style={[styles.questionNumber, { color }]}>
+            {currentPattern + 1}/{patterns.length}
+          </ThemedText>
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: color }]}>
+          <ThemedText style={styles.categoryText}>Pattern</ThemedText>
+        </View>
       </View>
+
+      <View style={[styles.questionCard, { borderColor: color + '40' }]}>
+        <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
+          <MaterialCommunityIcons name="shape" size={40} color={color} />
+        </View>
+        <ThemedText style={styles.title}>What comes next?</ThemedText>
+        
+        <View style={styles.patternDisplayCard}>
+          <View style={styles.patternContainer}>
+            {pattern.sequence.map((item, index) => (
+              <View key={index} style={styles.patternItemContainer}>
+                {index === pattern.missingIndex ? (
+                  <View style={[styles.missingBox, { borderColor: color }]}>
+                    <ThemedText style={styles.questionMark}>?</ThemedText>
+                  </View>
+                ) : (
+                  <View style={[styles.patternBox, { backgroundColor: color }]}>
+                    <ThemedText style={styles.patternItem}>{item}</ThemedText>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Choose the missing piece:</ThemedText>
 
       <View style={styles.optionsContainer}>
         {pattern.options.map((option, index) => {
-          let buttonStyle = [styles.optionButton, { borderColor: color }];
+          let buttonStyle = [styles.optionButton];
           if (selectedAnswer === option) {
             if (option === pattern.sequence[pattern.missingIndex]) {
               buttonStyle.push(styles.correctOption);
@@ -92,38 +111,102 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
               disabled={selectedAnswer !== null}
             >
               <ThemedText style={styles.optionText}>{option}</ThemedText>
+              {selectedAnswer === option && option === pattern.sequence[pattern.missingIndex] && (
+                <MaterialCommunityIcons name="check-circle" size={24} color="#FFFFFF" style={styles.checkIcon} />
+              )}
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <ThemedText style={styles.scoreText}>Score: {score}</ThemedText>
+      <View style={[styles.scoreBox, { backgroundColor: color + '15', borderColor: color }]}>
+        <MaterialCommunityIcons name="trophy" size={20} color={color} />
+        <ThemedText style={[styles.scoreText, { color }]}>Score: {score}</ThemedText>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
     width: '100%',
-    alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  progressBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
   questionNumber: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 24,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  categoryBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  questionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    borderWidth: 3,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  patternDisplayCard: {
+    backgroundColor: '#FFF9E6',
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
   },
   patternContainer: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
+    gap: 10,
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
@@ -131,9 +214,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   patternBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 65,
+    height: 65,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -143,22 +226,29 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   missingBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 65,
+    height: 65,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F8F8',
-    borderWidth: 3,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 4,
     borderStyle: 'dashed',
   },
   patternItem: {
-    fontSize: 32,
+    fontSize: 36,
   },
   questionMark: {
-    fontSize: 36,
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#999',
+  },
+  instructionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   optionsContainer: {
     flexDirection: 'row',
@@ -168,28 +258,54 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   optionButton: {
-    backgroundColor: '#F8F8F8',
-    width: 70,
-    height: 70,
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    width: 80,
+    height: 80,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 4,
+    borderColor: '#F0F0F0',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    position: 'relative',
   },
   correctOption: {
-    backgroundColor: '#D4EDDA',
-    borderColor: '#28A745',
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
   },
   incorrectOption: {
-    backgroundColor: '#F8D7DA',
-    borderColor: '#DC3545',
+    backgroundColor: '#FF6B6B',
+    borderColor: '#D32F2F',
   },
   optionText: {
-    fontSize: 28,
+    fontSize: 32,
+  },
+  checkIcon: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
+  scoreBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    gap: 8,
+    borderWidth: 2,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
   scoreText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#666',
   },
 });

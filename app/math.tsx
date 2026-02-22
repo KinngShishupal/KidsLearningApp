@@ -40,6 +40,8 @@ export default function MathScreen() {
   const [gameResults, setGameResults] = useState({ score: 0, total: 0, correct: 0 });
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
   const [answerIsCorrect, setAnswerIsCorrect] = useState(false);
+  const [matchingQuestionIndex, setMatchingQuestionIndex] = useState(0);
+  const [matchingAnswer, setMatchingAnswer] = useState<string | null>(null);
 
   const countingGames = [
     { question: 'How many stars?', stars: 5, options: [4, 5, 6, 7] },
@@ -60,13 +62,15 @@ export default function MathScreen() {
   const countingGame = countingGames[countingQuestionIndex];
   const additionGame = additionGames[additionQuestionIndex];
 
-  const matchingGame = [
-    { number: 1, word: 'one' },
-    { number: 2, word: 'two' },
-    { number: 3, word: 'three' },
-    { number: 4, word: 'four' },
-    { number: 5, word: 'five' },
+  const matchingGames = [
+    { number: 1, word: 'one', options: ['one', 'two', 'three', 'four'] },
+    { number: 2, word: 'two', options: ['one', 'two', 'three', 'five'] },
+    { number: 3, word: 'three', options: ['two', 'three', 'four', 'five'] },
+    { number: 4, word: 'four', options: ['one', 'three', 'four', 'five'] },
+    { number: 5, word: 'five', options: ['two', 'three', 'four', 'five'] },
   ];
+
+  const matchingGame = matchingGames[matchingQuestionIndex];
 
   const games = [
     { 
@@ -318,29 +322,107 @@ export default function MathScreen() {
     </View>
   );
 
+  const handleMatchingAnswer = (answer: string) => {
+    setMatchingAnswer(answer);
+    const isCorrect = answer === matchingGame.word;
+    
+    setAnswerIsCorrect(isCorrect);
+    setShowAnswerFeedback(true);
+    
+    if (isCorrect) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const newScore = score + 10;
+      setScore(newScore);
+      
+      setTimeout(() => {
+        setShowAnswerFeedback(false);
+        if (matchingQuestionIndex < matchingGames.length - 1) {
+          setMatchingQuestionIndex(matchingQuestionIndex + 1);
+          setMatchingAnswer(null);
+        } else {
+          setGameResults({ score: newScore, total: matchingGames.length, correct: matchingQuestionIndex + 1 });
+          setShowResultsModal(true);
+        }
+      }, 1500);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setTimeout(() => {
+        setShowAnswerFeedback(false);
+        setGameResults({ score, total: matchingGames.length, correct: matchingQuestionIndex });
+        setShowResultsModal(true);
+      }, 1500);
+    }
+  };
+
   const renderMatchingGame = () => (
     <View style={styles.gameContainer}>
-      <ThemedText style={styles.gameQuestion}>Match numbers to words!</ThemedText>
-      <View style={styles.matchingContainer}>
-        {matchingGame.slice(0, 3).map((item) => (
-          <View key={item.number} style={styles.matchingRow}>
-            <TouchableOpacity style={styles.numberBox}>
-              <ThemedText style={styles.matchingNumber}>{item.number}</ThemedText>
-            </TouchableOpacity>
-            <ThemedText style={styles.matchingArrow}>→</ThemedText>
-            <TouchableOpacity style={styles.wordBox}>
-              <ThemedText style={styles.matchingWord}>{item.word}</ThemedText>
-            </TouchableOpacity>
+      <View style={styles.questionHeader}>
+        <View style={styles.progressBadge}>
+          <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
+          <ThemedText style={styles.questionProgress}>
+            {matchingQuestionIndex + 1}/{matchingGames.length}
+          </ThemedText>
+        </View>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <ThemedText style={styles.categoryText}>Matching</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.questionCard}>
+        <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
+          <MaterialCommunityIcons name="link-variant" size={40} color="#FF6B6B" />
+        </View>
+        <ThemedText style={styles.gameQuestion}>Match the number to its word:</ThemedText>
+        
+        <View style={styles.matchingDisplayCard}>
+          <View style={styles.numberDisplayBubble}>
+            <ThemedText style={styles.numberDisplayText}>{matchingGame.number}</ThemedText>
           </View>
+          <MaterialCommunityIcons name="arrow-right-thick" size={40} color="#FF6B6B" />
+          <View style={styles.questionMarkBubble}>
+            <ThemedText style={styles.questionMarkText}>?</ThemedText>
+          </View>
+        </View>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Select the word:</ThemedText>
+      <View style={styles.optionsGrid}>
+        {matchingGame.options.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.wordOptionButton,
+              matchingAnswer === option && (option === matchingGame.word ? styles.correctWordButton : styles.incorrectWordButton),
+            ]}
+            onPress={() => handleMatchingAnswer(option)}
+            disabled={matchingAnswer !== null}
+          >
+            <ThemedText style={[
+              styles.wordOptionText,
+              matchingAnswer === option && styles.selectedWordOptionText,
+            ]}>{option}</ThemedText>
+          </TouchableOpacity>
         ))}
       </View>
-      <ThemedText style={styles.hintText}>Tap to practice counting!</ThemedText>
     </View>
   );
 
   const renderMemoryGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Find matching pairs!" buddy="star" />
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
+          <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Tap cards to flip them. Find matching pairs!
+        </ThemedText>
+      </View>
+
       <MemoryGame
         cards={memoryCards}
         onComplete={() => {
@@ -349,6 +431,7 @@ export default function MathScreen() {
           setShowResultsModal(true);
         }}
         cardBackColor="#FFE5E5"
+        cardFrontColors={['#FF6B6B', '#FF8E53']}
       />
     </View>
   );
@@ -387,8 +470,10 @@ export default function MathScreen() {
     setScore(0);
     setCountingQuestionIndex(0);
     setAdditionQuestionIndex(0);
+    setMatchingQuestionIndex(0);
     setCountingAnswer(null);
     setAdditionAnswer(null);
+    setMatchingAnswer(null);
     setQuizCompleted(false);
   };
 
@@ -398,8 +483,10 @@ export default function MathScreen() {
     setScore(0);
     setCountingQuestionIndex(0);
     setAdditionQuestionIndex(0);
+    setMatchingQuestionIndex(0);
     setCountingAnswer(null);
     setAdditionAnswer(null);
+    setMatchingAnswer(null);
     setQuizCompleted(false);
   };
 
@@ -411,8 +498,10 @@ export default function MathScreen() {
       setScore(0);
       setCountingQuestionIndex(0);
       setAdditionQuestionIndex(0);
+      setMatchingQuestionIndex(0);
       setCountingAnswer(null);
       setAdditionAnswer(null);
+      setMatchingAnswer(null);
       setQuizCompleted(false);
     } else {
       handleGoHome();
@@ -818,52 +907,99 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF6B6B',
   },
-  matchingContainer: {
-    width: '100%',
-    marginBottom: 24,
-  },
-  matchingRow: {
+  matchingDisplayCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    gap: 16,
+    gap: 20,
+    backgroundColor: '#FFF9E6',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    borderWidth: 2,
+    borderColor: '#FFE5E5',
   },
-  numberBox: {
-    backgroundColor: '#FFE5E5',
-    width: 80,
-    height: 80,
-    borderRadius: 16,
+  numberDisplayBubble: {
+    backgroundColor: '#FF6B6B',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FF6B6B',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
-  matchingNumber: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FF6B6B',
-  },
-  matchingArrow: {
-    fontSize: 32,
-    color: '#FF6B6B',
-  },
-  wordBox: {
-    backgroundColor: '#FF6B6B',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    borderRadius: 16,
-    minWidth: 100,
-    alignItems: 'center',
-  },
-  matchingWord: {
-    fontSize: 24,
+  numberDisplayText: {
+    fontSize: 48,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  hintText: {
-    fontSize: 16,
-    color: '#999',
-    fontStyle: 'italic',
+  questionMarkBubble: {
+    backgroundColor: '#FFE5E5',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#FF6B6B',
+    borderStyle: 'dashed',
+  },
+  questionMarkText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
+  },
+  wordOptionButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 28,
+    paddingVertical: 18,
+    borderRadius: 20,
+    minWidth: 140,
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#FFE5E5',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  correctWordButton: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
+  },
+  incorrectWordButton: {
+    backgroundColor: '#FF6B6B',
+    borderColor: '#D32F2F',
+  },
+  wordOptionText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
+  },
+  selectedWordOptionText: {
+    color: '#FFFFFF',
+  },
+  memoryInstructionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 20,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#FFD93D',
+  },
+  memoryInstruction: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    lineHeight: 22,
   },
 });

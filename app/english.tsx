@@ -323,7 +323,20 @@ export default function EnglishScreen() {
 
   const renderMemoryGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Match the letters!" buddy="star" />
+      <View style={styles.questionHeader}>
+        <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
+          <MaterialCommunityIcons name="brain" size={18} color="#FFFFFF" />
+          <ThemedText style={styles.categoryText}>Memory</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.memoryInstructionCard}>
+        <MaterialCommunityIcons name="lightbulb-on" size={32} color="#FFD93D" />
+        <ThemedText style={styles.memoryInstruction}>
+          Tap cards to flip them. Match the letters!
+        </ThemedText>
+      </View>
+
       <MemoryGame
         cards={letterMemoryCards}
         onComplete={() => {
@@ -332,6 +345,7 @@ export default function EnglishScreen() {
           setShowResultsModal(true);
         }}
         cardBackColor="#E8F8E8"
+        cardFrontColors={['#56C596', '#3AA76D']}
       />
     </View>
   );
@@ -889,5 +903,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#56C596',
+  },
+  memoryInstructionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 20,
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#FFD93D',
+  },
+  memoryInstruction: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    lineHeight: 22,
   },
 });
