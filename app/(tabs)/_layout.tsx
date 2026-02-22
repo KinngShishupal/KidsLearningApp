@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -12,22 +12,47 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#FF6B6B',
+        tabBarInactiveTintColor: '#999',
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 2,
+          borderTopColor: '#FFE5E5',
+          paddingTop: 8,
+          paddingBottom: 8,
+          height: 65,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: 'bold',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Learn',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons 
+              name={focused ? 'book-open-page-variant' : 'book-outline'} 
+              size={28} 
+              color={color} 
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Progress',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="star.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons 
+              name={focused ? 'star' : 'star-outline'} 
+              size={28} 
+              color={color} 
+            />
+          ),
         }}
       />
     </Tabs>
