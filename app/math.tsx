@@ -753,6 +753,8 @@ export default function MathScreen() {
           onNextGame={handleNextGame}
           color="#FF6B6B"
           gameTitle={games.find(g => g.id === selectedGame)?.title || 'Math Game'}
+          gameId={selectedGame || 'math'}
+          subject="math"
         />
         <Confetti show={showConfetti} />
         <Celebration message={celebrationMessage} show={showCelebration} />

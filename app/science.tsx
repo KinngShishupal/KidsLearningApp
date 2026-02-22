@@ -768,6 +768,8 @@ export default function ScienceScreen() {
           onNextGame={handleNextGame}
           color="#4ECDC4"
           gameTitle={games.find(g => g.id === selectedGame)?.title || 'Science Game'}
+          gameId={selectedGame || 'science'}
+          subject="science"
         />
         <Confetti show={showConfetti} />
         <Celebration message={celebrationMessage} show={showCelebration} />

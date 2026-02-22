@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Modal, Share } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { PersonalBestBadge } from '@/components/personal-best-badge';
+import { GameTracker } from '@/utils/game-tracker';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -22,6 +23,8 @@ interface GameResultsModalProps {
   onNextGame?: () => void;
   color?: string;
   gameTitle?: string;
+  gameId?: string;
+  subject?: 'math' | 'science' | 'english';
 }
 
 export function GameResultsModal({
@@ -34,6 +37,8 @@ export function GameResultsModal({
   onNextGame,
   color = '#FF6B6B',
   gameTitle = 'Game',
+  gameId = 'unknown',
+  subject = 'math',
 }: GameResultsModalProps) {
   const scale = useSharedValue(0);
   const star1Scale = useSharedValue(0);
@@ -43,16 +48,35 @@ export function GameResultsModal({
 
   const [showPersonalBest, setShowPersonalBest] = useState(false);
   const [previousBest, setPreviousBest] = useState(0);
+  const [dataSaved, setDataSaved] = useState(false);
 
   const percentage = (correctAnswers / totalQuestions) * 100;
   const stars = percentage >= 80 ? 3 : percentage >= 50 ? 2 : percentage >= 25 ? 1 : 0;
 
   useEffect(() => {
+    if (visible && !dataSaved) {
+      GameTracker.saveGameResult({
+        gameId,
+        gameName: gameTitle,
+        subject,
+        score,
+        totalQuestions,
+        correctAnswers,
+        timestamp: Date.now(),
+        completedSuccessfully: correctAnswers > 0,
+      });
+      setDataSaved(true);
+    }
+    
+    if (!visible) {
+      setDataSaved(false);
+    }
+    
     if (visible && score > previousBest) {
       setShowPersonalBest(true);
       setPreviousBest(score);
     }
-  }, [visible, score]);
+  }, [visible, score, dataSaved]);
 
   useEffect(() => {
     if (visible) {

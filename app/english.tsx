@@ -831,6 +831,8 @@ export default function EnglishScreen() {
           onNextGame={handleNextGame}
           color="#56C596"
           gameTitle={games.find(g => g.id === selectedGame)?.title || 'English Game'}
+          gameId={selectedGame || 'english'}
+          subject="english"
         />
         <Confetti show={showConfetti} />
         <Celebration message={celebrationMessage} show={showCelebration} />
