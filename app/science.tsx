@@ -642,37 +642,57 @@ export default function ScienceScreen() {
       </View>
 
       <View style={styles.natureGrid}>
-        {natureQuiz.options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.natureButton,
-              natureSelectedAnswers.has(index) && (option.correct ? styles.correctNature : styles.incorrectNature),
-            ]}
-            onPress={() => handleNatureAnswer(index, option.correct)}
-            disabled={natureSelectedAnswers.has(index)}
-          >
-            <View style={styles.natureButtonContent}>
-              <ThemedText style={[
-                styles.natureText,
-                natureSelectedAnswers.has(index) && styles.natureTextSelected,
-              ]}>{option.text}</ThemedText>
-              {natureSelectedAnswers.has(index) && (
-                <MaterialCommunityIcons 
-                  name={option.correct ? "check-circle" : "close-circle"} 
-                  size={24} 
-                  color="#FFFFFF" 
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
+        {natureQuiz.options.map((option, index) => {
+          const isSelected = natureSelectedAnswers.has(index);
+          const isCorrect = option.correct;
+          
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.natureButton,
+                isSelected && isCorrect && styles.correctNature,
+                isSelected && !isCorrect && styles.incorrectNature,
+              ]}
+              onPress={() => handleNatureAnswer(index, option.correct)}
+              disabled={natureSelectedAnswers.has(index)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.natureButtonContent}>
+                <ThemedText style={[
+                  styles.natureText,
+                  isSelected && styles.natureTextSelected,
+                ]}>{option.text}</ThemedText>
+                {isSelected && (
+                  <View style={[
+                    styles.natureIconBox,
+                    isCorrect && styles.correctIconBox,
+                    !isCorrect && styles.incorrectIconBox,
+                  ]}>
+                    <MaterialCommunityIcons 
+                      name={isCorrect ? "check-circle" : "close-circle"} 
+                      size={28} 
+                      color="#FFFFFF" 
+                    />
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-      <ThemedText style={styles.hintText}>
-        {natureSelectedAnswers.size === 0 
-          ? 'Tap your answers! You can select multiple.' 
-          : `Selected ${natureSelectedAnswers.size}/${natureQuiz.options.filter(o => o.correct).length} correct answers`}
-      </ThemedText>
+      <View style={styles.natureHintCard}>
+        <MaterialCommunityIcons 
+          name={natureSelectedAnswers.size === 0 ? "information" : "progress-check"} 
+          size={20} 
+          color="#4ECDC4" 
+        />
+        <ThemedText style={styles.hintText}>
+          {natureSelectedAnswers.size === 0 
+            ? 'Tap your answers! You can select multiple.' 
+            : `Selected ${natureSelectedAnswers.size}/${natureQuiz.options.filter(o => o.correct).length} correct answers`}
+        </ThemedText>
+      </View>
     </View>
   );
 
@@ -1393,52 +1413,94 @@ const styles = StyleSheet.create({
   },
   natureGrid: {
     width: '100%',
-    gap: 14,
+    gap: 16,
     marginBottom: 20,
   },
   natureButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 4,
+    borderRadius: 24,
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    borderWidth: 3,
+    borderColor: '#E8F8F5',
+    overflow: 'visible',
   },
   natureButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
-    borderWidth: 3,
-    borderColor: '#E8F8F5',
-    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    gap: 16,
+    minHeight: 70,
   },
-  correctNature: {
+  natureIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  correctIconBox: {
     backgroundColor: '#4CAF50',
   },
-  incorrectNature: {
+  incorrectIconBox: {
     backgroundColor: '#FF6B6B',
   },
+  correctNature: {
+    backgroundColor: '#E8F5E9',
+    borderColor: '#4CAF50',
+    borderWidth: 4,
+    transform: [{ scale: 1.02 }],
+  },
+  incorrectNature: {
+    backgroundColor: '#FFEBEE',
+    borderColor: '#F44336',
+    borderWidth: 4,
+  },
   natureText: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
     color: '#333',
     flex: 1,
+    lineHeight: 26,
+    includeFontPadding: false,
   },
   natureTextSelected: {
-    color: '#FFFFFF',
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  natureHintCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#E8F8F5',
+    padding: 14,
+    borderRadius: 16,
+    marginTop: 8,
+    borderWidth: 2,
+    borderColor: '#4ECDC4',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   hintText: {
     fontSize: 14,
-    color: '#999',
+    color: '#333',
     fontWeight: '600',
-    textAlign: 'center',
-    marginTop: 12,
-    backgroundColor: '#FFF9E6',
-    padding: 12,
-    borderRadius: 12,
+    flex: 1,
+    lineHeight: 20,
+    includeFontPadding: false,
   },
   multiSelectBadge: {
     flexDirection: 'row',
