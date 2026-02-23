@@ -53,9 +53,9 @@ export function QuestionTimer({ timeLeft, totalTime, color = '#FF6B6B' }: Questi
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.Create({
   container: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   timerBadge: {
     flexDirection: 'row',

@@ -1198,7 +1198,7 @@ const styles = StyleSheet.create({
   },
   gameContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   questionHeader: {
     flexDirection: 'row',
