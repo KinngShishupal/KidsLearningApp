@@ -35,6 +35,8 @@ export default function EnglishScreen() {
   const [spellingTimerActive, setSpellingTimerActive] = useState(true);
   const [rhymeQuestionIndex, setRhymeQuestionIndex] = useState(0);
   const [rhymeSelectedAnswers, setRhymeSelectedAnswers] = useState<Set<string>>(new Set());
+  const [rhymeTimeLeft, setRhymeTimeLeft] = useState(15);
+  const [rhymeTimerActive, setRhymeTimerActive] = useState(true);
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -420,6 +422,37 @@ export default function EnglishScreen() {
     }
   }, [selectedGame, spellingQuestionIndex, spellingTimerActive, spellingInput, spellingGame]);
 
+  useEffect(() => {
+    if (selectedGame === 'rhyming') {
+      setRhymeTimeLeft(15);
+      setRhymeTimerActive(true);
+      setRhymeSelectedAnswers(new Set());
+    }
+  }, [selectedGame, rhymeQuestionIndex]);
+
+  useEffect(() => {
+    if (selectedGame === 'rhyming' && rhymeTimerActive && rhymingGame) {
+      const timer = setInterval(() => {
+        setRhymeTimeLeft((prev) => {
+          if (prev <= 1) {
+            setRhymeTimerActive(false);
+            const correctAnswers = Array.from(rhymeSelectedAnswers).filter(
+              word => rhymingGame.options.find(o => o.word === word)?.rhymes
+            ).length;
+            const totalCorrect = (rhymeQuestionIndex * 2) + correctAnswers;
+            setTimeout(() => {
+              setGameResults({ score, total: rhymingQuestions.length * 2, correct: totalCorrect });
+              setShowResultsModal(true);
+            }, 100);
+            return 15;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [selectedGame, rhymeQuestionIndex, rhymeTimerActive, rhymeSelectedAnswers.size]);
+
   const handleSpellingLetter = (letter: string) => {
     if (spellingInput.length >= spellingGame.word.length) return;
     
@@ -492,11 +525,14 @@ export default function EnglishScreen() {
       
       // Check if found all rhymes
       if (correctAnswered === correctOptions.length) {
+        setRhymeTimerActive(false);
         setTimeout(() => {
           if (rhymeQuestionIndex < rhymingQuestions.length - 1) {
             setRhymeQuestionIndex(rhymeQuestionIndex + 1);
             setRhymeSelectedAnswers(new Set());
             setScore(newScore);
+            setRhymeTimeLeft(15);
+            setRhymeTimerActive(true);
           } else {
             setGameResults({ score: newScore, total: rhymingQuestions.length * 2, correct: rhymingQuestions.length * 2 });
             setShowResultsModal(true);
@@ -506,6 +542,7 @@ export default function EnglishScreen() {
     } else {
       soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setRhymeTimerActive(false);
       const correctAnswers = Array.from(newAnswers).filter(
         w => rhymingGame.options.find(o => o.word === w)?.rhymes
       ).length;
@@ -776,6 +813,8 @@ export default function EnglishScreen() {
           </View>
         </View>
 
+        <QuestionTimer timeLeft={rhymeTimeLeft} totalTime={15} color="#56C596" />
+
         <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
           <MaterialCommunityIcons name="music-clef-treble" size={40} color="#56C596" />
@@ -981,6 +1020,8 @@ export default function EnglishScreen() {
     setAlphabetMode('explore');
     setRhymeQuestionIndex(0);
     setRhymeSelectedAnswers(new Set());
+    setRhymeTimeLeft(15);
+    setRhymeTimerActive(true);
     setQuizCompleted(false);
     setGameKey(gameKey + 1);
   };
@@ -993,6 +1034,7 @@ export default function EnglishScreen() {
     setSpellingInput([]);
     setRhymeQuestionIndex(0);
     setRhymeSelectedAnswers(new Set());
+    setRhymeTimerActive(false);
     setQuizCompleted(false);
     setGameKey(0);
   };
@@ -1121,6 +1163,8 @@ export default function EnglishScreen() {
               if (game.id === 'rhyming') {
                 setRhymeQuestionIndex(0);
                 setRhymeSelectedAnswers(new Set());
+                setRhymeTimeLeft(15);
+                setRhymeTimerActive(true);
               }
               setSelectedGame(game.id);
             }}
@@ -1409,8 +1453,8 @@ const styles = StyleSheet.create({
   questionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 24,
-    marginBottom: 20,
+    padding: 2,
+    marginBottom: 10,
     alignItems: 'center',
     elevation: 6,
     shadowColor: '#000',
