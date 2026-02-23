@@ -525,8 +525,6 @@ export default function ScienceScreen() {
         </View>
         <ThemedText style={styles.gameQuestion}>{planetQuiz.question}</ThemedText>
       </View>
-
-      <ThemedText style={styles.instructionText}>Select the correct planet:</ThemedText>
       <View style={styles.planetsContainer}>
         {planetQuiz.options.map((planet) => (
           <TouchableOpacity
@@ -1258,7 +1256,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 10,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
