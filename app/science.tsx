@@ -541,7 +541,7 @@ export default function ScienceScreen() {
               <ThemedText style={styles.planetEmoji}>{planet.emoji}</ThemedText>
             </View>
             <ThemedText style={styles.planetName}>{planet.name}</ThemedText>
-            <ThemedText style={styles.planetDescription}>{planet.description}</ThemedText>
+            {/* <ThemedText style={styles.planetDescription}>{planet.description}</ThemedText> */}
             {selectedAnswer === planet.name && planet.name === planetQuiz.answer && (
               <View style={styles.checkMark}>
                 <MaterialCommunityIcons name="check-circle" size={32} color="#4CAF50" />
