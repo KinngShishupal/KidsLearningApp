@@ -2,7 +2,6 @@ import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
-import { LearningBuddy } from '@/components/learning-buddy';
 import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
@@ -992,7 +991,6 @@ export default function EnglishScreen() {
 
   const renderVocabularyGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Show off your word skills!" buddy="robot" />
       <TimedQuiz
         key={`vocabulary-${gameKey}`}
         questions={vocabularyQuestions}

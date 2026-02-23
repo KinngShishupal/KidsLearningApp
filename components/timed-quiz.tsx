@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { soundManager } from '@/utils/sound-manager';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 
 interface Question {
   question: string;
@@ -144,8 +144,6 @@ export function TimedQuiz({
         </ThemedText>
       </View>
 
-      <ThemedText style={styles.instructionText}>Choose your answer:</ThemedText>
-
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
           let buttonStyle = [styles.optionButton];
@@ -172,11 +170,6 @@ export function TimedQuiz({
             </TouchableOpacity>
           );
         })}
-      </View>
-
-      <View style={[styles.scoreBox, { backgroundColor: color + '15', borderColor: color }]}>
-        <MaterialCommunityIcons name="trophy" size={20} color={color} />
-        <ThemedText style={[styles.scoreText, { color }]}>Score: {score}</ThemedText>
       </View>
     </View>
   );
@@ -294,12 +287,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   optionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: 12,
     marginBottom: 20,
   },
   optionButton: {
     backgroundColor: '#FFFFFF',
-    padding: 18,
+    padding: 16,
     borderRadius: 18,
     borderWidth: 3,
     borderColor: '#F0F0F0',
@@ -312,6 +308,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 3,
+    flex: 1,
+    minWidth: '45%',
+    maxWidth: '48%',
   },
   correctButton: {
     backgroundColor: '#4CAF50',
