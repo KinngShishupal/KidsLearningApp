@@ -54,7 +54,7 @@ export default function ScienceScreen() {
     { 
       id: 'animals', 
       title: 'Animal Sounds', 
-      description: '10 animals to learn!', 
+      description: '10 animals • 15 seconds each', 
       icon: 'dog',
       difficulty: 'Easy',
       colors: ['#E0F7FA', '#B2EBF2']
@@ -62,7 +62,7 @@ export default function ScienceScreen() {
     { 
       id: 'planets', 
       title: 'Solar System', 
-      description: '12 seconds per question', 
+      description: '10 planets • 12 seconds each', 
       icon: 'earth',
       difficulty: 'Medium',
       colors: ['#E8F5E9', '#C8E6C9']
@@ -138,32 +138,102 @@ export default function ScienceScreen() {
     {
       question: 'Which planet is closest to the Sun?',
       options: [
-        { name: 'Mercury', emoji: '☿️', color: '#B0B0B0' },
-        { name: 'Venus', emoji: '♀️', color: '#FFC649' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2' },
-        { name: 'Mars', emoji: '♂️', color: '#E27B58' },
+        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
       ],
       answer: 'Mercury',
     },
     {
       question: 'Which planet do we live on?',
       options: [
-        { name: 'Mercury', emoji: '☿️', color: '#B0B0B0' },
-        { name: 'Venus', emoji: '♀️', color: '#FFC649' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2' },
-        { name: 'Mars', emoji: '♂️', color: '#E27B58' },
+        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
       ],
       answer: 'Earth',
     },
     {
       question: 'Which planet is known as the Red Planet?',
       options: [
-        { name: 'Mercury', emoji: '☿️', color: '#B0B0B0' },
-        { name: 'Venus', emoji: '♀️', color: '#FFC649' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2' },
-        { name: 'Mars', emoji: '♂️', color: '#E27B58' },
+        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
       ],
       answer: 'Mars',
+    },
+    {
+      question: 'Which is the largest planet?',
+      options: [
+        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
+        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
+      ],
+      answer: 'Jupiter',
+    },
+    {
+      question: 'Which planet has beautiful rings?',
+      options: [
+        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
+        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
+        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
+        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
+      ],
+      answer: 'Saturn',
+    },
+    {
+      question: 'Which planet is the hottest?',
+      options: [
+        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
+        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
+      ],
+      answer: 'Venus',
+    },
+    {
+      question: 'Which planet is known as the Blue Planet?',
+      options: [
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
+        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+      ],
+      answer: 'Neptune',
+    },
+    {
+      question: 'Which planet has water and life?',
+      options: [
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
+      ],
+      answer: 'Earth',
+    },
+    {
+      question: 'Which is the smallest planet?',
+      options: [
+        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
+        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
+        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
+        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
+      ],
+      answer: 'Mercury',
+    },
+    {
+      question: 'Which planet is farthest from the Sun?',
+      options: [
+        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
+        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
+        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
+        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
+      ],
+      answer: 'Neptune',
     },
   ];
 
@@ -469,11 +539,14 @@ export default function ScienceScreen() {
             onPress={() => handlePlanetAnswer(planet.name)}
             disabled={selectedAnswer !== null}
           >
-            <ThemedText style={styles.planetEmoji}>{planet.emoji}</ThemedText>
+            <View style={styles.planetEmojiContainer}>
+              <ThemedText style={styles.planetEmoji}>{planet.emoji}</ThemedText>
+            </View>
             <ThemedText style={styles.planetName}>{planet.name}</ThemedText>
+            <ThemedText style={styles.planetDescription}>{planet.description}</ThemedText>
             {selectedAnswer === planet.name && planet.name === planetQuiz.answer && (
               <View style={styles.checkMark}>
-                <MaterialCommunityIcons name="check-circle" size={28} color="#4CAF50" />
+                <MaterialCommunityIcons name="check-circle" size={32} color="#4CAF50" />
               </View>
             )}
           </TouchableOpacity>
@@ -1250,11 +1323,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   planetButton: {
-    width: 150,
-    height: 150,
-    borderRadius: 24,
+    width: 160,
+    height: 180,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 12,
     borderWidth: 4,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     elevation: 6,
@@ -1263,15 +1338,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     position: 'relative',
+    overflow: 'visible',
   },
   selectedPlanetButton: {
     borderColor: '#FFD700',
     borderWidth: 6,
     transform: [{ scale: 1.05 }],
   },
-  planetEmoji: {
-    fontSize: 56,
+  planetEmojiContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 12,
+    overflow: 'visible',
+  },
+  planetEmoji: {
+    fontSize: 48,
+    lineHeight: 56,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   planetName: {
     fontSize: 18,
@@ -1280,13 +1368,28 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+    marginBottom: 4,
+    lineHeight: 22,
+    includeFontPadding: false,
+  },
+  planetDescription: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 18,
+    includeFontPadding: false,
   },
   checkMark: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   natureGrid: {
     width: '100%',

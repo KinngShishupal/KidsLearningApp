@@ -27,7 +27,17 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
   - Lion, Cow, Cat, Bird, Dog, Sheep, Pig, Duck, Horse, Frog
   - Learn 10 different animal sounds
   - Multiple choice with 4 options each
-- **Solar System**: Learn about planets and their order (12 seconds - Medium, 3 questions)
+- **Solar System**: Complete planet knowledge! (12 seconds - Medium, 10 questions)
+  - Mercury ☀️ - Closest to sun, smallest, hottest surface
+  - Venus 🌥️ - Cloudy, hottest temperature
+  - Earth 🌍 - Our home, has water and life
+  - Mars 🔴 - The Red Planet
+  - Jupiter 🟤 - Largest planet
+  - Saturn 💍 - Beautiful rings
+  - Uranus 💙 - Tilted planet
+  - Neptune 🔵 - Farthest, blue planet
+  - Visual planet cards with colors and descriptions
+  - Learn planet order, characteristics, and facts
 - **Nature Quiz**: Timed multi-select challenge! (5 questions, 10 seconds each)
   - What plants need to grow
   - Identifying trees
