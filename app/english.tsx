@@ -802,8 +802,6 @@ export default function EnglishScreen() {
           Found {selectedCorrectCount}/{rhymingCorrectCount} rhymes - Find ALL!
         </ThemedText>
       </View>
-
-      <ThemedText style={styles.instructionText}>Tap ALL words that rhyme:</ThemedText>
       <View style={styles.rhymeOptionsGrid}>
         {rhymingGame.options.map((option) => {
           const isSelected = rhymeSelectedAnswers.has(option.word);
@@ -822,18 +820,34 @@ export default function EnglishScreen() {
               activeOpacity={0.8}
             >
               <View style={styles.rhymeButtonContent}>
-                <View style={styles.rhymeEmojiBoxSimple}>
+                <View style={[
+                  styles.rhymeEmojiBoxSimple,
+                  isSelected && isCorrect && styles.rhymeEmojiBoxCorrect,
+                  isSelected && !isCorrect && styles.rhymeEmojiBoxIncorrect,
+                ]}>
                   <ThemedText style={styles.rhymeButtonEmoji}>{option.emoji}</ThemedText>
+                  {isSelected && (
+                    <View style={styles.rhymeEmojiCheckBadge}>
+                      <MaterialCommunityIcons 
+                        name={isCorrect ? "check" : "close"} 
+                        size={16} 
+                        color="#FFFFFF" 
+                      />
+                    </View>
+                  )}
                 </View>
                 <ThemedText style={[
                   styles.rhymeOptionText,
-                  isSelected && styles.rhymeTextWhite,
                 ]}>{option.word}</ThemedText>
                 {isSelected && (
-                  <View style={styles.rhymeCheckBadge}>
+                  <View style={[
+                    styles.rhymeStatusBadge,
+                    isCorrect && styles.rhymeStatusCorrect,
+                    !isCorrect && styles.rhymeStatusIncorrect,
+                  ]}>
                     <MaterialCommunityIcons 
-                      name={isCorrect ? "check" : "close"} 
-                      size={20} 
+                      name={isCorrect ? "check-circle" : "close-circle"} 
+                      size={24} 
                       color="#FFFFFF" 
                     />
                   </View>
@@ -965,9 +979,9 @@ export default function EnglishScreen() {
     setAlphabetQuizIndex(0);
     setAlphabetQuizAnswered(false);
     setAlphabetMode('explore');
+    setRhymeQuestionIndex(0);
+    setRhymeSelectedAnswers(new Set());
     setQuizCompleted(false);
-    setRhymeAttempts(0);
-    setRhymeCorrect(0);
     setGameKey(gameKey + 1);
   };
 
@@ -977,9 +991,9 @@ export default function EnglishScreen() {
     setScore(0);
     setSelectedLetter(null);
     setSpellingInput([]);
+    setRhymeQuestionIndex(0);
+    setRhymeSelectedAnswers(new Set());
     setQuizCompleted(false);
-    setRhymeAttempts(0);
-    setRhymeCorrect(0);
     setGameKey(0);
   };
 
@@ -991,9 +1005,9 @@ export default function EnglishScreen() {
       setScore(0);
       setSelectedLetter(null);
       setSpellingInput([]);
+      setRhymeQuestionIndex(0);
+      setRhymeSelectedAnswers(new Set());
       setQuizCompleted(false);
-      setRhymeAttempts(0);
-      setRhymeCorrect(0);
       setGameKey(gameKey + 1);
     } else {
       handleGoHome();
@@ -1101,7 +1115,13 @@ export default function EnglishScreen() {
           <TouchableOpacity
             key={game.id}
             onPress={() => {
+              soundManager.playSound('click');
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              // Reset rhyme game state when selecting
+              if (game.id === 'rhyming') {
+                setRhymeQuestionIndex(0);
+                setRhymeSelectedAnswers(new Set());
+              }
               setSelectedGame(game.id);
             }}
             activeOpacity={0.9}
@@ -1944,7 +1964,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    overflow: 'visible',
+    position: 'relative',
+  },
+  rhymeEmojiBoxCorrect: {
+    backgroundColor: '#C8E6C9',
+    borderWidth: 3,
+    borderColor: '#4CAF50',
+  },
+  rhymeEmojiBoxIncorrect: {
+    backgroundColor: '#FFCDD2',
+    borderWidth: 3,
+    borderColor: '#F44336',
+  },
+  rhymeEmojiCheckBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   rhymeButtonEmoji: {
     fontSize: 44,
@@ -1968,16 +2011,16 @@ const styles = StyleSheet.create({
   rhymeTextWhite: {
     color: '#FFFFFF',
   },
-  rhymeCheckBadge: {
+  rhymeStatusBadge: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  rhymeStatusCorrect: {
+    backgroundColor: 'transparent',
+  },
+  rhymeStatusIncorrect: {
+    backgroundColor: 'transparent',
   },
   rhymeProgressCard: {
     flexDirection: 'row',
