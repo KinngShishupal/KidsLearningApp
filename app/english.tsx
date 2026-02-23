@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import { soundManager } from '@/utils/sound-manager';
+import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
-import { MemoryGame } from '@/components/memory-game';
-import { LearningBuddy } from '@/components/learning-buddy';
-import { TimedQuiz } from '@/components/timed-quiz';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
-import { AnswerFeedback } from '@/components/answer-feedback';
+import { LearningBuddy } from '@/components/learning-buddy';
+import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
+import { ThemedText } from '@/components/themed-text';
+import { TimedQuiz } from '@/components/timed-quiz';
+import { soundManager } from '@/utils/sound-manager';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function EnglishScreen() {
   const router = useRouter();
@@ -295,11 +295,13 @@ export default function EnglishScreen() {
   const handleSpellingLetter = (letter: string) => {
     if (spellingInput.length >= spellingGame.word.length) return;
     
+    soundManager.playSound('click');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const newInput = [...spellingInput, letter];
     setSpellingInput(newInput);
     
     if (newInput.join('') === spellingGame.word) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSpellingTimerActive(false);
       const newScore = score + 15;
@@ -538,24 +540,6 @@ export default function EnglishScreen() {
       </View>
 
       <QuestionTimer timeLeft={spellingTimeLeft} totalTime={spellingGame.time} color="#56C596" />
-
-      <View style={styles.spellingQuestionCard}>
-        <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
-          <MaterialCommunityIcons name="spellcheck" size={40} color="#56C596" />
-        </View>
-        
-        <View style={styles.difficultyBadgeSpelling}>
-          <MaterialCommunityIcons 
-            name={spellingGame.difficulty === 'Easy' ? 'signal-cellular-1' : 
-                  spellingGame.difficulty === 'Medium' ? 'signal-cellular-2' : 'signal-cellular-3'} 
-            size={16} 
-            color="#FFFFFF" 
-          />
-          <ThemedText style={styles.difficultyTextWhite}>{spellingGame.difficulty}</ThemedText>
-        </View>
-
-        <ThemedText style={styles.gameQuestion}>Spell this word:</ThemedText>
-      </View>
 
       <View style={styles.imageCard}>
         <View style={styles.emojiContainer}>
