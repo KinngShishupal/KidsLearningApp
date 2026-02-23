@@ -23,7 +23,10 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
 - **Speed Math**: Timed quiz to test quick math skills
 
 ### 🔬 Science Section (7 Games!)
-- **Animal Sounds**: Match animals to their sounds (15 seconds - Easy, 4 questions)
+- **Animal Sounds**: Match animals to their sounds! (15 seconds - Easy, 10 questions)
+  - Lion, Cow, Cat, Bird, Dog, Sheep, Pig, Duck, Horse, Frog
+  - Learn 10 different animal sounds
+  - Multiple choice with 4 options each
 - **Solar System**: Learn about planets and their order (12 seconds - Medium, 3 questions)
 - **Nature Quiz**: Timed multi-select challenge! (5 questions, 10 seconds each)
   - What plants need to grow

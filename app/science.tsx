@@ -54,7 +54,7 @@ export default function ScienceScreen() {
     { 
       id: 'animals', 
       title: 'Animal Sounds', 
-      description: '15 seconds per question', 
+      description: '10 animals to learn!', 
       icon: 'dog',
       difficulty: 'Easy',
       colors: ['#E0F7FA', '#B2EBF2']
@@ -126,6 +126,12 @@ export default function ScienceScreen() {
     { question: 'What sound does a cow make?', animal: '🐮', options: ['Moo', 'Baa', 'Oink', 'Neigh'], answer: 'Moo' },
     { question: 'What sound does a cat make?', animal: '🐱', options: ['Woof', 'Meow', 'Roar', 'Chirp'], answer: 'Meow' },
     { question: 'What sound does a bird make?', animal: '🐦', options: ['Moo', 'Roar', 'Chirp', 'Hiss'], answer: 'Chirp' },
+    { question: 'What sound does a dog make?', animal: '🐕', options: ['Meow', 'Woof', 'Moo', 'Quack'], answer: 'Woof' },
+    { question: 'What sound does a sheep make?', animal: '🐑', options: ['Baa', 'Moo', 'Oink', 'Neigh'], answer: 'Baa' },
+    { question: 'What sound does a pig make?', animal: '🐷', options: ['Moo', 'Baa', 'Oink', 'Chirp'], answer: 'Oink' },
+    { question: 'What sound does a duck make?', animal: '🦆', options: ['Quack', 'Chirp', 'Roar', 'Meow'], answer: 'Quack' },
+    { question: 'What sound does a horse make?', animal: '🐴', options: ['Neigh', 'Moo', 'Baa', 'Roar'], answer: 'Neigh' },
+    { question: 'What sound does a frog make?', animal: '🐸', options: ['Ribbit', 'Chirp', 'Hiss', 'Woof'], answer: 'Ribbit' },
   ];
 
   const planetQuizzes = [
@@ -1173,14 +1179,21 @@ const styles = StyleSheet.create({
   animalDisplayCard: {
     backgroundColor: '#E8F8F5',
     borderRadius: 24,
-    padding: 24,
+    paddingVertical: 40,
+    paddingHorizontal: 32,
     width: '100%',
     alignItems: 'center',
-    borderWidth: 3,
+    justifyContent: 'center',
+    borderWidth: 4,
     borderColor: '#4ECDC4',
+    minHeight: 180,
+    overflow: 'visible',
   },
   animalEmoji: {
-    fontSize: 100,
+    fontSize: 88,
+    lineHeight: 100,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   instructionText: {
     fontSize: 16,
