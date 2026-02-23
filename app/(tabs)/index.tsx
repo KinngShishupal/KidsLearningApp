@@ -1,23 +1,21 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { soundManager } from '@/utils/sound-manager';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withSpring, 
-  withRepeat, 
-  withSequence,
-  withTiming 
-} from 'react-native-reanimated';
-import { useEffect, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 import { LearningBuddy } from '@/components/learning-buddy';
+import { ThemedText } from '@/components/themed-text';
+import { soundManager } from '@/utils/sound-manager';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const USER_NAME_KEY = '@learn_with_fun_username';
