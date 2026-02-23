@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -53,9 +53,9 @@ export function QuestionTimer({ timeLeft, totalTime, color = '#FF6B6B' }: Questi
   );
 }
 
-const styles = StyleSheet.Create({
+const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: 2,
   },
   timerBadge: {
     flexDirection: 'row',
@@ -71,7 +71,7 @@ const styles = StyleSheet.Create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
     alignSelf: 'flex-end',
-    marginBottom: 12,
+    marginBottom: 5,
   },
   timerText: {
     fontSize: 16,
