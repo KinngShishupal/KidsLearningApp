@@ -33,6 +33,8 @@ export default function EnglishScreen() {
   const [spellingQuestionIndex, setSpellingQuestionIndex] = useState(0);
   const [spellingTimeLeft, setSpellingTimeLeft] = useState(20);
   const [spellingTimerActive, setSpellingTimerActive] = useState(true);
+  const [rhymeQuestionIndex, setRhymeQuestionIndex] = useState(0);
+  const [rhymeSelectedAnswers, setRhymeSelectedAnswers] = useState<Set<string>>(new Set());
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -226,16 +228,142 @@ export default function EnglishScreen() {
   const spellingGame = spellingWords[spellingQuestionIndex];
   const [showSpellingHint, setShowSpellingHint] = useState(false);
 
-  const rhymingGame = {
-    word: 'CAT',
-    emoji: '🐱',
-    options: [
-      { word: 'HAT', emoji: '🎩', rhymes: true },
-      { word: 'DOG', emoji: '🐕', rhymes: false },
-      { word: 'BAT', emoji: '🦇', rhymes: true },
-      { word: 'CAR', emoji: '🚗', rhymes: false },
-    ],
-  };
+  const rhymingQuestions = [
+    {
+      word: 'CAT',
+      emoji: '🐱',
+      sound: '-at',
+      options: [
+        { word: 'HAT', emoji: '🎩', rhymes: true },
+        { word: 'DOG', emoji: '🐕', rhymes: false },
+        { word: 'BAT', emoji: '🦇', rhymes: true },
+        { word: 'CAR', emoji: '🚗', rhymes: false },
+      ],
+    },
+    {
+      word: 'BEE',
+      emoji: '🐝',
+      sound: '-ee',
+      options: [
+        { word: 'TREE', emoji: '🌳', rhymes: true },
+        { word: 'CAT', emoji: '🐱', rhymes: false },
+        { word: 'SEA', emoji: '🌊', rhymes: true },
+        { word: 'SUN', emoji: '☀️', rhymes: false },
+      ],
+    },
+    {
+      word: 'BALL',
+      emoji: '⚽',
+      sound: '-all',
+      options: [
+        { word: 'TALL', emoji: '📏', rhymes: true },
+        { word: 'BOAT', emoji: '⛵', rhymes: false },
+        { word: 'WALL', emoji: '🧱', rhymes: true },
+        { word: 'BOOK', emoji: '📚', rhymes: false },
+      ],
+    },
+    {
+      word: 'STAR',
+      emoji: '⭐',
+      sound: '-ar',
+      options: [
+        { word: 'CAR', emoji: '🚗', rhymes: true },
+        { word: 'MOON', emoji: '🌙', rhymes: false },
+        { word: 'JAR', emoji: '🫙', rhymes: true },
+        { word: 'FISH', emoji: '🐠', rhymes: false },
+      ],
+    },
+    {
+      word: 'KING',
+      emoji: '👑',
+      sound: '-ing',
+      options: [
+        { word: 'RING', emoji: '💍', rhymes: true },
+        { word: 'CAKE', emoji: '🎂', rhymes: false },
+        { word: 'WING', emoji: '🪽', rhymes: true },
+        { word: 'BEAR', emoji: '🐻', rhymes: false },
+      ],
+    },
+    {
+      word: 'PIG',
+      emoji: '🐷',
+      sound: '-ig',
+      options: [
+        { word: 'BIG', emoji: '📏', rhymes: true },
+        { word: 'HOT', emoji: '🔥', rhymes: false },
+        { word: 'DIG', emoji: '⛏️', rhymes: true },
+        { word: 'TOP', emoji: '🔝', rhymes: false },
+      ],
+    },
+    {
+      word: 'BLUE',
+      emoji: '💙',
+      sound: '-ue',
+      options: [
+        { word: 'TRUE', emoji: '✅', rhymes: true },
+        { word: 'BIRD', emoji: '🐦', rhymes: false },
+        { word: 'GLUE', emoji: '🧴', rhymes: true },
+        { word: 'FROG', emoji: '🐸', rhymes: false },
+      ],
+    },
+    {
+      word: 'SUN',
+      emoji: '☀️',
+      sound: '-un',
+      options: [
+        { word: 'RUN', emoji: '🏃', rhymes: true },
+        { word: 'MOON', emoji: '🌙', rhymes: false },
+        { word: 'FUN', emoji: '🎉', rhymes: true },
+        { word: 'RAIN', emoji: '🌧️', rhymes: false },
+      ],
+    },
+    {
+      word: 'DOG',
+      emoji: '🐕',
+      sound: '-og',
+      options: [
+        { word: 'LOG', emoji: '🪵', rhymes: true },
+        { word: 'CAT', emoji: '🐱', rhymes: false },
+        { word: 'FOG', emoji: '🌫️', rhymes: true },
+        { word: 'SUN', emoji: '☀️', rhymes: false },
+      ],
+    },
+    {
+      word: 'BOX',
+      emoji: '📦',
+      sound: '-ox',
+      options: [
+        { word: 'FOX', emoji: '🦊', rhymes: true },
+        { word: 'BAT', emoji: '🦇', rhymes: false },
+        { word: 'SOX', emoji: '🧦', rhymes: true },
+        { word: 'CUP', emoji: '☕', rhymes: false },
+      ],
+    },
+    {
+      word: 'MOON',
+      emoji: '🌙',
+      sound: '-oon',
+      options: [
+        { word: 'SPOON', emoji: '🥄', rhymes: true },
+        { word: 'STAR', emoji: '⭐', rhymes: false },
+        { word: 'SOON', emoji: '⏰', rhymes: true },
+        { word: 'BIRD', emoji: '🐦', rhymes: false },
+      ],
+    },
+    {
+      word: 'RAIN',
+      emoji: '🌧️',
+      sound: '-ain',
+      options: [
+        { word: 'TRAIN', emoji: '🚂', rhymes: true },
+        { word: 'SNOW', emoji: '❄️', rhymes: false },
+        { word: 'CHAIN', emoji: '⛓️', rhymes: true },
+        { word: 'WIND', emoji: '💨', rhymes: false },
+      ],
+    },
+  ];
+
+  const rhymingGame = rhymingQuestions[rhymeQuestionIndex];
 
   const handleLetterPress = (letter: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -347,29 +475,45 @@ export default function EnglishScreen() {
   const [rhymeCorrect, setRhymeCorrect] = useState(0);
 
   const handleRhymeAnswer = (word: string, rhymes: boolean) => {
-    const newAttempts = rhymeAttempts + 1;
-    setRhymeAttempts(newAttempts);
+    const newAnswers = new Set(rhymeSelectedAnswers);
+    newAnswers.add(word);
+    setRhymeSelectedAnswers(newAnswers);
 
     if (rhymes) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 10;
-      const newCorrect = rhymeCorrect + 1;
       setScore(newScore);
-      setRhymeCorrect(newCorrect);
-      showCelebrationWithMessage(`Yes! ${word} rhymes!`);
       
-      if (newAttempts >= rhymingGame.options.length) {
+      const correctOptions = rhymingGame.options.filter(o => o.rhymes);
+      const correctAnswered = Array.from(newAnswers).filter(
+        w => rhymingGame.options.find(o => o.word === w)?.rhymes
+      ).length;
+      
+      // Check if found all rhymes
+      if (correctAnswered === correctOptions.length) {
         setTimeout(() => {
-          setGameResults({ score: newScore, total: rhymingGame.options.filter(o => o.rhymes).length, correct: newCorrect });
-          setShowResultsModal(true);
+          if (rhymeQuestionIndex < rhymingQuestions.length - 1) {
+            setRhymeQuestionIndex(rhymeQuestionIndex + 1);
+            setRhymeSelectedAnswers(new Set());
+            setScore(newScore);
+          } else {
+            setGameResults({ score: newScore, total: rhymingQuestions.length * 2, correct: rhymingQuestions.length * 2 });
+            setShowResultsModal(true);
+          }
         }, 1500);
       }
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const correctAnswers = Array.from(newAnswers).filter(
+        w => rhymingGame.options.find(o => o.word === w)?.rhymes
+      ).length;
+      const totalCorrect = (rhymeQuestionIndex * 2) + correctAnswers;
       setTimeout(() => {
-        setGameResults({ score, total: rhymingGame.options.filter(o => o.rhymes).length, correct: rhymeCorrect });
+        setGameResults({ score, total: rhymingQuestions.length * 2, correct: totalCorrect });
         setShowResultsModal(true);
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -611,46 +755,97 @@ export default function EnglishScreen() {
     </View>
   );
 
-  const renderRhymingGame = () => (
-    <View style={styles.gameContainer}>
-      <View style={styles.questionHeader}>
-        <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
-          <MaterialCommunityIcons name="music-note" size={18} color="#FFFFFF" />
-          <ThemedText style={styles.categoryText}>Rhyming</ThemedText>
-        </View>
-      </View>
+  const renderRhymingGame = () => {
+    const rhymingCorrectCount = rhymingGame.options.filter(o => o.rhymes).length;
+    const selectedCorrectCount = Array.from(rhymeSelectedAnswers).filter(
+      w => rhymingGame.options.find(o => o.word === w)?.rhymes
+    ).length;
 
-      <View style={styles.questionCard}>
+    return (
+      <View style={styles.gameContainer}>
+        <View style={styles.questionHeader}>
+          <View style={styles.progressBadge}>
+            <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
+            <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
+              {rhymeQuestionIndex + 1}/{rhymingQuestions.length}
+            </ThemedText>
+          </View>
+          <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
+            <MaterialCommunityIcons name="music-note" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.categoryText}>Rhyming</ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
-          <MaterialCommunityIcons name="rhombus-split" size={40} color="#56C596" />
+          <MaterialCommunityIcons name="music-clef-treble" size={40} color="#56C596" />
         </View>
         <ThemedText style={styles.gameQuestion}>Find words that rhyme with:</ThemedText>
         
         <View style={styles.rhymeWordContainer}>
-          <ThemedText style={styles.rhymeEmoji}>{rhymingGame.emoji}</ThemedText>
-          <ThemedText style={styles.rhymeWord}>{rhymingGame.word}</ThemedText>
+          <View style={styles.rhymeEmojiCircleSimple}>
+            <ThemedText style={styles.rhymeEmoji}>{rhymingGame.emoji}</ThemedText>
+          </View>
+          <View>
+            <ThemedText style={styles.rhymeWord}>{rhymingGame.word}</ThemedText>
+            <View style={styles.soundBadge}>
+              <MaterialCommunityIcons name="music" size={14} color="#9C27B0" />
+              <ThemedText style={styles.soundText}>"{rhymingGame.sound}"</ThemedText>
+            </View>
+          </View>
         </View>
       </View>
 
-      <ThemedText style={styles.instructionText}>Tap words that rhyme:</ThemedText>
+      <View style={styles.rhymeProgressCard}>
+        <MaterialCommunityIcons name="checkbox-multiple-marked" size={18} color="#56C596" />
+        <ThemedText style={styles.rhymeProgressTextSimple}>
+          Found {selectedCorrectCount}/{rhymingCorrectCount} rhymes - Find ALL!
+        </ThemedText>
+      </View>
+
+      <ThemedText style={styles.instructionText}>Tap ALL words that rhyme:</ThemedText>
       <View style={styles.rhymeOptionsGrid}>
-        {rhymingGame.options.map((option) => (
-          <TouchableOpacity
-            key={option.word}
-            style={[
-              styles.rhymeButton,
-            ]}
-            onPress={() => handleRhymeAnswer(option.word, option.rhymes)}
-          >
-            <View style={styles.rhymeButtonContent}>
-              <ThemedText style={styles.rhymeButtonEmoji}>{option.emoji}</ThemedText>
-              <ThemedText style={styles.rhymeOptionText}>{option.word}</ThemedText>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {rhymingGame.options.map((option) => {
+          const isSelected = rhymeSelectedAnswers.has(option.word);
+          const isCorrect = option.rhymes;
+          
+          return (
+            <TouchableOpacity
+              key={option.word}
+              style={[
+                styles.rhymeButton,
+                isSelected && isCorrect && styles.rhymeCorrectButton,
+                isSelected && !isCorrect && styles.rhymeIncorrectButton,
+              ]}
+              onPress={() => handleRhymeAnswer(option.word, option.rhymes)}
+              disabled={rhymeSelectedAnswers.has(option.word)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.rhymeButtonContent}>
+                <View style={styles.rhymeEmojiBoxSimple}>
+                  <ThemedText style={styles.rhymeButtonEmoji}>{option.emoji}</ThemedText>
+                </View>
+                <ThemedText style={[
+                  styles.rhymeOptionText,
+                  isSelected && styles.rhymeTextWhite,
+                ]}>{option.word}</ThemedText>
+                {isSelected && (
+                  <View style={styles.rhymeCheckBadge}>
+                    <MaterialCommunityIcons 
+                      name={isCorrect ? "check" : "close"} 
+                      size={20} 
+                      color="#FFFFFF" 
+                    />
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
-  );
+    );
+  };
 
   const renderMemoryGame = () => (
     <View style={styles.gameContainer}>
@@ -1669,10 +1864,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   rhymeWordContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     padding: 24,
     backgroundColor: '#E8F8E8',
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 4,
     borderColor: '#56C596',
     elevation: 4,
@@ -1680,26 +1876,49 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    gap: 20,
+    marginVertical: 16,
+    minHeight: 120,
+    justifyContent: 'center',
+  },
+  rhymeEmojiCircleSimple: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    overflow: 'visible',
   },
   rhymeEmoji: {
-    fontSize: 64,
+    fontSize: 48,
+    lineHeight: 56,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   rhymeWord: {
-    fontSize: 40,
+    fontSize: 38,
     fontWeight: 'bold',
     color: '#56C596',
-    marginTop: 12,
-    letterSpacing: 2,
+    letterSpacing: 1,
+    lineHeight: 46,
+    includeFontPadding: false,
   },
   rhymeOptionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 14,
+    gap: 16,
+    marginBottom: 20,
   },
   rhymeButton: {
-    width: 145,
-    borderRadius: 20,
+    width: 155,
+    borderRadius: 24,
     overflow: 'hidden',
     elevation: 5,
     shadowColor: '#000',
@@ -1713,16 +1932,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 3,
     borderColor: '#E8F8E8',
-    borderRadius: 20,
+    borderRadius: 24,
+    minHeight: 150,
+    justifyContent: 'center',
+  },
+  rhymeEmojiBoxSimple: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    overflow: 'visible',
   },
   rhymeButtonEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 44,
+    lineHeight: 52,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   rhymeOptionText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#56C596',
+    lineHeight: 26,
+    includeFontPadding: false,
+  },
+  rhymeCorrectButton: {
+    backgroundColor: '#4CAF50',
+  },
+  rhymeIncorrectButton: {
+    backgroundColor: '#FF6B6B',
+  },
+  rhymeTextWhite: {
+    color: '#FFFFFF',
+  },
+  rhymeCheckBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 12,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rhymeProgressCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#E8F8E8',
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#56C596',
+  },
+  rhymeProgressTextSimple: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#56C596',
+    flex: 1,
   },
   memoryInstructionCard: {
     flexDirection: 'row',
