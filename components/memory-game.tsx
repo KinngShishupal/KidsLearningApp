@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -73,6 +74,7 @@ export function MemoryGame({
       const [first, second] = newFlipped;
       
       if (gameCards[first].content === gameCards[second].content) {
+        soundManager.playSound('correct');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setTimeout(() => {
           const updatedCards = [...gameCards];
@@ -83,10 +85,14 @@ export function MemoryGame({
           setMatchedPairs(matchedPairs + 1);
 
           if (updatedCards.every(card => card.matched)) {
-            setTimeout(() => onComplete(), 500);
+            setTimeout(() => {
+              soundManager.playSound('celebration');
+              onComplete();
+            }, 500);
           }
         }, 600);
       } else {
+        soundManager.playSound('wrong');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setTimeout(() => {
           const updatedCards = [...gameCards];

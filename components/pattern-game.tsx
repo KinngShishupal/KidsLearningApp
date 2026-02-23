@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PatternCelebration } from '@/components/pattern-celebration';
+import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -63,6 +64,7 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
     setShowCelebration(true);
 
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const newScore = score + 15;
       const newCorrectCount = correctCount + 1;
@@ -82,6 +84,7 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
         }
       }, 2000);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setShowExplanation(true);
       setTimeout(() => {

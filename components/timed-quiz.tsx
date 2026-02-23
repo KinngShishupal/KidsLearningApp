@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -92,8 +93,10 @@ export function TimedQuiz({
     const isCorrect = answer === questions[currentQuestionIndex].correctAnswer;
     
     if (isCorrect) {
+      soundManager.playSound('correct');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
+      soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
 
