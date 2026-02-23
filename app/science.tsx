@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { AnswerFeedback } from '@/components/answer-feedback';
+import { Celebration } from '@/components/celebration';
+import { Confetti } from '@/components/confetti';
+import { GameResultsModal } from '@/components/game-results-modal';
+import { LearningBuddy } from '@/components/learning-buddy';
+import { MemoryGame } from '@/components/memory-game';
+import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
-import { useRouter } from 'expo-router';
+import { TimedQuiz } from '@/components/timed-quiz';
+import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { soundManager } from '@/utils/sound-manager';
-import { Celebration } from '@/components/celebration';
-import { MemoryGame } from '@/components/memory-game';
-import { LearningBuddy } from '@/components/learning-buddy';
-import { TimedQuiz } from '@/components/timed-quiz';
-import { Confetti } from '@/components/confetti';
-import { GameResultsModal } from '@/components/game-results-modal';
-import { AnswerFeedback } from '@/components/answer-feedback';
-import { QuestionTimer } from '@/components/question-timer';
 
 export default function ScienceScreen() {
   const router = useRouter();
@@ -465,9 +465,9 @@ export default function ScienceScreen() {
       <QuestionTimer timeLeft={animalTimeLeft} totalTime={15} color="#4ECDC4" />
 
       <View style={styles.questionCard}>
-        <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
+        {/* <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
           <MaterialCommunityIcons name="paw" size={40} color="#4ECDC4" />
-        </View>
+        </View> */}
         <ThemedText style={styles.gameQuestion}>{animalQuiz.question}</ThemedText>
         
         <View style={styles.animalDisplayCard}>
@@ -475,7 +475,7 @@ export default function ScienceScreen() {
         </View>
       </View>
 
-      <ThemedText style={styles.instructionText}>What sound does it make?</ThemedText>
+      {/* <ThemedText style={styles.instructionText}>What sound does it make?</ThemedText> */}
       <View style={styles.optionsGrid}>
         {animalQuiz.options.map((option) => (
           <TouchableOpacity
@@ -1229,6 +1229,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   categoryText: {
     fontSize: 14,
