@@ -20,7 +20,12 @@ A fun and interactive learning app for kids featuring engaging games for Math, S
   - Shape patterns
   - Built-in hint system
   - Pattern type badges (Repeating, Growing, Sequence, Alternating)
-- **Speed Math**: Timed quiz to test quick math skills
+- **Speed Math**: 15 rapid-fire questions! (10 seconds each)
+  - Addition problems (2+3, 3+3, 5+2, 6+2, 7+3)
+  - Subtraction problems (5-2, 6-3, 7-4, 8-5, 9-4)
+  - Visual counting (apples, stars, balloons)
+  - Progressive difficulty
+  - Test your speed and accuracy!
 
 ### 🔬 Science Section (7 Games!)
 - **Animal Sounds**: Match animals to their sounds! (15 seconds - Easy, 10 questions)

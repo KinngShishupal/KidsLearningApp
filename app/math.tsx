@@ -1,27 +1,19 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import { soundManager } from '@/utils/sound-manager';
-import { Celebration } from '@/components/celebration';
-import { MemoryGame } from '@/components/memory-game';
-import { LearningBuddy } from '@/components/learning-buddy';
-import { TimedQuiz } from '@/components/timed-quiz';
-import { Confetti } from '@/components/confetti';
-import { PatternGame } from '@/components/pattern-game';
-import { GameResultsModal } from '@/components/game-results-modal';
 import { AnswerFeedback } from '@/components/answer-feedback';
+import { Celebration } from '@/components/celebration';
+import { Confetti } from '@/components/confetti';
+import { GameResultsModal } from '@/components/game-results-modal';
+import { MemoryGame } from '@/components/memory-game';
+import { PatternGame } from '@/components/pattern-game';
 import { QuestionTimer } from '@/components/question-timer';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withSpring,
-  withSequence,
-  withTiming 
-} from 'react-native-reanimated';
+import { ThemedText } from '@/components/themed-text';
+import { TimedQuiz } from '@/components/timed-quiz';
+import { soundManager } from '@/utils/sound-manager';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function MathScreen() {
   const router = useRouter();
@@ -197,7 +189,7 @@ export default function MathScreen() {
     { 
       id: 'speedmath', 
       title: 'Speed Math', 
-      description: 'Beat the clock!', 
+      description: '15 questions • 10 seconds!', 
       icon: 'lightning-bolt',
       difficulty: 'Hard',
       colors: ['#FFE5F0', '#FFB3D9']
@@ -209,11 +201,21 @@ export default function MathScreen() {
   const fruitMemoryCards = ['🍎', '🍌', '🍊', '🍇', '🍓', '🍉'];
 
   const speedMathQuestions = [
-    { question: 'What is 2 + 3?', options: ['4', '5', '6', '7'], correctAnswer: '5', emoji: '➕' },
-    { question: 'What is 5 - 2?', options: ['2', '3', '4', '5'], correctAnswer: '3', emoji: '➖' },
-    { question: 'Count: 🍎🍎🍎', options: ['2', '3', '4', '5'], correctAnswer: '3', emoji: '🍎' },
-    { question: 'What is 4 + 1?', options: ['3', '4', '5', '6'], correctAnswer: '5', emoji: '➕' },
-    { question: 'What is 6 - 3?', options: ['2', '3', '4', '5'], correctAnswer: '3', emoji: '➖' },
+    { question: 'What is 2 + 3?', options: ['7', '4', '6', '5'], correctAnswer: '5', emoji: '➕' },
+    { question: 'What is 5 - 2?', options: ['3', '2', '5', '4'], correctAnswer: '3', emoji: '➖' },
+    { question: 'Count: 🍎🍎🍎', options: ['4', '2', '5', '3'], correctAnswer: '3', emoji: '🍎' },
+    { question: 'What is 4 + 1?', options: ['6', '3', '5', '4'], correctAnswer: '5', emoji: '➕' },
+    { question: 'What is 6 - 3?', options: ['4', '5', '2', '3'], correctAnswer: '3', emoji: '➖' },
+    { question: 'What is 3 + 3?', options: ['5', '7', '6', '8'], correctAnswer: '6', emoji: '➕' },
+    { question: 'Count: ⭐⭐⭐⭐', options: ['3', '6', '5', '4'], correctAnswer: '4', emoji: '⭐' },
+    { question: 'What is 7 - 4?', options: ['4', '2', '3', '5'], correctAnswer: '3', emoji: '➖' },
+    { question: 'What is 5 + 2?', options: ['8', '7', '6', '9'], correctAnswer: '7', emoji: '➕' },
+    { question: 'What is 8 - 5?', options: ['5', '4', '3', '2'], correctAnswer: '3', emoji: '➖' },
+    { question: 'Count: 🌟🌟🌟🌟🌟', options: ['7', '4', '6', '5'], correctAnswer: '5', emoji: '🌟' },
+    { question: 'What is 6 + 2?', options: ['9', '7', '10', '8'], correctAnswer: '8', emoji: '➕' },
+    { question: 'What is 9 - 4?', options: ['6', '5', '7', '4'], correctAnswer: '5', emoji: '➖' },
+    { question: 'What is 7 + 3?', options: ['11', '9', '10', '12'], correctAnswer: '10', emoji: '➕' },
+    { question: 'Count: 🎈🎈🎈🎈🎈🎈', options: ['7', '5', '8', '6'], correctAnswer: '6', emoji: '🎈' },
   ];
 
   const patterns = [
@@ -682,7 +684,6 @@ export default function MathScreen() {
 
   const renderSpeedMathGame = () => (
     <View style={styles.gameContainer}>
-      <LearningBuddy message="Answer as fast as you can!" buddy="robot" />
       <TimedQuiz
         key={`speedmath-${gameKey}`}
         questions={speedMathQuestions}
