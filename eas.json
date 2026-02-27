@@ -2,6 +2,7 @@
   "cli": {
     "version": ">= 13.2.0"
   },
+  "appVersionSource": "local",
   "build": {
     "development": {
       "developmentClient": true,
@@ -32,16 +33,5 @@
   },
   "submit": {
     "production": {}
-  },
-  "update": {
-    "development": {
-      "channel": "development"
-    },
-    "preview": {
-      "channel": "preview"
-    },
-    "production": {
-      "channel": "production"
-    }
   }
 }
