@@ -62,14 +62,6 @@
             "backgroundColor": "#FFF9E6"
           }
         }
-      ],
-      [
-        "expo-audio",
-        {
-          "android": {
-            "addForegroundService": false
-          }
-        }
       ]
     ],
     "experiments": {
