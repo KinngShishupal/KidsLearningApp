@@ -137,6 +137,7 @@ export default function ProgressScreen() {
   return (
     <ScrollView 
       style={styles.container}
+      contentContainerStyle={styles.scrollContent}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -205,8 +206,8 @@ export default function ProgressScreen() {
         </View>
       </LinearGradient>
 
-      <View style={styles.contentContainer}>
-        {stats.totalGamesPlayed === 0 ? (
+      {stats.totalGamesPlayed === 0 ? (
+        <View style={styles.contentContainer}>
           <View style={styles.noDataCard}>
             <MaterialCommunityIcons name="play-circle-outline" size={64} color="#999" />
             <ThemedText style={styles.noDataTitle}>Start Your Learning Journey!</ThemedText>
@@ -214,18 +215,37 @@ export default function ProgressScreen() {
               Play games to earn achievements, track progress, and collect stickers!
             </ThemedText>
           </View>
-        ) : (
-          <>
+        </View>
+      ) : (
+        <>
+          <View style={styles.contentContainer}>
             <View style={styles.funFactCard}>
               <ThemedText style={styles.funFactTitle}>Fun Fact of the Day! {dailyFact.emoji}</ThemedText>
               <ThemedText style={styles.funFactText}>{dailyFact.fact}</ThemedText>
             </View>
-            
-            <StickerCollection stickers={allStickers} />
+          </View>
 
-            {recentGames.length > 0 && (
-              <View style={styles.recentGamesSection}>
-                <ThemedText style={styles.sectionTitle}>Recent Games</ThemedText>
+          <View style={styles.statsSection}>
+            <ThemedText style={styles.sectionTitleMain}>Your Stats</ThemedText>
+            <View style={styles.statsGrid}>
+              {statsDisplay.map((stat, index) => (
+                <View key={index} style={[styles.statCard, { borderLeftColor: stat.color }]}>
+                  <ThemedText style={styles.statEmoji}>{stat.emoji}</ThemedText>
+                  <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
+                  <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.stickersSection}>
+            <StickerCollection stickers={allStickers} />
+          </View>
+
+          {recentGames.length > 0 && (
+            <View style={styles.recentGamesContainer}>
+              <ThemedText style={styles.sectionTitleMain}>Recent Games</ThemedText>
+              <View style={styles.recentGamesList}>
                 {recentGames.map((game, idx) => (
                   <View key={idx} style={styles.recentGameCard}>
                     <View style={[styles.subjectBadge, { backgroundColor: 
@@ -253,25 +273,15 @@ export default function ProgressScreen() {
                   </View>
                 ))}
               </View>
-            )}
-          </>
-        )}
-      </View>
-
-      <View style={styles.statsContainer}>
-        {statsDisplay.map((stat, index) => (
-          <View key={index} style={[styles.statCard, { borderLeftColor: stat.color }]}>
-            <ThemedText style={styles.statEmoji}>{stat.emoji}</ThemedText>
-            <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
-            <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
-          </View>
-        ))}
-      </View>
+            </View>
+          )}
+        </>
+      )}
 
       {stats.totalGamesPlayed > 0 && (
         <View style={styles.achievementsSection}>
           <View style={styles.achievementsSectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Achievements</ThemedText>
+            <ThemedText style={styles.sectionTitleMain}>Achievements</ThemedText>
             <View style={styles.achievementCountBadge}>
               <MaterialCommunityIcons name="trophy" size={16} color="#FFD93D" />
               <ThemedText style={styles.achievementCountText}>
@@ -281,41 +291,41 @@ export default function ProgressScreen() {
           </View>
           <View style={styles.achievementsGrid}>
             {achievementDefinitions.map((achievement) => (
-            <View
-              key={achievement.id}
-              style={[
-                styles.achievementCard,
-                !stats.achievements.includes(achievement.id) && styles.achievementLocked,
-              ]}
-            >
-              <ThemedText style={[
-                styles.achievementEmoji,
-                !stats.achievements.includes(achievement.id) && styles.achievementEmojiLocked,
-              ]}>
-                {achievement.emoji}
-              </ThemedText>
-              <ThemedText style={[
-                styles.achievementTitle,
-                !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
-              ]}>
-                {achievement.title}
-              </ThemedText>
-              <ThemedText style={[
-                styles.achievementDescription,
-                !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
-              ]}>
-                {achievement.description}
-              </ThemedText>
-              {stats.achievements.includes(achievement.id) && (
-                <View style={styles.earnedBadge}>
-                  <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
-                  <ThemedText style={styles.earnedText}>Earned!</ThemedText>
-                </View>
-              )}
-            </View>
-          ))}
+              <View
+                key={achievement.id}
+                style={[
+                  styles.achievementCard,
+                  !stats.achievements.includes(achievement.id) && styles.achievementLocked,
+                ]}
+              >
+                <ThemedText style={[
+                  styles.achievementEmoji,
+                  !stats.achievements.includes(achievement.id) && styles.achievementEmojiLocked,
+                ]}>
+                  {achievement.emoji}
+                </ThemedText>
+                <ThemedText style={[
+                  styles.achievementTitle,
+                  !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
+                ]}>
+                  {achievement.title}
+                </ThemedText>
+                <ThemedText style={[
+                  styles.achievementDescription,
+                  !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
+                ]}>
+                  {achievement.description}
+                </ThemedText>
+                {stats.achievements.includes(achievement.id) && (
+                  <View style={styles.earnedBadge}>
+                    <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
+                    <ThemedText style={styles.earnedText}>Earned!</ThemedText>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
       )}
 
       {stats.totalGamesPlayed > 0 && (
@@ -343,6 +353,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF9E6',
+  },
+  scrollContent: {
+    paddingBottom: 30,
   },
   header: {
     paddingTop: 60,
@@ -506,12 +519,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 10,
   },
   funFactCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
-    marginBottom: 16,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -531,10 +544,20 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 24,
   },
-  statsContainer: {
+  statsSection: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  sectionTitleMain: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 20,
     gap: 12,
   },
   statCard: {
@@ -614,8 +637,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
-  recentGamesSection: {
-    marginBottom: 20,
+  stickersSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  recentGamesContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
+  recentGamesList: {
+    gap: 12,
   },
   recentGameCard: {
     flexDirection: 'row',
@@ -663,18 +695,15 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   achievementsSection: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
   },
   achievementsSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
   },
   achievementCountBadge: {
     flexDirection: 'row',
@@ -700,9 +729,11 @@ const styles = StyleSheet.create({
   achievementCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
-    width: '47%',
+    padding: 16,
+    width: '48%',
+    minHeight: 180,
     alignItems: 'center',
+    justifyContent: 'space-between',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -751,7 +782,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   devSection: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
     paddingBottom: 40,
   },
   clearDataButton: {
@@ -775,7 +807,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   motivationSection: {
-    margin: 20,
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 24,
