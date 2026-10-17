@@ -27,9 +27,9 @@ try {
  * Also replace the test App IDs in app.json (react-native-google-mobile-ads plugin).
  */
 const PRODUCTION_AD_UNITS = {
-  banner: Platform.select({ android: '', ios: '', default: '' }),
-  interstitial: Platform.select({ android: '', ios: '', default: '' }),
-  rewarded: Platform.select({ android: '', ios: '', default: '' }),
+  banner: Platform.select({ android: 'ca-app-pub-8284285672679424/3665514815', ios: '', default: '' }),
+  interstitial: Platform.select({ android: 'ca-app-pub-8284285672679424/8482727226', ios: '', default: '' }),
+  rewarded: Platform.select({ android: 'ca-app-pub-8284285672679424/9604237201', ios: '', default: '' }),
 };
 
 /** How long to wait for a hint video to load before giving the hint anyway. */
