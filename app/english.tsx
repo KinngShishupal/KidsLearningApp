@@ -6,6 +6,17 @@ import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
 import { TimedQuiz } from '@/components/timed-quiz';
+import {
+  ALPHABET_QUIZ_POOL,
+  ALPHABET_QUIZ_ROUND_LENGTH,
+  RHYMING_POOL,
+  RHYMING_ROUND_LENGTH,
+  SPELLING_POOL,
+  SPELLING_ROUND_LENGTH,
+  VOCABULARY_POOL,
+  VOCABULARY_ROUND_LENGTH,
+} from '@/data/questions/english';
+import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +24,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+// Random spelling round, ordered easy -> hard like the original fixed list.
+const drawSpellingRound = () =>
+  pickRandomQuestions(SPELLING_POOL, SPELLING_ROUND_LENGTH).sort((a, b) => a.time - b.time);
 
 export default function EnglishScreen() {
   const router = useRouter();
@@ -106,13 +121,9 @@ export default function EnglishScreen() {
   const emojiMemoryCards = ['😀', '😎', '🥳', '🤓', '😴', '🤩'];
   const foodMemoryCards = ['🍕', '🍔', '🌮', '🍰', '🍪', '🥤'];
 
-  const vocabularyQuestions = [
-    { question: 'Which word means "big"?', options: ['Small', 'Large', 'Tiny', 'Little'], correctAnswer: 'Large', emoji: '📏' },
-    { question: 'What is a baby dog called?', options: ['Kitten', 'Puppy', 'Calf', 'Chick'], correctAnswer: 'Puppy', emoji: '🐕' },
-    { question: 'Which word rhymes with "cat"?', options: ['Dog', 'Hat', 'Bird', 'Fish'], correctAnswer: 'Hat', emoji: '🎩' },
-    { question: 'What color is grass?', options: ['Blue', 'Red', 'Green', 'Yellow'], correctAnswer: 'Green', emoji: '🌱' },
-    { question: 'Opposite of "happy"?', options: ['Sad', 'Glad', 'Jolly', 'Merry'], correctAnswer: 'Sad', emoji: '😢' },
-  ];
+  const [vocabularyRound, setVocabularyRound] = useState(() =>
+    pickRandomQuestions(VOCABULARY_POOL, VOCABULARY_ROUND_LENGTH)
+  );
 
   const alphabetData = {
     A: { word: 'Apple', emoji: '🍎', sound: 'ah' },
@@ -148,223 +159,43 @@ export default function EnglishScreen() {
   const [alphabetQuizIndex, setAlphabetQuizIndex] = useState(0);
   const [alphabetQuizAnswered, setAlphabetQuizAnswered] = useState(false);
 
-  const alphabetQuizQuestions = [
-    { letter: 'A', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🍎' },
-    { letter: 'B', options: ['🍎', '⚽', '🐱', '🐕'], answer: '⚽' },
-    { letter: 'C', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🐱' },
-    { letter: 'D', options: ['🍎', '⚽', '🐱', '🐕'], answer: '🐕' },
-    { letter: 'E', options: ['🐘', '🐠', '🍇', '🎩'], answer: '🐘' },
-    { letter: 'F', options: ['🐘', '🐠', '🍇', '🎩'], answer: '🐠' },
-    { letter: 'L', options: ['🦁', '🌙', '🪺', '🍊'], answer: '🦁' },
-    { letter: 'S', options: ['☀️', '🌈', '🌳', '🍕'], answer: '☀️' },
-  ];
+  const [alphabetQuizRound, setAlphabetQuizRound] = useState(() =>
+    pickRandomQuestions(ALPHABET_QUIZ_POOL, ALPHABET_QUIZ_ROUND_LENGTH)
+  );
 
-  const spellingWords = [
-    { 
-      word: 'CAT', 
-      image: '🐱', 
-      scrambledLetters: ['T', 'A', 'C', 'B', 'D', 'E'],
-      hint: 'A furry pet that meows',
-      difficulty: 'Easy',
-      time: 20
-    },
-    { 
-      word: 'DOG', 
-      image: '🐕', 
-      scrambledLetters: ['G', 'O', 'D', 'C', 'A', 'T'],
-      hint: 'A pet that barks',
-      difficulty: 'Easy',
-      time: 20
-    },
-    { 
-      word: 'SUN', 
-      image: '☀️', 
-      scrambledLetters: ['N', 'U', 'S', 'M', 'O', 'T'],
-      hint: 'Bright in the sky',
-      difficulty: 'Easy',
-      time: 20
-    },
-    { 
-      word: 'TREE', 
-      image: '🌳', 
-      scrambledLetters: ['E', 'T', 'R', 'E', 'A', 'S'],
-      hint: 'Has leaves and bark',
-      difficulty: 'Medium',
-      time: 25
-    },
-    { 
-      word: 'FISH', 
-      image: '🐠', 
-      scrambledLetters: ['H', 'I', 'S', 'F', 'D', 'K'],
-      hint: 'Swims in water',
-      difficulty: 'Medium',
-      time: 25
-    },
-    { 
-      word: 'BIRD', 
-      image: '🐦', 
-      scrambledLetters: ['R', 'B', 'I', 'D', 'P', 'T'],
-      hint: 'Can fly in the sky',
-      difficulty: 'Medium',
-      time: 25
-    },
-    { 
-      word: 'APPLE', 
-      image: '🍎', 
-      scrambledLetters: ['P', 'A', 'L', 'E', 'P', 'O', 'I', 'B'],
-      hint: 'Red fruit, keeps doctor away',
-      difficulty: 'Hard',
-      time: 30
-    },
-    { 
-      word: 'FLOWER', 
-      image: '🌸', 
-      scrambledLetters: ['W', 'F', 'L', 'O', 'E', 'R', 'T', 'S'],
-      hint: 'Beautiful plant that blooms',
-      difficulty: 'Hard',
-      time: 30
-    },
-  ];
-
-  const spellingGame = spellingWords[spellingQuestionIndex];
+  const [spellingRound, setSpellingRound] = useState(drawSpellingRound);
+  const spellingGame = spellingRound[spellingQuestionIndex];
   const [showSpellingHint, setShowSpellingHint] = useState(false);
 
-  const rhymingQuestions = [
-    {
-      word: 'CAT',
-      emoji: '🐱',
-      sound: '-at',
-      options: [
-        { word: 'HAT', emoji: '🎩', rhymes: true },
-        { word: 'DOG', emoji: '🐕', rhymes: false },
-        { word: 'BAT', emoji: '🦇', rhymes: true },
-        { word: 'CAR', emoji: '🚗', rhymes: false },
-      ],
-    },
-    {
-      word: 'BEE',
-      emoji: '🐝',
-      sound: '-ee',
-      options: [
-        { word: 'TREE', emoji: '🌳', rhymes: true },
-        { word: 'CAT', emoji: '🐱', rhymes: false },
-        { word: 'SEA', emoji: '🌊', rhymes: true },
-        { word: 'SUN', emoji: '☀️', rhymes: false },
-      ],
-    },
-    {
-      word: 'BALL',
-      emoji: '⚽',
-      sound: '-all',
-      options: [
-        { word: 'TALL', emoji: '📏', rhymes: true },
-        { word: 'BOAT', emoji: '⛵', rhymes: false },
-        { word: 'WALL', emoji: '🧱', rhymes: true },
-        { word: 'BOOK', emoji: '📚', rhymes: false },
-      ],
-    },
-    {
-      word: 'STAR',
-      emoji: '⭐',
-      sound: '-ar',
-      options: [
-        { word: 'CAR', emoji: '🚗', rhymes: true },
-        { word: 'MOON', emoji: '🌙', rhymes: false },
-        { word: 'JAR', emoji: '🫙', rhymes: true },
-        { word: 'FISH', emoji: '🐠', rhymes: false },
-      ],
-    },
-    {
-      word: 'KING',
-      emoji: '👑',
-      sound: '-ing',
-      options: [
-        { word: 'RING', emoji: '💍', rhymes: true },
-        { word: 'CAKE', emoji: '🎂', rhymes: false },
-        { word: 'WING', emoji: '🪽', rhymes: true },
-        { word: 'BEAR', emoji: '🐻', rhymes: false },
-      ],
-    },
-    {
-      word: 'PIG',
-      emoji: '🐷',
-      sound: '-ig',
-      options: [
-        { word: 'BIG', emoji: '📏', rhymes: true },
-        { word: 'HOT', emoji: '🔥', rhymes: false },
-        { word: 'DIG', emoji: '⛏️', rhymes: true },
-        { word: 'TOP', emoji: '🔝', rhymes: false },
-      ],
-    },
-    {
-      word: 'BLUE',
-      emoji: '💙',
-      sound: '-ue',
-      options: [
-        { word: 'TRUE', emoji: '✅', rhymes: true },
-        { word: 'BIRD', emoji: '🐦', rhymes: false },
-        { word: 'GLUE', emoji: '🧴', rhymes: true },
-        { word: 'FROG', emoji: '🐸', rhymes: false },
-      ],
-    },
-    {
-      word: 'SUN',
-      emoji: '☀️',
-      sound: '-un',
-      options: [
-        { word: 'RUN', emoji: '🏃', rhymes: true },
-        { word: 'MOON', emoji: '🌙', rhymes: false },
-        { word: 'FUN', emoji: '🎉', rhymes: true },
-        { word: 'RAIN', emoji: '🌧️', rhymes: false },
-      ],
-    },
-    {
-      word: 'DOG',
-      emoji: '🐕',
-      sound: '-og',
-      options: [
-        { word: 'LOG', emoji: '🪵', rhymes: true },
-        { word: 'CAT', emoji: '🐱', rhymes: false },
-        { word: 'FOG', emoji: '🌫️', rhymes: true },
-        { word: 'SUN', emoji: '☀️', rhymes: false },
-      ],
-    },
-    {
-      word: 'BOX',
-      emoji: '📦',
-      sound: '-ox',
-      options: [
-        { word: 'FOX', emoji: '🦊', rhymes: true },
-        { word: 'BAT', emoji: '🦇', rhymes: false },
-        { word: 'SOX', emoji: '🧦', rhymes: true },
-        { word: 'CUP', emoji: '☕', rhymes: false },
-      ],
-    },
-    {
-      word: 'MOON',
-      emoji: '🌙',
-      sound: '-oon',
-      options: [
-        { word: 'SPOON', emoji: '🥄', rhymes: true },
-        { word: 'STAR', emoji: '⭐', rhymes: false },
-        { word: 'SOON', emoji: '⏰', rhymes: true },
-        { word: 'BIRD', emoji: '🐦', rhymes: false },
-      ],
-    },
-    {
-      word: 'RAIN',
-      emoji: '🌧️',
-      sound: '-ain',
-      options: [
-        { word: 'TRAIN', emoji: '🚂', rhymes: true },
-        { word: 'SNOW', emoji: '❄️', rhymes: false },
-        { word: 'CHAIN', emoji: '⛓️', rhymes: true },
-        { word: 'WIND', emoji: '💨', rhymes: false },
-      ],
-    },
-  ];
+  const [rhymingRound, setRhymingRound] = useState(() =>
+    pickRandomQuestions(RHYMING_POOL, RHYMING_ROUND_LENGTH)
+  );
+  const rhymingGame = rhymingRound[rhymeQuestionIndex];
 
-  const rhymingGame = rhymingQuestions[rhymeQuestionIndex];
+  // Draws a fresh random round for a game and resets its progress.
+  const startNewRound = (gameId: string) => {
+    if (gameId === 'alphabet') {
+      setAlphabetQuizRound(pickRandomQuestions(ALPHABET_QUIZ_POOL, ALPHABET_QUIZ_ROUND_LENGTH));
+      setAlphabetQuizIndex(0);
+      setAlphabetQuizAnswered(false);
+    } else if (gameId === 'spelling') {
+      const round = drawSpellingRound();
+      setSpellingRound(round);
+      setSpellingQuestionIndex(0);
+      setSpellingInput([]);
+      setShowSpellingHint(false);
+      setSpellingTimeLeft(round[0].time);
+      setSpellingTimerActive(true);
+    } else if (gameId === 'rhyming') {
+      setRhymingRound(pickRandomQuestions(RHYMING_POOL, RHYMING_ROUND_LENGTH));
+      setRhymeQuestionIndex(0);
+      setRhymeSelectedAnswers(new Set());
+      setRhymeTimeLeft(15);
+      setRhymeTimerActive(true);
+    } else if (gameId === 'vocabulary') {
+      setVocabularyRound(pickRandomQuestions(VOCABULARY_POOL, VOCABULARY_ROUND_LENGTH));
+    }
+  };
 
   const handleLetterPress = (letter: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -372,7 +203,7 @@ export default function EnglishScreen() {
   };
 
   const handleAlphabetQuizAnswer = (emoji: string) => {
-    const currentQuestion = alphabetQuizQuestions[alphabetQuizIndex];
+    const currentQuestion = alphabetQuizRound[alphabetQuizIndex];
     const isCorrect = emoji === currentQuestion.answer;
     
     setAlphabetQuizAnswered(true);
@@ -384,11 +215,11 @@ export default function EnglishScreen() {
       setScore(newScore);
       
       setTimeout(() => {
-        if (alphabetQuizIndex < alphabetQuizQuestions.length - 1) {
+        if (alphabetQuizIndex < alphabetQuizRound.length - 1) {
           setAlphabetQuizIndex(alphabetQuizIndex + 1);
           setAlphabetQuizAnswered(false);
         } else {
-          setGameResults({ score: newScore, total: alphabetQuizQuestions.length, correct: alphabetQuizIndex + 1 });
+          setGameResults({ score: newScore, total: alphabetQuizRound.length, correct: alphabetQuizIndex + 1 });
           setShowResultsModal(true);
         }
       }, 1500);
@@ -396,7 +227,7 @@ export default function EnglishScreen() {
       soundManager.playSound('wrong');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setTimeout(() => {
-        setGameResults({ score, total: alphabetQuizQuestions.length, correct: alphabetQuizIndex });
+        setGameResults({ score, total: alphabetQuizRound.length, correct: alphabetQuizIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -409,7 +240,7 @@ export default function EnglishScreen() {
           if (prev <= 1) {
             setSpellingTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: spellingWords.length, correct: spellingQuestionIndex });
+              setGameResults({ score, total: spellingRound.length, correct: spellingQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return spellingGame?.time || 20;
@@ -440,7 +271,7 @@ export default function EnglishScreen() {
             ).length;
             const totalCorrect = (rhymeQuestionIndex * 2) + correctAnswers;
             setTimeout(() => {
-              setGameResults({ score, total: rhymingQuestions.length * 2, correct: totalCorrect });
+              setGameResults({ score, total: rhymingRound.length * 2, correct: totalCorrect });
               setShowResultsModal(true);
             }, 100);
             return 15;
@@ -469,14 +300,14 @@ export default function EnglishScreen() {
       showCelebrationWithMessage('Perfect spelling!');
       
       setTimeout(() => {
-        if (spellingQuestionIndex < spellingWords.length - 1) {
+        if (spellingQuestionIndex < spellingRound.length - 1) {
           setSpellingQuestionIndex(spellingQuestionIndex + 1);
           setSpellingInput([]);
           setShowSpellingHint(false);
-          setSpellingTimeLeft(spellingWords[spellingQuestionIndex + 1].time);
+          setSpellingTimeLeft(spellingRound[spellingQuestionIndex + 1].time);
           setSpellingTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: spellingWords.length, correct: spellingQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: spellingRound.length, correct: spellingQuestionIndex + 1 });
           setShowResultsModal(true);
         }
       }, 2000);
@@ -485,7 +316,7 @@ export default function EnglishScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setSpellingTimerActive(false);
       setTimeout(() => {
-        setGameResults({ score, total: spellingWords.length, correct: spellingQuestionIndex });
+        setGameResults({ score, total: spellingRound.length, correct: spellingQuestionIndex });
         setShowResultsModal(true);
       }, 1000);
     }
@@ -526,14 +357,14 @@ export default function EnglishScreen() {
       if (correctAnswered === correctOptions.length) {
         setRhymeTimerActive(false);
         setTimeout(() => {
-          if (rhymeQuestionIndex < rhymingQuestions.length - 1) {
+          if (rhymeQuestionIndex < rhymingRound.length - 1) {
             setRhymeQuestionIndex(rhymeQuestionIndex + 1);
             setRhymeSelectedAnswers(new Set());
             setScore(newScore);
             setRhymeTimeLeft(15);
             setRhymeTimerActive(true);
           } else {
-            setGameResults({ score: newScore, total: rhymingQuestions.length * 2, correct: rhymingQuestions.length * 2 });
+            setGameResults({ score: newScore, total: rhymingRound.length * 2, correct: rhymingRound.length * 2 });
             setShowResultsModal(true);
           }
         }, 1500);
@@ -547,7 +378,7 @@ export default function EnglishScreen() {
       ).length;
       const totalCorrect = (rhymeQuestionIndex * 2) + correctAnswers;
       setTimeout(() => {
-        setGameResults({ score, total: rhymingQuestions.length * 2, correct: totalCorrect });
+        setGameResults({ score, total: rhymingRound.length * 2, correct: totalCorrect });
         setShowResultsModal(true);
       }, 1000);
     }
@@ -567,7 +398,12 @@ export default function EnglishScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.modeButton, alphabetMode === 'quiz' && styles.modeButtonActive]}
-          onPress={() => setAlphabetMode('quiz')}
+          onPress={() => {
+            if (alphabetMode !== 'quiz' && alphabetQuizIndex === 0 && !alphabetQuizAnswered) {
+              startNewRound('alphabet');
+            }
+            setAlphabetMode('quiz');
+          }}
         >
           <MaterialCommunityIcons name="head-question" size={20} color={alphabetMode === 'quiz' ? '#FFFFFF' : '#56C596'} />
           <ThemedText style={[styles.modeButtonText, alphabetMode === 'quiz' && styles.modeButtonTextActive]}>
@@ -629,7 +465,7 @@ export default function EnglishScreen() {
   );
 
   const renderAlphabetQuiz = () => {
-    const currentQuestion = alphabetQuizQuestions[alphabetQuizIndex];
+    const currentQuestion = alphabetQuizRound[alphabetQuizIndex];
     const letterData = alphabetData[currentQuestion.letter as keyof typeof alphabetData];
     
     return (
@@ -640,7 +476,7 @@ export default function EnglishScreen() {
             <ThemedText style={styles.quizLetter}>{currentQuestion.letter}</ThemedText>
             <View style={styles.soundBadge}>
               <MaterialCommunityIcons name="volume-high" size={16} color="#56C596" />
-              <ThemedText style={styles.soundText}>"{letterData.sound}"</ThemedText>
+              <ThemedText style={styles.soundText}>"{letterData?.sound}"</ThemedText>
             </View>
           </View>
         </View>
@@ -682,7 +518,7 @@ export default function EnglishScreen() {
           <View style={styles.progressBadge}>
             <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
             <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
-              {alphabetQuizIndex + 1}/{alphabetQuizQuestions.length}
+              {alphabetQuizIndex + 1}/{alphabetQuizRound.length}
             </ThemedText>
           </View>
         )}
@@ -710,7 +546,7 @@ export default function EnglishScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
           <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
-            {spellingQuestionIndex + 1}/{spellingWords.length}
+            {spellingQuestionIndex + 1}/{spellingRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
@@ -803,7 +639,7 @@ export default function EnglishScreen() {
           <View style={styles.progressBadge}>
             <MaterialCommunityIcons name="progress-check" size={16} color="#56C596" />
             <ThemedText style={[styles.questionProgress, { color: '#56C596' }]}>
-              {rhymeQuestionIndex + 1}/{rhymingQuestions.length}
+              {rhymeQuestionIndex + 1}/{rhymingRound.length}
             </ThemedText>
           </View>
           <View style={[styles.categoryBadge, { backgroundColor: '#56C596' }]}>
@@ -993,10 +829,10 @@ export default function EnglishScreen() {
     <View style={styles.gameContainer}>
       <TimedQuiz
         key={`vocabulary-${gameKey}`}
-        questions={vocabularyQuestions}
+        questions={vocabularyRound}
         timePerQuestion={12}
         onComplete={(finalScore, correctAnswers) => {
-          setGameResults({ score: finalScore, total: vocabularyQuestions.length, correct: correctAnswers });
+          setGameResults({ score: finalScore, total: vocabularyRound.length, correct: correctAnswers });
           setShowResultsModal(true);
         }}
         color="#56C596"
@@ -1005,12 +841,17 @@ export default function EnglishScreen() {
   );
 
   const handleRestart = () => {
+    const newSpellingRound = drawSpellingRound();
     setShowResultsModal(false);
     setScore(0);
     setSelectedLetter(null);
+    setSpellingRound(newSpellingRound);
+    setAlphabetQuizRound(pickRandomQuestions(ALPHABET_QUIZ_POOL, ALPHABET_QUIZ_ROUND_LENGTH));
+    setRhymingRound(pickRandomQuestions(RHYMING_POOL, RHYMING_ROUND_LENGTH));
+    setVocabularyRound(pickRandomQuestions(VOCABULARY_POOL, VOCABULARY_ROUND_LENGTH));
     setSpellingInput([]);
     setSpellingQuestionIndex(0);
-    setSpellingTimeLeft(20);
+    setSpellingTimeLeft(newSpellingRound[0].time);
     setSpellingTimerActive(true);
     setShowSpellingHint(false);
     setAlphabetQuizIndex(0);
@@ -1041,7 +882,9 @@ export default function EnglishScreen() {
     setShowResultsModal(false);
     const currentGameIndex = games.findIndex(g => g.id === selectedGame);
     if (currentGameIndex < games.length - 1) {
-      setSelectedGame(games[currentGameIndex + 1].id);
+      const nextGameId = games[currentGameIndex + 1].id;
+      startNewRound(nextGameId);
+      setSelectedGame(nextGameId);
       setScore(0);
       setSelectedLetter(null);
       setSpellingInput([]);
@@ -1157,13 +1000,8 @@ export default function EnglishScreen() {
             onPress={() => {
               soundManager.playSound('click');
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              // Reset rhyme game state when selecting
-              if (game.id === 'rhyming') {
-                setRhymeQuestionIndex(0);
-                setRhymeSelectedAnswers(new Set());
-                setRhymeTimeLeft(15);
-                setRhymeTimerActive(true);
-              }
+              // Draw a fresh random round (and reset progress) when selecting
+              startNewRound(game.id);
               setSelectedGame(game.id);
             }}
             activeOpacity={0.9}

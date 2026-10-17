@@ -7,6 +7,17 @@ import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
 import { TimedQuiz } from '@/components/timed-quiz';
+import {
+  ANIMAL_POOL,
+  ANIMAL_ROUND_LENGTH,
+  NATURE_POOL,
+  NATURE_ROUND_LENGTH,
+  PLANET_POOL,
+  PLANET_ROUND_LENGTH,
+  SCIENCE_POOL,
+  SCIENCE_ROUND_LENGTH,
+} from '@/data/questions/science';
+import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -43,6 +54,18 @@ export default function ScienceScreen() {
   const [animalTimeLeft, setAnimalTimeLeft] = useState(15);
   const [planetTimeLeft, setPlanetTimeLeft] = useState(12);
   const [timerActive, setTimerActive] = useState(true);
+  const [animalRound, setAnimalRound] = useState(() => pickRandomQuestions(ANIMAL_POOL, ANIMAL_ROUND_LENGTH));
+  const [planetRound, setPlanetRound] = useState(() => pickRandomQuestions(PLANET_POOL, PLANET_ROUND_LENGTH));
+  const [natureRound, setNatureRound] = useState(() => pickRandomQuestions(NATURE_POOL, NATURE_ROUND_LENGTH));
+  const [scienceRound, setScienceRound] = useState(() => pickRandomQuestions(SCIENCE_POOL, SCIENCE_ROUND_LENGTH));
+
+  // Draw a fresh random round for every quiz game; called whenever a game starts or restarts.
+  const drawNewRounds = () => {
+    setAnimalRound(pickRandomQuestions(ANIMAL_POOL, ANIMAL_ROUND_LENGTH));
+    setPlanetRound(pickRandomQuestions(PLANET_POOL, PLANET_ROUND_LENGTH));
+    setNatureRound(pickRandomQuestions(NATURE_POOL, NATURE_ROUND_LENGTH));
+    setScienceRound(pickRandomQuestions(SCIENCE_POOL, SCIENCE_ROUND_LENGTH));
+  };
 
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
@@ -113,182 +136,10 @@ export default function ScienceScreen() {
   const insectMemoryCards = ['🐝', '🦋', '🐞', '🦗', '🐛', '🦟'];
   const seaCreatureMemoryCards = ['🐠', '🐙', '🦈', '🐬', '🦀', '🐡'];
 
-  const scienceQuestions = [
-    { question: 'Which animal lives in water?', options: ['Cat', 'Fish', 'Dog', 'Bird'], correctAnswer: 'Fish', emoji: '🐠' },
-    { question: 'What do bees make?', options: ['Milk', 'Honey', 'Eggs', 'Wool'], correctAnswer: 'Honey', emoji: '🐝' },
-    { question: 'Where do birds live?', options: ['Nests', 'Caves', 'Ocean', 'Desert'], correctAnswer: 'Nests', emoji: '🐦' },
-    { question: 'What color is the sun?', options: ['Blue', 'Green', 'Yellow', 'Purple'], correctAnswer: 'Yellow', emoji: '☀️' },
-    { question: 'How many legs does a spider have?', options: ['6', '8', '4', '10'], correctAnswer: '8', emoji: '🕷️' },
-  ];
+  const animalQuiz = animalRound[animalQuestionIndex];
+  const planetQuiz = planetRound[planetQuestionIndex];
 
-  const animalQuizzes = [
-    { question: 'What sound does a lion make?', animal: '🦁', options: ['Meow', 'Roar', 'Woof', 'Quack'], answer: 'Roar' },
-    { question: 'What sound does a cow make?', animal: '🐮', options: ['Moo', 'Baa', 'Oink', 'Neigh'], answer: 'Moo' },
-    { question: 'What sound does a cat make?', animal: '🐱', options: ['Woof', 'Meow', 'Roar', 'Chirp'], answer: 'Meow' },
-    { question: 'What sound does a bird make?', animal: '🐦', options: ['Moo', 'Roar', 'Chirp', 'Hiss'], answer: 'Chirp' },
-    { question: 'What sound does a dog make?', animal: '🐕', options: ['Meow', 'Woof', 'Moo', 'Quack'], answer: 'Woof' },
-    { question: 'What sound does a sheep make?', animal: '🐑', options: ['Baa', 'Moo', 'Oink', 'Neigh'], answer: 'Baa' },
-    { question: 'What sound does a pig make?', animal: '🐷', options: ['Moo', 'Baa', 'Oink', 'Chirp'], answer: 'Oink' },
-    { question: 'What sound does a duck make?', animal: '🦆', options: ['Quack', 'Chirp', 'Roar', 'Meow'], answer: 'Quack' },
-    { question: 'What sound does a horse make?', animal: '🐴', options: ['Neigh', 'Moo', 'Baa', 'Roar'], answer: 'Neigh' },
-    { question: 'What sound does a frog make?', animal: '🐸', options: ['Ribbit', 'Chirp', 'Hiss', 'Woof'], answer: 'Ribbit' },
-  ];
-
-  const planetQuizzes = [
-    {
-      question: 'Which planet is closest to the Sun?',
-      options: [
-        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-      ],
-      answer: 'Mercury',
-    },
-    {
-      question: 'Which planet do we live on?',
-      options: [
-        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-      ],
-      answer: 'Earth',
-    },
-    {
-      question: 'Which planet is known as the Red Planet?',
-      options: [
-        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-      ],
-      answer: 'Mars',
-    },
-    {
-      question: 'Which is the largest planet?',
-      options: [
-        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
-        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
-      ],
-      answer: 'Jupiter',
-    },
-    {
-      question: 'Which planet has beautiful rings?',
-      options: [
-        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
-        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
-        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
-        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
-      ],
-      answer: 'Saturn',
-    },
-    {
-      question: 'Which planet is the hottest?',
-      options: [
-        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
-      ],
-      answer: 'Venus',
-    },
-    {
-      question: 'Which planet is known as the Blue Planet?',
-      options: [
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
-        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-      ],
-      answer: 'Neptune',
-    },
-    {
-      question: 'Which planet has water and life?',
-      options: [
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
-      ],
-      answer: 'Earth',
-    },
-    {
-      question: 'Which is the smallest planet?',
-      options: [
-        { name: 'Mercury', emoji: '☀️', color: '#8B8B8B', description: 'Tiny & Gray' },
-        { name: 'Mars', emoji: '🔴', color: '#E27B58', description: 'Red' },
-        { name: 'Venus', emoji: '🌥️', color: '#FFC649', description: 'Cloudy' },
-        { name: 'Earth', emoji: '🌍', color: '#4A90E2', description: 'Home' },
-      ],
-      answer: 'Mercury',
-    },
-    {
-      question: 'Which planet is farthest from the Sun?',
-      options: [
-        { name: 'Neptune', emoji: '🔵', color: '#4169E1', description: 'Blue' },
-        { name: 'Uranus', emoji: '💙', color: '#7CB9E8', description: 'Tilted' },
-        { name: 'Saturn', emoji: '💍', color: '#F4D03F', description: 'Rings' },
-        { name: 'Jupiter', emoji: '🟤', color: '#D4A574', description: 'Giant' },
-      ],
-      answer: 'Neptune',
-    },
-  ];
-
-  const animalQuiz = animalQuizzes[animalQuestionIndex];
-  const planetQuiz = planetQuizzes[planetQuestionIndex];
-
-  const natureQuizzes = [
-    {
-      question: 'What does a plant need to grow?',
-      options: [
-        { text: '☀️ Sunlight', correct: true },
-        { text: '💧 Water', correct: true },
-        { text: '🍕 Pizza', correct: false },
-        { text: '🌱 Soil', correct: true },
-      ],
-    },
-    {
-      question: 'Which of these are trees?',
-      options: [
-        { text: '🌲 Pine Tree', correct: true },
-        { text: '🌻 Sunflower', correct: false },
-        { text: '🌳 Oak Tree', correct: true },
-        { text: '🌹 Rose', correct: false },
-      ],
-    },
-    {
-      question: 'What do bees make?',
-      options: [
-        { text: '🍯 Honey', correct: true },
-        { text: '🥛 Milk', correct: false },
-        { text: '🌼 Flowers', correct: false },
-        { text: '🐝 More Bees', correct: true },
-      ],
-    },
-    {
-      question: 'Which animals can fly?',
-      options: [
-        { text: '🐦 Bird', correct: true },
-        { text: '🐟 Fish', correct: false },
-        { text: '🦋 Butterfly', correct: true },
-        { text: '🐘 Elephant', correct: false },
-      ],
-    },
-    {
-      question: 'What comes from clouds?',
-      options: [
-        { text: '🌧️ Rain', correct: true },
-        { text: '🍔 Burgers', correct: false },
-        { text: '❄️ Snow', correct: true },
-        { text: '🎈 Balloons', correct: false },
-      ],
-    },
-  ];
-
-  const natureQuiz = natureQuizzes[natureQuestionIndex];
+  const natureQuiz = natureRound[natureQuestionIndex];
   const timerProgress = useSharedValue(100);
 
   useEffect(() => {
@@ -308,7 +159,7 @@ export default function ScienceScreen() {
             const correctCount = natureQuiz.options.filter(o => o.correct).length;
             const correctAnswered = Array.from(natureSelectedAnswers).filter(idx => natureQuiz.options[idx].correct).length;
             const totalCorrect = (natureQuestionIndex * correctCount) + correctAnswered;
-            const totalQuestions = natureQuizzes.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
+            const totalQuestions = natureRound.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
             setTimeout(() => {
               setGameResults({ score, total: totalQuestions, correct: totalCorrect });
               setShowResultsModal(true);
@@ -340,7 +191,7 @@ export default function ScienceScreen() {
           if (prev <= 1) {
             setTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: animalQuizzes.length, correct: animalQuestionIndex });
+              setGameResults({ score, total: animalRound.length, correct: animalQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return 15;
@@ -359,7 +210,7 @@ export default function ScienceScreen() {
           if (prev <= 1) {
             setTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: planetQuizzes.length, correct: planetQuestionIndex });
+              setGameResults({ score, total: planetRound.length, correct: planetQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return 12;
@@ -386,13 +237,13 @@ export default function ScienceScreen() {
       
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        if (animalQuestionIndex < animalQuizzes.length - 1) {
+        if (animalQuestionIndex < animalRound.length - 1) {
           setAnimalQuestionIndex(animalQuestionIndex + 1);
           setSelectedAnswer(null);
           setAnimalTimeLeft(15);
           setTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: animalQuizzes.length, correct: animalQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: animalRound.length, correct: animalQuestionIndex + 1 });
           setShowResultsModal(true);
           setTimerActive(false);
         }
@@ -403,7 +254,7 @@ export default function ScienceScreen() {
       setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        setGameResults({ score, total: animalQuizzes.length, correct: animalQuestionIndex });
+        setGameResults({ score, total: animalRound.length, correct: animalQuestionIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -424,13 +275,13 @@ export default function ScienceScreen() {
       
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        if (planetQuestionIndex < planetQuizzes.length - 1) {
+        if (planetQuestionIndex < planetRound.length - 1) {
           setPlanetQuestionIndex(planetQuestionIndex + 1);
           setSelectedAnswer(null);
           setPlanetTimeLeft(12);
           setTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: planetQuizzes.length, correct: planetQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: planetRound.length, correct: planetQuestionIndex + 1 });
           setShowResultsModal(true);
           setTimerActive(false);
         }
@@ -441,7 +292,7 @@ export default function ScienceScreen() {
       setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        setGameResults({ score, total: planetQuizzes.length, correct: planetQuestionIndex });
+        setGameResults({ score, total: planetRound.length, correct: planetQuestionIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -453,7 +304,7 @@ export default function ScienceScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
           <ThemedText style={styles.questionProgress}>
-            {animalQuestionIndex + 1}/{animalQuizzes.length}
+            {animalQuestionIndex + 1}/{animalRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
@@ -508,7 +359,7 @@ export default function ScienceScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
           <ThemedText style={styles.questionProgress}>
-            {planetQuestionIndex + 1}/{planetQuizzes.length}
+            {planetQuestionIndex + 1}/{planetRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#4ECDC4' }]}>
@@ -570,14 +421,14 @@ export default function ScienceScreen() {
       if (correctAnswered === correctCount) {
         setNatureTimerActive(false);
         setTimeout(() => {
-          if (natureQuestionIndex < natureQuizzes.length - 1) {
+          if (natureQuestionIndex < natureRound.length - 1) {
             setNatureQuestionIndex(natureQuestionIndex + 1);
             setNatureSelectedAnswers(new Set());
             setScore(newScore);
             setNatureTimeLeft(10);
             setNatureTimerActive(true);
           } else {
-            setGameResults({ score: newScore, total: natureQuizzes.length * correctCount, correct: natureQuizzes.length * correctCount });
+            setGameResults({ score: newScore, total: natureRound.length * correctCount, correct: natureRound.length * correctCount });
             setShowResultsModal(true);
           }
         }, 1200);
@@ -589,7 +440,7 @@ export default function ScienceScreen() {
       setTimeout(() => {
         const totalCorrect = (natureQuestionIndex * natureQuiz.options.filter(o => o.correct).length) + 
                              Array.from(newAnswers).filter(idx => natureQuiz.options[idx].correct).length;
-        const totalQuestions = natureQuizzes.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
+        const totalQuestions = natureRound.reduce((sum, q) => sum + q.options.filter(o => o.correct).length, 0);
         setGameResults({ score, total: totalQuestions, correct: totalCorrect });
         setShowResultsModal(true);
       }, 800);
@@ -602,7 +453,7 @@ export default function ScienceScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#4ECDC4" />
           <ThemedText style={styles.questionProgress}>
-            {natureQuestionIndex + 1}/{natureQuizzes.length}
+            {natureQuestionIndex + 1}/{natureRound.length}
           </ThemedText>
         </View>
         <View style={styles.timerBadge}>
@@ -789,10 +640,10 @@ export default function ScienceScreen() {
       <LearningBuddy message="Test your science knowledge!" buddy="robot" />
       <TimedQuiz
         key={`speedscience-${gameKey}`}
-        questions={scienceQuestions}
+        questions={scienceRound}
         timePerQuestion={12}
         onComplete={(finalScore, correctAnswers) => {
-          setGameResults({ score: finalScore, total: scienceQuestions.length, correct: correctAnswers });
+          setGameResults({ score: finalScore, total: scienceRound.length, correct: correctAnswers });
           setShowResultsModal(true);
         }}
         color="#4ECDC4"
@@ -802,6 +653,7 @@ export default function ScienceScreen() {
 
   const handleRestart = () => {
     setShowResultsModal(false);
+    drawNewRounds();
     setScore(0);
     setAnimalQuestionIndex(0);
     setPlanetQuestionIndex(0);
@@ -840,6 +692,7 @@ export default function ScienceScreen() {
     const currentGameIndex = games.findIndex(g => g.id === selectedGame);
     if (currentGameIndex < games.length - 1) {
       setSelectedGame(games[currentGameIndex + 1].id);
+      drawNewRounds();
       setScore(0);
       setAnimalQuestionIndex(0);
       setPlanetQuestionIndex(0);
@@ -960,6 +813,7 @@ export default function ScienceScreen() {
             key={game.id}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              drawNewRounds();
               setSelectedGame(game.id);
             }}
             activeOpacity={0.9}

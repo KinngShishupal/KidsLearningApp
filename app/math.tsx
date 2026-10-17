@@ -7,6 +7,19 @@ import { PatternGame } from '@/components/pattern-game';
 import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
 import { TimedQuiz } from '@/components/timed-quiz';
+import {
+  ADDITION_POOL,
+  ADDITION_ROUND_LENGTH,
+  COUNTING_POOL,
+  COUNTING_ROUND_LENGTH,
+  MATCHING_POOL,
+  MATCHING_ROUND_LENGTH,
+  PATTERNS_POOL,
+  PATTERNS_ROUND_LENGTH,
+  SPEED_MATH_POOL,
+  SPEED_MATH_ROUND_LENGTH,
+} from '@/data/questions/math';
+import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -43,24 +56,26 @@ export default function MathScreen() {
   const [matchingTimeLeft, setMatchingTimeLeft] = useState(12);
   const [timerActive, setTimerActive] = useState(true);
 
-  const countingGames = [
-    { question: 'How many stars?', stars: 5, options: [4, 5, 6, 7] },
-    { question: 'How many hearts?', stars: 7, options: [5, 6, 7, 8], emoji: '❤️' },
-    { question: 'How many flowers?', stars: 6, options: [4, 5, 6, 7], emoji: '🌸' },
-    { question: 'How many apples?', stars: 8, options: [6, 7, 8, 9], emoji: '🍎' },
-    { question: 'How many balloons?', stars: 9, options: [7, 8, 9, 10], emoji: '🎈' },
-  ];
+  // Each game plays a random round drawn from its 50-question pool (see data/questions/math.ts).
+  const [countingRound, setCountingRound] = useState(() => pickRandomQuestions(COUNTING_POOL, COUNTING_ROUND_LENGTH));
+  const [additionRound, setAdditionRound] = useState(() => pickRandomQuestions(ADDITION_POOL, ADDITION_ROUND_LENGTH));
+  const [matchingRound, setMatchingRound] = useState(() => pickRandomQuestions(MATCHING_POOL, MATCHING_ROUND_LENGTH));
+  const [patternsRound, setPatternsRound] = useState(() => pickRandomQuestions(PATTERNS_POOL, PATTERNS_ROUND_LENGTH));
+  const [speedMathRound, setSpeedMathRound] = useState(() =>
+    pickRandomQuestions(SPEED_MATH_POOL, SPEED_MATH_ROUND_LENGTH)
+  );
 
-  const additionGames = [
-    { num1: 2, num2: 3, options: [4, 5, 6, 7], answer: 5 },
-    { num1: 4, num2: 2, options: [5, 6, 7, 8], answer: 6 },
-    { num1: 3, num2: 4, options: [6, 7, 8, 9], answer: 7 },
-    { num1: 5, num2: 3, options: [6, 7, 8, 9], answer: 8 },
-    { num1: 6, num2: 3, options: [7, 8, 9, 10], answer: 9 },
-  ];
+  // Draw a fresh random round for every game; called whenever a game starts or restarts.
+  const drawNewRounds = () => {
+    setCountingRound(pickRandomQuestions(COUNTING_POOL, COUNTING_ROUND_LENGTH));
+    setAdditionRound(pickRandomQuestions(ADDITION_POOL, ADDITION_ROUND_LENGTH));
+    setMatchingRound(pickRandomQuestions(MATCHING_POOL, MATCHING_ROUND_LENGTH));
+    setPatternsRound(pickRandomQuestions(PATTERNS_POOL, PATTERNS_ROUND_LENGTH));
+    setSpeedMathRound(pickRandomQuestions(SPEED_MATH_POOL, SPEED_MATH_ROUND_LENGTH));
+  };
 
-  const countingGame = countingGames[countingQuestionIndex];
-  const additionGame = additionGames[additionQuestionIndex];
+  const countingGame = countingRound[countingQuestionIndex];
+  const additionGame = additionRound[additionQuestionIndex];
 
   useEffect(() => {
     if (selectedGame === 'counting' && timerActive && countingAnswer === null) {
@@ -69,7 +84,7 @@ export default function MathScreen() {
           if (prev <= 1) {
             setTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: countingGames.length, correct: countingQuestionIndex });
+              setGameResults({ score, total: countingRound.length, correct: countingQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return 15;
@@ -88,7 +103,7 @@ export default function MathScreen() {
           if (prev <= 1) {
             setTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: additionGames.length, correct: additionQuestionIndex });
+              setGameResults({ score, total: additionRound.length, correct: additionQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return 15;
@@ -107,7 +122,7 @@ export default function MathScreen() {
           if (prev <= 1) {
             setTimerActive(false);
             setTimeout(() => {
-              setGameResults({ score, total: matchingGames.length, correct: matchingQuestionIndex });
+              setGameResults({ score, total: matchingRound.length, correct: matchingQuestionIndex });
               setShowResultsModal(true);
             }, 100);
             return 12;
@@ -119,15 +134,7 @@ export default function MathScreen() {
     }
   }, [selectedGame, matchingQuestionIndex, timerActive, matchingAnswer]);
 
-  const matchingGames = [
-    { number: 1, word: 'one', options: ['one', 'two', 'three', 'four'] },
-    { number: 2, word: 'two', options: ['one', 'two', 'three', 'five'] },
-    { number: 3, word: 'three', options: ['two', 'three', 'four', 'five'] },
-    { number: 4, word: 'four', options: ['one', 'three', 'four', 'five'] },
-    { number: 5, word: 'five', options: ['two', 'three', 'four', 'five'] },
-  ];
-
-  const matchingGame = matchingGames[matchingQuestionIndex];
+  const matchingGame = matchingRound[matchingQuestionIndex];
 
   const games = [
     { 
@@ -200,83 +207,6 @@ export default function MathScreen() {
   const shapeMemoryCards = ['🔴', '🔵', '🟡', '🟢', '🟣', '🟠'];
   const fruitMemoryCards = ['🍎', '🍌', '🍊', '🍇', '🍓', '🍉'];
 
-  const speedMathQuestions = [
-    { question: 'What is 2 + 3?', options: ['7', '4', '6', '5'], correctAnswer: '5', emoji: '➕' },
-    { question: 'What is 5 - 2?', options: ['3', '2', '5', '4'], correctAnswer: '3', emoji: '➖' },
-    { question: 'Count: 🍎🍎🍎', options: ['4', '2', '5', '3'], correctAnswer: '3', emoji: '🍎' },
-    { question: 'What is 4 + 1?', options: ['6', '3', '5', '4'], correctAnswer: '5', emoji: '➕' },
-    { question: 'What is 6 - 3?', options: ['4', '5', '2', '3'], correctAnswer: '3', emoji: '➖' },
-    { question: 'What is 3 + 3?', options: ['5', '7', '6', '8'], correctAnswer: '6', emoji: '➕' },
-    { question: 'Count: ⭐⭐⭐⭐', options: ['3', '6', '5', '4'], correctAnswer: '4', emoji: '⭐' },
-    { question: 'What is 7 - 4?', options: ['4', '2', '3', '5'], correctAnswer: '3', emoji: '➖' },
-    { question: 'What is 5 + 2?', options: ['8', '7', '6', '9'], correctAnswer: '7', emoji: '➕' },
-    { question: 'What is 8 - 5?', options: ['5', '4', '3', '2'], correctAnswer: '3', emoji: '➖' },
-    { question: 'Count: 🌟🌟🌟🌟🌟', options: ['7', '4', '6', '5'], correctAnswer: '5', emoji: '🌟' },
-    { question: 'What is 6 + 2?', options: ['9', '7', '10', '8'], correctAnswer: '8', emoji: '➕' },
-    { question: 'What is 9 - 4?', options: ['6', '5', '7', '4'], correctAnswer: '5', emoji: '➖' },
-    { question: 'What is 7 + 3?', options: ['11', '9', '10', '12'], correctAnswer: '10', emoji: '➕' },
-    { question: 'Count: 🎈🎈🎈🎈🎈🎈', options: ['7', '5', '8', '6'], correctAnswer: '6', emoji: '🎈' },
-  ];
-
-  const patterns = [
-    { 
-      sequence: ['🔴', '🔵', '🔴', '🔵', '🔴'], 
-      options: ['🔴', '🔵', '🟡', '🟢'], 
-      missingIndex: 4,
-      hint: 'Alternating pattern',
-      type: 'Repeating'
-    },
-    { 
-      sequence: ['⭐', '⭐', '🌟', '⭐', '⭐', '🌟'], 
-      options: ['⭐', '🌟', '💫', '✨'], 
-      missingIndex: 5,
-      hint: 'Two then one pattern',
-      type: 'Repeating'
-    },
-    { 
-      sequence: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'], 
-      options: ['4️⃣', '5️⃣', '6️⃣', '7️⃣'], 
-      missingIndex: 4,
-      hint: 'Counting up',
-      type: 'Growing'
-    },
-    { 
-      sequence: ['🟥', '🟧', '🟨', '🟩', '🟦'], 
-      options: ['🟪', '🟦', '🟩', '⬛'], 
-      missingIndex: 4,
-      hint: 'Rainbow order',
-      type: 'Sequence'
-    },
-    { 
-      sequence: ['🔺', '🔺', '🔻', '🔺', '🔺', '🔻'], 
-      options: ['🔺', '🔻', '⬜', '🔶'], 
-      missingIndex: 5,
-      hint: 'Up, up, down pattern',
-      type: 'Repeating'
-    },
-    { 
-      sequence: ['🍎', '🍎', '🍊', '🍎', '🍎', '🍊'], 
-      options: ['🍎', '🍊', '🍋', '🍇'], 
-      missingIndex: 5,
-      hint: 'Apple, apple, orange',
-      type: 'Repeating'
-    },
-    { 
-      sequence: ['⬜', '⬛', '⬜', '⬛', '⬜'], 
-      options: ['⬜', '⬛', '🟦', '🟥'], 
-      missingIndex: 4,
-      hint: 'Light and dark',
-      type: 'Alternating'
-    },
-    { 
-      sequence: ['🐶', '🐱', '🐶', '🐱', '🐶'], 
-      options: ['🐶', '🐱', '🐭', '🐹'], 
-      missingIndex: 4,
-      hint: 'Dog, cat pattern',
-      type: 'Alternating'
-    },
-  ];
-
   const showCelebrationWithMessage = (message: string) => {
     setCelebrationMessage(message);
     setShowCelebration(true);
@@ -298,13 +228,13 @@ export default function MathScreen() {
       
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        if (countingQuestionIndex < countingGames.length - 1) {
+        if (countingQuestionIndex < countingRound.length - 1) {
           setCountingQuestionIndex(countingQuestionIndex + 1);
           setCountingAnswer(null);
           setCountingTimeLeft(15);
           setTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: countingGames.length, correct: countingQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: countingRound.length, correct: countingQuestionIndex + 1 });
           setShowResultsModal(true);
           setTimerActive(false);
         }
@@ -315,7 +245,7 @@ export default function MathScreen() {
       setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        setGameResults({ score, total: countingGames.length, correct: countingQuestionIndex });
+        setGameResults({ score, total: countingRound.length, correct: countingQuestionIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -336,13 +266,13 @@ export default function MathScreen() {
       
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        if (additionQuestionIndex < additionGames.length - 1) {
+        if (additionQuestionIndex < additionRound.length - 1) {
           setAdditionQuestionIndex(additionQuestionIndex + 1);
           setAdditionAnswer(null);
           setAdditionTimeLeft(15);
           setTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: additionGames.length, correct: additionQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: additionRound.length, correct: additionQuestionIndex + 1 });
           setShowResultsModal(true);
           setTimerActive(false);
         }
@@ -353,7 +283,7 @@ export default function MathScreen() {
       setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        setGameResults({ score, total: additionGames.length, correct: additionQuestionIndex });
+        setGameResults({ score, total: additionRound.length, correct: additionQuestionIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -365,7 +295,7 @@ export default function MathScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
           <ThemedText style={styles.questionProgress}>
-            {countingQuestionIndex + 1}/{countingGames.length}
+            {countingQuestionIndex + 1}/{countingRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
@@ -420,7 +350,7 @@ export default function MathScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
           <ThemedText style={styles.questionProgress}>
-            {additionQuestionIndex + 1}/{additionGames.length}
+            {additionQuestionIndex + 1}/{additionRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
@@ -490,13 +420,13 @@ export default function MathScreen() {
       
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        if (matchingQuestionIndex < matchingGames.length - 1) {
+        if (matchingQuestionIndex < matchingRound.length - 1) {
           setMatchingQuestionIndex(matchingQuestionIndex + 1);
           setMatchingAnswer(null);
           setMatchingTimeLeft(12);
           setTimerActive(true);
         } else {
-          setGameResults({ score: newScore, total: matchingGames.length, correct: matchingQuestionIndex + 1 });
+          setGameResults({ score: newScore, total: matchingRound.length, correct: matchingQuestionIndex + 1 });
           setShowResultsModal(true);
           setTimerActive(false);
         }
@@ -507,7 +437,7 @@ export default function MathScreen() {
       setTimerActive(false);
       setTimeout(() => {
         setShowAnswerFeedback(false);
-        setGameResults({ score, total: matchingGames.length, correct: matchingQuestionIndex });
+        setGameResults({ score, total: matchingRound.length, correct: matchingQuestionIndex });
         setShowResultsModal(true);
       }, 1500);
     }
@@ -519,7 +449,7 @@ export default function MathScreen() {
         <View style={styles.progressBadge}>
           <MaterialCommunityIcons name="progress-check" size={16} color="#FF6B6B" />
           <ThemedText style={styles.questionProgress}>
-            {matchingQuestionIndex + 1}/{matchingGames.length}
+            {matchingQuestionIndex + 1}/{matchingRound.length}
           </ThemedText>
         </View>
         <View style={[styles.categoryBadge, { backgroundColor: '#FF6B6B' }]}>
@@ -672,9 +602,9 @@ export default function MathScreen() {
 
       <PatternGame
         key={`pattern-${gameKey}`}
-        patterns={patterns}
+        patterns={patternsRound}
         onComplete={(finalScore, correctAnswers) => {
-          setGameResults({ score: finalScore, total: patterns.length, correct: correctAnswers });
+          setGameResults({ score: finalScore, total: patternsRound.length, correct: correctAnswers });
           setShowResultsModal(true);
         }}
         color="#FF6B6B"
@@ -686,10 +616,10 @@ export default function MathScreen() {
     <View style={styles.gameContainer}>
       <TimedQuiz
         key={`speedmath-${gameKey}`}
-        questions={speedMathQuestions}
+        questions={speedMathRound}
         timePerQuestion={10}
         onComplete={(finalScore, correctAnswers) => {
-          setGameResults({ score: finalScore, total: speedMathQuestions.length, correct: correctAnswers });
+          setGameResults({ score: finalScore, total: speedMathRound.length, correct: correctAnswers });
           setShowResultsModal(true);
         }}
         color="#FF6B6B"
@@ -699,6 +629,7 @@ export default function MathScreen() {
 
   const handleRestart = () => {
     setShowResultsModal(false);
+    drawNewRounds();
     setScore(0);
     setCountingQuestionIndex(0);
     setAdditionQuestionIndex(0);
@@ -733,6 +664,7 @@ export default function MathScreen() {
     const currentGameIndex = games.findIndex(g => g.id === selectedGame);
     if (currentGameIndex < games.length - 1) {
       setSelectedGame(games[currentGameIndex + 1].id);
+      drawNewRounds();
       setScore(0);
       setCountingQuestionIndex(0);
       setAdditionQuestionIndex(0);
@@ -851,6 +783,7 @@ export default function MathScreen() {
             onPress={() => {
               soundManager.playSound('click');
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              drawNewRounds();
               setSelectedGame(game.id);
             }}
             activeOpacity={0.9}
