@@ -1,4 +1,5 @@
 import { StyleSheet, ScrollView, View, TouchableOpacity, RefreshControl, TextInput, Modal } from 'react-native';
+import { AdBanner } from '@/components/ad-banner';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -135,221 +136,228 @@ export default function ProgressScreen() {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <Modal
-        visible={showNameEdit}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowNameEdit(false)}
+    <View style={styles.screen}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.nameEditCard}>
-            <MaterialCommunityIcons name="account-edit" size={48} color="#FFD93D" />
-            <ThemedText style={styles.modalTitle}>Edit Your Name</ThemedText>
-            <TextInput
-              style={styles.nameInput}
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="Enter your name"
-              maxLength={20}
-              autoFocus
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={styles.modalCancelButton} 
-                onPress={() => setShowNameEdit(false)}
-              >
-                <ThemedText style={styles.modalCancelText}>Cancel</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.modalSaveButton} 
-                onPress={handleSaveName}
-              >
-                <ThemedText style={styles.modalSaveText}>Save</ThemedText>
-              </TouchableOpacity>
+        <Modal
+          visible={showNameEdit}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowNameEdit(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.nameEditCard}>
+              <MaterialCommunityIcons name="account-edit" size={48} color="#FFD93D" />
+              <ThemedText style={styles.modalTitle}>Edit Your Name</ThemedText>
+              <TextInput
+                style={styles.nameInput}
+                value={newName}
+                onChangeText={setNewName}
+                placeholder="Enter your name"
+                maxLength={20}
+                autoFocus
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setShowNameEdit(false)}
+                >
+                  <ThemedText style={styles.modalCancelText}>Cancel</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.modalSaveButton} 
+                  onPress={handleSaveName}
+                >
+                  <ThemedText style={styles.modalSaveText}>Save</ThemedText>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-
-      <LinearGradient
-        colors={['#FFD93D', '#FFC107']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.header}
-      >
-        <View style={styles.headerContent}>
-          <View style={styles.headerIconCircle}>
-            <MaterialCommunityIcons name="trophy-award" size={40} color="#FFD93D" />
-          </View>
-          <ThemedText style={styles.headerTitle}>
-            {userName ? `${userName}'s Progress` : 'Your Progress'}
-          </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>Keep up the great work!</ThemedText>
-          {userName && (
-            <TouchableOpacity style={styles.editNameButton} onPress={handleEditName}>
-              <MaterialCommunityIcons name="pencil" size={14} color="#FFFFFF" />
-              <ThemedText style={styles.editNameText}>Edit Name</ThemedText>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View style={styles.headerDecoration}>
-          <View style={styles.decorativeCircleSmall} />
-          <View style={styles.decorativeCircleLarge} />
-        </View>
-      </LinearGradient>
-
-      {stats.totalGamesPlayed === 0 ? (
-        <View style={styles.contentContainer}>
-          <View style={styles.noDataCard}>
-            <MaterialCommunityIcons name="play-circle-outline" size={64} color="#999" />
-            <ThemedText style={styles.noDataTitle}>Start Your Learning Journey!</ThemedText>
-            <ThemedText style={styles.noDataText}>
-              Play games to earn achievements, track progress, and collect stickers!
+        </Modal>
+  
+        <LinearGradient
+          colors={['#FFD93D', '#FFC107']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.headerIconCircle}>
+              <MaterialCommunityIcons name="trophy-award" size={40} color="#FFD93D" />
+            </View>
+            <ThemedText style={styles.headerTitle}>
+              {userName ? `${userName}'s Progress` : 'Your Progress'}
             </ThemedText>
+            <ThemedText style={styles.headerSubtitle}>Keep up the great work!</ThemedText>
+            {userName && (
+              <TouchableOpacity style={styles.editNameButton} onPress={handleEditName}>
+                <MaterialCommunityIcons name="pencil" size={14} color="#FFFFFF" />
+                <ThemedText style={styles.editNameText}>Edit Name</ThemedText>
+              </TouchableOpacity>
+            )}
           </View>
-        </View>
-      ) : (
-        <>
+  
+          <View style={styles.headerDecoration}>
+            <View style={styles.decorativeCircleSmall} />
+            <View style={styles.decorativeCircleLarge} />
+          </View>
+        </LinearGradient>
+  
+        {stats.totalGamesPlayed === 0 ? (
           <View style={styles.contentContainer}>
-            <View style={styles.funFactCard}>
-              <ThemedText style={styles.funFactTitle}>Fun Fact of the Day! {dailyFact.emoji}</ThemedText>
-              <ThemedText style={styles.funFactText}>{dailyFact.fact}</ThemedText>
+            <View style={styles.noDataCard}>
+              <MaterialCommunityIcons name="play-circle-outline" size={64} color="#999" />
+              <ThemedText style={styles.noDataTitle}>Start Your Learning Journey!</ThemedText>
+              <ThemedText style={styles.noDataText}>
+                Play games to earn achievements, track progress, and collect stickers!
+              </ThemedText>
             </View>
           </View>
-
-          <View style={styles.statsSection}>
-            <ThemedText style={styles.sectionTitleMain}>Your Stats</ThemedText>
-            <View style={styles.statsGrid}>
-              {statsDisplay.map((stat, index) => (
-                <View key={index} style={[styles.statCard, { borderLeftColor: stat.color }]}>
-                  <ThemedText style={styles.statEmoji}>{stat.emoji}</ThemedText>
-                  <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
-                  <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
-                </View>
-              ))}
+        ) : (
+          <>
+            <View style={styles.contentContainer}>
+              <View style={styles.funFactCard}>
+                <ThemedText style={styles.funFactTitle}>Fun Fact of the Day! {dailyFact.emoji}</ThemedText>
+                <ThemedText style={styles.funFactText}>{dailyFact.fact}</ThemedText>
+              </View>
             </View>
-          </View>
-
-          <View style={styles.stickersSection}>
-            <StickerCollection stickers={allStickers} />
-          </View>
-
-          {recentGames.length > 0 && (
-            <View style={styles.recentGamesContainer}>
-              <ThemedText style={styles.sectionTitleMain}>Recent Games</ThemedText>
-              <View style={styles.recentGamesList}>
-                {recentGames.map((game, idx) => (
-                  <View key={idx} style={styles.recentGameCard}>
-                    <View style={[styles.subjectBadge, { backgroundColor: 
-                      game.subject === 'math' ? '#FF6B6B' :
-                      game.subject === 'science' ? '#4ECDC4' : '#56C596'
-                    }]}>
-                      <MaterialCommunityIcons 
-                        name={game.subject === 'math' ? 'calculator-variant' :
-                              game.subject === 'science' ? 'flask' : 'book-alphabet'} 
-                        size={18} 
-                        color="#FFFFFF" 
-                      />
-                    </View>
-                    <View style={styles.recentGameInfo}>
-                      <ThemedText style={styles.recentGameTitle}>{game.gameName}</ThemedText>
-                      <ThemedText style={styles.recentGameStats}>
-                        {game.correctAnswers}/{game.totalQuestions} correct • {game.score} pts
-                      </ThemedText>
-                    </View>
-                    <View style={styles.recentGameScore}>
-                      <ThemedText style={styles.recentGamePercentage}>
-                        {Math.round((game.correctAnswers / game.totalQuestions) * 100)}%
-                      </ThemedText>
-                    </View>
+  
+            <View style={styles.statsSection}>
+              <ThemedText style={styles.sectionTitleMain}>Your Stats</ThemedText>
+              <View style={styles.statsGrid}>
+                {statsDisplay.map((stat, index) => (
+                  <View key={index} style={[styles.statCard, { borderLeftColor: stat.color }]}>
+                    <ThemedText style={styles.statEmoji}>{stat.emoji}</ThemedText>
+                    <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
+                    <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
                   </View>
                 ))}
               </View>
             </View>
-          )}
-        </>
-      )}
-
-      {stats.totalGamesPlayed > 0 && (
-        <View style={styles.achievementsSection}>
-          <View style={styles.achievementsSectionHeader}>
-            <ThemedText style={styles.sectionTitleMain}>Achievements</ThemedText>
-            <View style={styles.achievementCountBadge}>
-              <MaterialCommunityIcons name="trophy" size={16} color="#FFD93D" />
-              <ThemedText style={styles.achievementCountText}>
-                {stats.achievements.length}/{achievementDefinitions.length}
-              </ThemedText>
+  
+            <View style={styles.stickersSection}>
+              <StickerCollection stickers={allStickers} />
+            </View>
+  
+            {recentGames.length > 0 && (
+              <View style={styles.recentGamesContainer}>
+                <ThemedText style={styles.sectionTitleMain}>Recent Games</ThemedText>
+                <View style={styles.recentGamesList}>
+                  {recentGames.map((game, idx) => (
+                    <View key={idx} style={styles.recentGameCard}>
+                      <View style={[styles.subjectBadge, { backgroundColor: 
+                        game.subject === 'math' ? '#FF6B6B' :
+                        game.subject === 'science' ? '#4ECDC4' : '#56C596'
+                      }]}>
+                        <MaterialCommunityIcons 
+                          name={game.subject === 'math' ? 'calculator-variant' :
+                                game.subject === 'science' ? 'flask' : 'book-alphabet'} 
+                          size={18} 
+                          color="#FFFFFF" 
+                        />
+                      </View>
+                      <View style={styles.recentGameInfo}>
+                        <ThemedText style={styles.recentGameTitle}>{game.gameName}</ThemedText>
+                        <ThemedText style={styles.recentGameStats}>
+                          {game.correctAnswers}/{game.totalQuestions} correct • {game.score} pts
+                        </ThemedText>
+                      </View>
+                      <View style={styles.recentGameScore}>
+                        <ThemedText style={styles.recentGamePercentage}>
+                          {Math.round((game.correctAnswers / game.totalQuestions) * 100)}%
+                        </ThemedText>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </>
+        )}
+  
+        {stats.totalGamesPlayed > 0 && (
+          <View style={styles.achievementsSection}>
+            <View style={styles.achievementsSectionHeader}>
+              <ThemedText style={styles.sectionTitleMain}>Achievements</ThemedText>
+              <View style={styles.achievementCountBadge}>
+                <MaterialCommunityIcons name="trophy" size={16} color="#FFD93D" />
+                <ThemedText style={styles.achievementCountText}>
+                  {stats.achievements.length}/{achievementDefinitions.length}
+                </ThemedText>
+              </View>
+            </View>
+            <View style={styles.achievementsGrid}>
+              {achievementDefinitions.map((achievement) => (
+                <View
+                  key={achievement.id}
+                  style={[
+                    styles.achievementCard,
+                    !stats.achievements.includes(achievement.id) && styles.achievementLocked,
+                  ]}
+                >
+                  <ThemedText style={[
+                    styles.achievementEmoji,
+                    !stats.achievements.includes(achievement.id) && styles.achievementEmojiLocked,
+                  ]}>
+                    {achievement.emoji}
+                  </ThemedText>
+                  <ThemedText style={[
+                    styles.achievementTitle,
+                    !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
+                  ]}>
+                    {achievement.title}
+                  </ThemedText>
+                  <ThemedText style={[
+                    styles.achievementDescription,
+                    !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
+                  ]}>
+                    {achievement.description}
+                  </ThemedText>
+                  {stats.achievements.includes(achievement.id) && (
+                    <View style={styles.earnedBadge}>
+                      <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
+                      <ThemedText style={styles.earnedText}>Earned!</ThemedText>
+                    </View>
+                  )}
+                </View>
+              ))}
             </View>
           </View>
-          <View style={styles.achievementsGrid}>
-            {achievementDefinitions.map((achievement) => (
-              <View
-                key={achievement.id}
-                style={[
-                  styles.achievementCard,
-                  !stats.achievements.includes(achievement.id) && styles.achievementLocked,
-                ]}
-              >
-                <ThemedText style={[
-                  styles.achievementEmoji,
-                  !stats.achievements.includes(achievement.id) && styles.achievementEmojiLocked,
-                ]}>
-                  {achievement.emoji}
-                </ThemedText>
-                <ThemedText style={[
-                  styles.achievementTitle,
-                  !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
-                ]}>
-                  {achievement.title}
-                </ThemedText>
-                <ThemedText style={[
-                  styles.achievementDescription,
-                  !stats.achievements.includes(achievement.id) && styles.achievementTextLocked,
-                ]}>
-                  {achievement.description}
-                </ThemedText>
-                {stats.achievements.includes(achievement.id) && (
-                  <View style={styles.earnedBadge}>
-                    <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
-                    <ThemedText style={styles.earnedText}>Earned!</ThemedText>
-                  </View>
-                )}
-              </View>
-            ))}
+        )}
+  
+        {stats.totalGamesPlayed > 0 && (
+          <View style={styles.motivationSection}>
+            <ThemedText style={styles.motivationEmoji}>🌟</ThemedText>
+            <ThemedText style={styles.motivationText}>
+              You're doing amazing! Keep learning and having fun!
+            </ThemedText>
           </View>
-        </View>
-      )}
-
-      {stats.totalGamesPlayed > 0 && (
-        <View style={styles.motivationSection}>
-          <ThemedText style={styles.motivationEmoji}>🌟</ThemedText>
-          <ThemedText style={styles.motivationText}>
-            You're doing amazing! Keep learning and having fun!
-          </ThemedText>
-        </View>
-      )}
-
-      {__DEV__ && stats.totalGamesPlayed > 0 && (
-        <View style={styles.devSection}>
-          <TouchableOpacity style={styles.clearDataButton} onPress={clearData}>
-            <MaterialCommunityIcons name="delete" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.clearDataText}>Clear Progress (Dev Only)</ThemedText>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+        )}
+  
+        {__DEV__ && stats.totalGamesPlayed > 0 && (
+          <View style={styles.devSection}>
+            <TouchableOpacity style={styles.clearDataButton} onPress={clearData}>
+              <MaterialCommunityIcons name="delete" size={18} color="#FFFFFF" />
+              <ThemedText style={styles.clearDataText}>Clear Progress (Dev Only)</ThemedText>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+      <AdBanner />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFF9E6',
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFF9E6',
