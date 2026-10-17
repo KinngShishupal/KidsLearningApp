@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { initAds } from '@/utils/ads';
 import { soundManager } from '@/utils/sound-manager';
 
 export const unstable_settings = {
@@ -16,6 +17,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     soundManager.initialize();
+    initAds();
   }, []);
 
   return (

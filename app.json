@@ -38,7 +38,8 @@
         "READ_PHONE_STATE",
         "CALL_PHONE",
         "READ_SMS",
-        "SEND_SMS"
+        "SEND_SMS",
+        "com.google.android.gms.permission.AD_ID"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -66,7 +67,15 @@
       "expo-status-bar",
       "expo-web-browser",
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "delayAppMeasurementInit": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

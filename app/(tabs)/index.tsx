@@ -1,3 +1,4 @@
+import { AdBanner } from '@/components/ad-banner';
 import { LearningBuddy } from '@/components/learning-buddy';
 import { ThemedText } from '@/components/themed-text';
 import { soundManager } from '@/utils/sound-manager';
@@ -94,6 +95,7 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
 }
 
 export default function HomeScreen() {
+  const router = useRouter();
   const headerOpacity = useSharedValue(0);
   const [userName, setUserName] = useState('');
 
@@ -157,55 +159,73 @@ export default function HomeScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container}>
-      <Animated.View style={headerAnimatedStyle}>
-        <LinearGradient
-          colors={['#FF6B6B', '#4ECDC4', '#56C596']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.header}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.headerIconCircle}>
-              <Image
-                source={require('@/assets/images/icon.png')}
-                style={styles.headerLogo}
-                contentFit="cover"
-              />
+    <View style={styles.screen}>
+      <ScrollView style={styles.container}>
+        <Animated.View style={headerAnimatedStyle}>
+          <LinearGradient
+            colors={['#FF6B6B', '#4ECDC4', '#56C596']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.header}
+          >
+            <View style={styles.headerContent}>
+              <View style={styles.headerIconCircle}>
+                <Image
+                  source={require('@/assets/images/icon.png')}
+                  style={styles.headerLogo}
+                  contentFit="cover"
+                />
+              </View>
+              <ThemedText style={styles.headerTitle}>
+                {userName ? `Hi, ${userName}!` : 'Learn With Fun!'}
+              </ThemedText>
+              <ThemedText style={styles.headerSubtitle}>
+                {userName ? 'Ready to learn today?' : 'Choose a subject to start'}
+              </ThemedText>
+              <TouchableOpacity
+                style={styles.changeNameButton}
+                onPress={() => {
+                  soundManager.playSound('click');
+                  router.push({ pathname: '/welcome', params: { edit: '1' } });
+                }}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="pencil" size={16} color="#FFFFFF" />
+                <ThemedText style={styles.changeNameText}>{userName ? 'Change name' : 'Add your name'}</ThemedText>
+              </TouchableOpacity>
             </View>
-            <ThemedText style={styles.headerTitle}>
-              {userName ? `Hi, ${userName}!` : 'Learn With Fun!'}
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              {userName ? 'Ready to learn today?' : 'Choose a subject to start'}
-            </ThemedText>
-          </View>
 
-          <View style={styles.headerDecoration}>
-            <View style={styles.decorativeCircleSmall} />
-            <View style={styles.decorativeCircleLarge} />
-          </View>
-        </LinearGradient>
-      </Animated.View>
-
-      <LearningBuddy 
-        message={userName 
-          ? `Great to see you, ${userName}! Ready for some fun games?` 
-          : "Hi! I'm your learning buddy! Pick a subject to start playing!"
-        }
-        buddy="robot"
-      />
-
-      <View style={styles.cardsContainer}>
-        {subjects.map((subject, index) => (
-          <AnimatedCard key={subject.id} subject={subject} index={index} />
-        ))}
-      </View>
-    </ScrollView>
+            <View style={styles.headerDecoration}>
+              <View style={styles.decorativeCircleSmall} />
+              <View style={styles.decorativeCircleLarge} />
+            </View>
+          </LinearGradient>
+        </Animated.View>
+  
+        <LearningBuddy 
+          message={userName 
+            ? `Great to see you, ${userName}! Ready for some fun games?` 
+            : "Hi! I'm your learning buddy! Pick a subject to start playing!"
+          }
+          buddy="robot"
+        />
+  
+        <View style={styles.cardsContainer}>
+          {subjects.map((subject, index) => (
+            <AnimatedCard key={subject.id} subject={subject} index={index} />
+          ))}
+        </View>
+      </ScrollView>
+      <AdBanner />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFF9E6',
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFF9E6',
@@ -240,6 +260,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     overflow: 'visible',
+  },
+  changeNameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  changeNameText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   headerTitle: {
     fontSize: 36,

@@ -3,6 +3,8 @@ import { StyleSheet, View, TouchableOpacity, Modal, Share } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { PersonalBestBadge } from '@/components/personal-best-badge';
 import { GameTracker } from '@/utils/game-tracker';
+import { AdBanner } from '@/components/ad-banner';
+import { recordGameCompleted, showInterstitialIfDue } from '@/utils/ads';
 import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
@@ -64,6 +66,7 @@ export function GameResultsModal({
         timestamp: Date.now(),
         completedSuccessfully: correctAnswers > 0,
       });
+      recordGameCompleted();
       setDataSaved(true);
     }
     
@@ -222,6 +225,7 @@ export function GameResultsModal({
                 onPress={() => {
                   soundManager.playSound('click');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  showInterstitialIfDue();
                   onRestart();
                 }}
               >
@@ -234,6 +238,7 @@ export function GameResultsModal({
                 onPress={() => {
                   soundManager.playSound('whoosh');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  showInterstitialIfDue();
                   onHome();
                 }}
               >
@@ -248,6 +253,7 @@ export function GameResultsModal({
                   style={[styles.button, styles.nextButton, { borderColor: color }]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    showInterstitialIfDue();
                     onNextGame();
                   }}
                 >
@@ -273,6 +279,8 @@ export function GameResultsModal({
                  'Take your time and read each question carefully!'}
               </ThemedText>
             </View>
+
+            <AdBanner variant="compact" style={styles.adBanner} />
           </View>
         </Animated.View>
       </View>
@@ -281,6 +289,9 @@ export function GameResultsModal({
 }
 
 const styles = StyleSheet.create({
+  adBanner: {
+    marginTop: 20,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',

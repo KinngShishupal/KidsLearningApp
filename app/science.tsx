@@ -1,3 +1,4 @@
+import { AdBanner } from '@/components/ad-banner';
 import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
 import { Confetti } from '@/components/confetti';
@@ -848,6 +849,7 @@ export default function ScienceScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <AdBanner />
     </View>
   );
 }
