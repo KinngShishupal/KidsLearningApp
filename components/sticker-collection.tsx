@@ -6,6 +6,7 @@ import Animated, {
   withSpring,
   withRepeat,
   withSequence,
+  withDelay,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 
@@ -26,7 +27,7 @@ function AnimatedSticker({ sticker, index }: { sticker: Sticker; index: number }
 
   useEffect(() => {
     if (sticker.earned) {
-      scale.value = withSpring(1, { damping: 10, delay: index * 100 });
+      scale.value = withDelay(index * 100, withSpring(1, { damping: 10 }));
       rotate.value = withRepeat(
         withSequence(
           withSpring(5, { damping: 8 }),

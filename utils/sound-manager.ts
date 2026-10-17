@@ -1,14 +1,14 @@
-import { Audio } from 'expo-av';
+import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 
 class SoundManager {
-  private sounds: { [key: string]: Audio.Sound | null } = {};
+  private sounds: { [key: string]: AudioPlayer | null } = {};
   private isEnabled: boolean = true;
 
   async initialize() {
     try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
       });
     } catch (error) {
       console.error('Error initializing audio:', error);
@@ -30,16 +30,16 @@ class SoundManager {
       }
 
       console.log('Creating sound from source:', soundType);
-      const { sound } = await Audio.Sound.createAsync(
-        source,
-        { shouldPlay: true, volume: 0.8 },
-        (status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            console.log('Sound finished playing:', soundType);
-            sound.unloadAsync();
-          }
+      const sound = createAudioPlayer(source);
+      sound.volume = 0.8;
+      const subscription = sound.addListener('playbackStatusUpdate', (status) => {
+        if (status.didJustFinish) {
+          console.log('Sound finished playing:', soundType);
+          subscription.remove();
+          sound.remove();
         }
-      );
+      });
+      sound.play();
       console.log('Sound created and should be playing:', soundType);
     } catch (error) {
       console.error('Error playing sound:', soundType, error);
@@ -84,7 +84,7 @@ class SoundManager {
     try {
       for (const key in this.sounds) {
         if (this.sounds[key]) {
-          await this.sounds[key]?.unloadAsync();
+          this.sounds[key]?.remove();
           this.sounds[key] = null;
         }
       }

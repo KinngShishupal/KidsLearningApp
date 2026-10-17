@@ -1429,15 +1429,6 @@ const styles = StyleSheet.create({
     borderColor: '#E8F8F5',
     overflow: 'visible',
   },
-  natureButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    gap: 16,
-    minHeight: 70,
-  },
   natureIconBox: {
     width: 44,
     height: 44,

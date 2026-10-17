@@ -3,7 +3,7 @@ import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -146,7 +146,7 @@ export function TimedQuiz({
 
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
-          let buttonStyle = [styles.optionButton];
+          let buttonStyle: StyleProp<ViewStyle>[] = [styles.optionButton];
           if (answered && option === currentQuestion.correctAnswer) {
             buttonStyle.push(styles.correctButton);
           } else if (answered && option === selectedAnswer && option !== currentQuestion.correctAnswer) {

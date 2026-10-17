@@ -8,8 +8,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "learnwithfun",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "privacy": "public",
     "primaryColor": "#FFF9E6",
     "ios": {
       "supportsTablet": true
@@ -42,7 +40,6 @@
         "READ_SMS",
         "SEND_SMS"
       ],
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -62,7 +59,14 @@
             "backgroundColor": "#FFF9E6"
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-sharing",
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-audio",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

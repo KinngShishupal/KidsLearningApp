@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from 'expo-audio';
 import Animated, {
   Easing,
   interpolate,
@@ -30,7 +30,7 @@ export function LearningBuddy({
 }: LearningBuddyProps) {
   const [currentMood, setCurrentMood] = useState(mood);
   const [tapCount, setTapCount] = useState(0);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const sound = useAudioPlayer(require('@/assets/sounds/no.mp3'));
   
   const bounce = useSharedValue(0);
   const rotate = useSharedValue(0);
@@ -65,38 +65,6 @@ export function LearningBuddy({
   };
 
   const celebrationEmojis = ['✨', '🎉', '🌟', '💫', '🎊'];
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadSound = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-        
-        const { sound: loadedSound } = await Audio.Sound.createAsync(
-          require('@/assets/sounds/no.mp3')
-        );
-        
-        if (isMounted) {
-          setSound(loadedSound);
-        }
-      } catch (error) {
-        console.log('Error loading sound:', error);
-      }
-    };
-
-    loadSound();
-
-    return () => {
-      isMounted = false;
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, []);
 
   useEffect(() => {
     speechBubbleScale.value = withSpring(1, { damping: 12, stiffness: 100 });
@@ -229,12 +197,11 @@ export function LearningBuddy({
   }, [currentMood]);
 
   const playSound = async () => {
-    if (sound) {
-      try {
-        await sound.replayAsync();
-      } catch (error) {
-        console.log('Error playing sound:', error);
-      }
+    try {
+      await sound.seekTo(0);
+      sound.play();
+    } catch (error) {
+      console.log('Error playing sound:', error);
     }
   };
 

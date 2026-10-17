@@ -24,7 +24,7 @@ interface MemoryGameProps {
   cards: string[];
   onComplete: () => void;
   cardBackColor?: string;
-  cardFrontColors?: string[];
+  cardFrontColors?: readonly [string, string, ...string[]];
 }
 
 export function MemoryGame({ 
@@ -155,7 +155,7 @@ function MemoryCard({
   matched: boolean; 
   onPress: () => void;
   backColor: string;
-  frontColors: string[];
+  frontColors: readonly [string, string, ...string[]];
 }) {
   const rotateValue = useSharedValue(0);
   const scale = useSharedValue(1);

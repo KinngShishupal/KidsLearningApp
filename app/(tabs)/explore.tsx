@@ -7,7 +7,7 @@ import { GameTracker, GameStats, GameResult } from '@/utils/game-tracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useState, useEffect } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router/react-navigation';
 import { useCallback } from 'react';
 
 const USER_NAME_KEY = '@learn_with_fun_username';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PatternCelebration } from '@/components/pattern-celebration';
@@ -209,7 +209,7 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
 
       <View style={styles.optionsContainer}>
         {pattern.options.map((option, index) => {
-          let buttonStyle = [styles.optionButton];
+          let buttonStyle: StyleProp<ViewStyle>[] = [styles.optionButton];
           if (selectedAnswer === option) {
             if (option === pattern.sequence[pattern.missingIndex]) {
               buttonStyle.push(styles.correctOption);
