@@ -1295,9 +1295,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   numberDisplayText: {
-    fontSize: 48,
+    fontSize: 44,
+    lineHeight: 54,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   questionMarkBubble: {
     backgroundColor: '#FFE5E5',
@@ -1311,9 +1314,12 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   questionMarkText: {
-    fontSize: 48,
+    fontSize: 44,
+    lineHeight: 54,
     fontWeight: 'bold',
     color: '#FF6B6B',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   wordOptionButton: {
     backgroundColor: '#FFFFFF',

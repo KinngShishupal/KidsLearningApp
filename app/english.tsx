@@ -170,7 +170,6 @@ export default function EnglishScreen() {
 
   const [spellingRound, setSpellingRound] = useState(drawSpellingRound);
   const spellingGame = spellingRound[spellingQuestionIndex];
-  const [showSpellingHint, setShowSpellingHint] = useState(false);
 
   const [rhymingRound, setRhymingRound] = useState(() =>
     pickRandomQuestions(RHYMING_POOL, RHYMING_ROUND_LENGTH)
@@ -209,7 +208,6 @@ export default function EnglishScreen() {
       setSpellingRound(round);
       setSpellingQuestionIndex(0);
       setSpellingInput([]);
-      setShowSpellingHint(false);
       setSpellingTimeLeft(round[0].time);
       setSpellingTimerActive(true);
     } else if (gameId === 'rhyming') {
@@ -330,7 +328,6 @@ export default function EnglishScreen() {
         if (spellingQuestionIndex < spellingRound.length - 1) {
           setSpellingQuestionIndex(spellingQuestionIndex + 1);
           setSpellingInput([]);
-          setShowSpellingHint(false);
           setSpellingTimeLeft(spellingRound[spellingQuestionIndex + 1].time);
           setSpellingTimerActive(true);
         } else {
@@ -635,24 +632,6 @@ export default function EnglishScreen() {
         </ThemedText>
       </View>
 
-      {!showSpellingHint ? (
-        <TouchableOpacity 
-          style={styles.hintButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowSpellingHint(true);
-          }}
-        >
-          <MaterialCommunityIcons name="lightbulb-outline" size={18} color="#56C596" />
-          <ThemedText style={[styles.hintButtonText, { color: '#56C596' }]}>Need a Hint?</ThemedText>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.spellingHintCard}>
-          <MaterialCommunityIcons name="lightbulb-on" size={20} color="#FFD93D" />
-          <ThemedText style={styles.spellingHintText}>{spellingGame.hint}</ThemedText>
-        </View>
-      )}
-
       <ThemedText style={styles.instructionText}>Tap letters to spell the word:</ThemedText>
       <View style={styles.spellingWordContainer}>
         {spellingInput.map((letter, index) => (
@@ -945,7 +924,6 @@ export default function EnglishScreen() {
     setSpellingQuestionIndex(0);
     setSpellingTimeLeft(newSpellingRound[0].time);
     setSpellingTimerActive(true);
-    setShowSpellingHint(false);
     setAlphabetQuizIndex(0);
     setAlphabetQuizAnswered(false);
     setAlphabetMode('explore');
@@ -1485,44 +1463,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 12,
     lineHeight: 20,
-  },
-  spellingHintCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#FFF9E6',
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 12,
-    borderWidth: 2,
-    borderColor: '#FFD93D',
-  },
-  spellingHintText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  hintButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    marginTop: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    borderWidth: 2,
-    borderColor: '#E8F8E8',
-  },
-  hintButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   alphabetScroll: {
     width: '100%',

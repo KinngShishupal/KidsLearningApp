@@ -38,7 +38,6 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B', hintsEnab
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
@@ -97,7 +96,6 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B', hintsEnab
         if (currentPattern < patterns.length - 1) {
           setCurrentPattern(currentPattern + 1);
           setSelectedAnswer(null);
-          setShowHint(false);
         } else {
           onComplete(newScore, newCorrectCount);
         }
@@ -183,27 +181,6 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B', hintsEnab
           </View>
         </View>
 
-        {pattern.hint && !selectedAnswer && (
-          <TouchableOpacity 
-            style={styles.hintButton}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setShowHint(!showHint);
-            }}
-          >
-            <MaterialCommunityIcons name={showHint ? "lightbulb-on" : "lightbulb-outline"} size={20} color={color} />
-            <ThemedText style={[styles.hintButtonText, { color }]}>
-              {showHint ? 'Hide Hint' : 'Need a Hint?'}
-            </ThemedText>
-          </TouchableOpacity>
-        )}
-
-        {showHint && pattern.hint && (
-          <View style={[styles.hintCard, { backgroundColor: color + '10', borderColor: color }]}>
-            <MaterialCommunityIcons name="lightbulb-on" size={20} color="#FFD93D" />
-            <ThemedText style={styles.hintText}>{pattern.hint}</ThemedText>
-          </View>
-        )}
       </View>
 
       {showExplanation && (
@@ -383,40 +360,6 @@ const styles = StyleSheet.create({
   },
   arrowIcon: {
     opacity: 0.5,
-  },
-  hintButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    marginTop: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  hintButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  hintCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 12,
-    borderWidth: 2,
-  },
-  hintText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
   },
   explanationCard: {
     flexDirection: 'row',

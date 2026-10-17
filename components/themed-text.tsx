@@ -17,6 +17,15 @@ export function ThemedText({
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
+  // The default type sets lineHeight 24, which clips big text (e.g. fontSize 48)
+  // on Android. Give large text without its own lineHeight one that fits.
+  const flatStyle = StyleSheet.flatten(style);
+  const fontSize = flatStyle?.fontSize;
+  const fitLineHeight =
+    fontSize && fontSize > 20 && flatStyle.lineHeight == null
+      ? { lineHeight: Math.ceil(fontSize * 1.25) }
+      : undefined;
+
   return (
     <Text
       style={[
@@ -27,6 +36,7 @@ export function ThemedText({
         type === 'subtitle' ? styles.subtitle : undefined,
         type === 'link' ? styles.link : undefined,
         style,
+        fitLineHeight,
       ]}
       {...rest}
     />
