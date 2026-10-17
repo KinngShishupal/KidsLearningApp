@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { HintButton } from '@/components/hint-button';
 import { PatternCelebration } from '@/components/pattern-celebration';
+import { pickWrongOptionsToHide } from '@/utils/hints';
 import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
@@ -27,9 +29,11 @@ interface PatternGameProps {
   patterns: Pattern[];
   onComplete: (score: number, correctAnswers: number) => void;
   color?: string;
+  /** Show the "💡 Hint" (watch a video) button above each pattern. Defaults to true. */
+  hintsEnabled?: boolean;
 }
 
-export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: PatternGameProps) {
+export function PatternGame({ patterns, onComplete, color = '#FF6B6B', hintsEnabled = true }: PatternGameProps) {
   const [currentPattern, setCurrentPattern] = useState(0);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -39,7 +43,22 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
 
+  // Video hint for one pattern only: tagged with the pattern index it belongs to,
+  // so it never carries over to the next pattern.
+  const [videoHint, setVideoHint] = useState<{ index: number; hidden: string[] } | null>(null);
+
   const pattern = patterns[currentPattern];
+  const correctOption = pattern.sequence[pattern.missingIndex];
+  const videoHintUsed = videoHint?.index === currentPattern;
+  const hiddenOptions = videoHint && videoHintUsed ? videoHint.hidden : [];
+
+  const revealVideoHint = () => {
+    setVideoHint({
+      index: currentPattern,
+      hidden: pickWrongOptionsToHide(pattern.options, (opt) => opt === correctOption),
+    });
+  };
+
   const pulseAnimation = useSharedValue(1);
 
   useEffect(() => {
@@ -113,6 +132,14 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
           <ThemedText style={styles.categoryText}>Pattern</ThemedText>
         </View>
       </View>
+
+      {hintsEnabled && (
+        <HintButton
+          used={videoHintUsed}
+          disabled={selectedAnswer !== null}
+          onReveal={revealVideoHint}
+        />
+      )}
 
       <View style={[styles.questionCard, { borderColor: color + '40' }]}>
         <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
@@ -210,6 +237,10 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
       <View style={styles.optionsContainer}>
         {pattern.options.map((option, index) => {
           let buttonStyle: StyleProp<ViewStyle>[] = [styles.optionButton];
+          const isHidden = hiddenOptions.includes(option);
+          if (isHidden) {
+            buttonStyle.push(styles.hiddenOption);
+          }
           if (selectedAnswer === option) {
             if (option === pattern.sequence[pattern.missingIndex]) {
               buttonStyle.push(styles.correctOption);
@@ -223,7 +254,7 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B' }: Pattern
               key={index}
               style={buttonStyle}
               onPress={() => handleAnswer(option)}
-              disabled={selectedAnswer !== null}
+              disabled={selectedAnswer !== null || isHidden}
             >
               <ThemedText style={styles.optionText}>{option}</ThemedText>
               {selectedAnswer === option && option === pattern.sequence[pattern.missingIndex] && (
@@ -492,6 +523,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     position: 'relative',
+  },
+  hiddenOption: {
+    opacity: 0.25,
   },
   correctOption: {
     backgroundColor: '#4CAF50',

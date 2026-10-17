@@ -3,6 +3,7 @@ import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
+import { HintButton } from '@/components/hint-button';
 import { MemoryGame } from '@/components/memory-game';
 import { PatternGame } from '@/components/pattern-game';
 import { QuestionTimer } from '@/components/question-timer';
@@ -20,13 +21,14 @@ import {
   SPEED_MATH_POOL,
   SPEED_MATH_ROUND_LENGTH,
 } from '@/data/questions/math';
+import { pickWrongOptionsToHide } from '@/utils/hints';
 import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function MathScreen() {
@@ -56,6 +58,12 @@ export default function MathScreen() {
   const [additionTimeLeft, setAdditionTimeLeft] = useState(15);
   const [matchingTimeLeft, setMatchingTimeLeft] = useState(12);
   const [timerActive, setTimerActive] = useState(true);
+
+  // Video hint for the counting / addition / matching games. It is tagged with the
+  // question it belongs to (game + round + question index), so it never carries over.
+  const [hint, setHint] = useState<{ key: string; hidden: (number | string)[] } | null>(null);
+  // Whether opening the hint prompt actually stopped a running countdown.
+  const hintPausedTimer = useRef(false);
 
   // Each game plays a random round drawn from its 50-question pool (see data/questions/math.ts).
   const [countingRound, setCountingRound] = useState(() => pickRandomQuestions(COUNTING_POOL, COUNTING_ROUND_LENGTH));
@@ -136,6 +144,42 @@ export default function MathScreen() {
   }, [selectedGame, matchingQuestionIndex, timerActive, matchingAnswer]);
 
   const matchingGame = matchingRound[matchingQuestionIndex];
+
+  const hintQuestionIndex =
+    selectedGame === 'counting'
+      ? countingQuestionIndex
+      : selectedGame === 'addition'
+        ? additionQuestionIndex
+        : matchingQuestionIndex;
+  const hintKey = `${selectedGame}-${gameKey}-${hintQuestionIndex}`;
+  const hintUsed = hint?.key === hintKey;
+  const hiddenOptions = hint && hintUsed ? hint.hidden : [];
+
+  // Freeze the countdown while the hint prompt / video is up; the time left is kept.
+  const pauseForHint = () => {
+    hintPausedTimer.current = timerActive;
+    if (timerActive) setTimerActive(false);
+  };
+
+  // Restart the countdown from where it stopped (only if the prompt stopped it).
+  const resumeAfterHint = () => {
+    if (hintPausedTimer.current) {
+      hintPausedTimer.current = false;
+      setTimerActive(true);
+    }
+  };
+
+  const renderHintButton = <T extends number | string>(answered: boolean, options: readonly T[], correct: T) => (
+    <HintButton
+      used={hintUsed}
+      disabled={answered}
+      onPause={pauseForHint}
+      onResume={resumeAfterHint}
+      onReveal={() =>
+        setHint({ key: hintKey, hidden: pickWrongOptionsToHide(options, (option) => option === correct) })
+      }
+    />
+  );
 
   const games = [
     { 
@@ -306,6 +350,8 @@ export default function MathScreen() {
 
       <QuestionTimer timeLeft={countingTimeLeft} totalTime={15} color="#FF6B6B" />
 
+      {renderHintButton(countingAnswer !== null, countingGame.options, countingGame.stars)}
+
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
           <MaterialCommunityIcons name="counter" size={40} color="#FF6B6B" />
@@ -331,9 +377,10 @@ export default function MathScreen() {
             style={[
               styles.modernOptionButton,
               countingAnswer === option && (option === countingGame.stars ? styles.correctOptionButton : styles.incorrectOptionButton),
+              hiddenOptions.includes(option) && styles.hiddenOption,
             ]}
             onPress={() => handleCountingAnswer(option)}
-            disabled={countingAnswer !== null}
+            disabled={countingAnswer !== null || hiddenOptions.includes(option)}
           >
             <ThemedText style={[
               styles.modernOptionText,
@@ -360,6 +407,8 @@ export default function MathScreen() {
       </View>
 
       <QuestionTimer timeLeft={additionTimeLeft} totalTime={15} color="#FF6B6B" />
+
+      {renderHintButton(additionAnswer !== null, additionGame.options, additionGame.answer)}
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
@@ -392,9 +441,10 @@ export default function MathScreen() {
             style={[
               styles.modernOptionButton,
               additionAnswer === option && (option === additionGame.answer ? styles.correctOptionButton : styles.incorrectOptionButton),
+              hiddenOptions.includes(option) && styles.hiddenOption,
             ]}
             onPress={() => handleAdditionAnswer(option)}
-            disabled={additionAnswer !== null}
+            disabled={additionAnswer !== null || hiddenOptions.includes(option)}
           >
             <ThemedText style={[
               styles.modernOptionText,
@@ -460,6 +510,8 @@ export default function MathScreen() {
 
       <QuestionTimer timeLeft={matchingTimeLeft} totalTime={12} color="#FF6B6B" />
 
+      {renderHintButton(matchingAnswer !== null, matchingGame.options, matchingGame.word)}
+
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#FFE5E5' }]}>
           <MaterialCommunityIcons name="link-variant" size={40} color="#FF6B6B" />
@@ -485,9 +537,10 @@ export default function MathScreen() {
             style={[
               styles.wordOptionButton,
               matchingAnswer === option && (option === matchingGame.word ? styles.correctWordButton : styles.incorrectWordButton),
+              hiddenOptions.includes(option) && styles.hiddenOption,
             ]}
             onPress={() => handleMatchingAnswer(option)}
-            disabled={matchingAnswer !== null}
+            disabled={matchingAnswer !== null || hiddenOptions.includes(option)}
           >
             <ThemedText style={[
               styles.wordOptionText,
@@ -649,6 +702,7 @@ export default function MathScreen() {
   const handleGoHome = () => {
     setShowResultsModal(false);
     setSelectedGame(null);
+    setHint(null);
     setScore(0);
     setCountingQuestionIndex(0);
     setAdditionQuestionIndex(0);
@@ -1132,6 +1186,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 12,
+  },
+  hiddenOption: {
+    opacity: 0.25,
   },
   modernOptionButton: {
     backgroundColor: '#FFFFFF',

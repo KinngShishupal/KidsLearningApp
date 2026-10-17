@@ -3,6 +3,7 @@ import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
+import { HintButton } from '@/components/hint-button';
 import { LearningBuddy } from '@/components/learning-buddy';
 import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
@@ -18,6 +19,7 @@ import {
   SCIENCE_POOL,
   SCIENCE_ROUND_LENGTH,
 } from '@/data/questions/science';
+import { pickWrongOptionsToHide } from '@/utils/hints';
 import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -59,6 +61,9 @@ export default function ScienceScreen() {
   const [planetRound, setPlanetRound] = useState(() => pickRandomQuestions(PLANET_POOL, PLANET_ROUND_LENGTH));
   const [natureRound, setNatureRound] = useState(() => pickRandomQuestions(NATURE_POOL, NATURE_ROUND_LENGTH));
   const [scienceRound, setScienceRound] = useState(() => pickRandomQuestions(SCIENCE_POOL, SCIENCE_ROUND_LENGTH));
+  // Hint for the current question. It is tied to one round + question index, so it resets
+  // by itself whenever the question changes or a new round is drawn (restart / new game).
+  const [hint, setHint] = useState<{ round: readonly unknown[]; index: number; hidden: string[] } | null>(null);
 
   // Draw a fresh random round for every quiz game; called whenever a game starts or restarts.
   const drawNewRounds = () => {
@@ -142,6 +147,46 @@ export default function ScienceScreen() {
 
   const natureQuiz = natureRound[natureQuestionIndex];
   const timerProgress = useSharedValue(100);
+
+  // Options the hint hid for the current question (null when no hint was used for it).
+  const getHiddenOptions = (round: readonly unknown[], index: number) =>
+    hint && hint.round === round && hint.index === index ? hint.hidden : null;
+  const animalHidden = getHiddenOptions(animalRound, animalQuestionIndex);
+  const planetHidden = getHiddenOptions(planetRound, planetQuestionIndex);
+  const natureHidden = getHiddenOptions(natureRound, natureQuestionIndex);
+
+  // Nature is multi-select: keep at least one wrong option visible so it stays a puzzle.
+  const natureWrongCount = natureQuiz.options.filter(o => !o.correct).length;
+  const natureHideCount = Math.max(0, Math.min(2, natureWrongCount - 1));
+  const natureCorrectCount = natureQuiz.options.filter(o => o.correct).length;
+  const natureQuestionDone =
+    Array.from(natureSelectedAnswers).some(idx => !natureQuiz.options[idx].correct) ||
+    Array.from(natureSelectedAnswers).filter(idx => natureQuiz.options[idx].correct).length === natureCorrectCount;
+
+  // The hint prompt pauses the countdown; resuming continues from the same second
+  // (timeLeft is untouched) and never restarts a question that is already over.
+  const pauseQuizTimer = () => setTimerActive(false);
+  const resumeQuizTimer = () => {
+    if (selectedAnswer === null && !showResultsModal) setTimerActive(true);
+  };
+  const pauseNatureTimer = () => setNatureTimerActive(false);
+  const resumeNatureTimer = () => {
+    if (!natureQuestionDone && !showResultsModal) setNatureTimerActive(true);
+  };
+
+  const revealAnimalHint = () => {
+    const hidden = pickWrongOptionsToHide(animalQuiz.options, o => o === animalQuiz.answer);
+    setHint({ round: animalRound, index: animalQuestionIndex, hidden });
+  };
+  const revealPlanetHint = () => {
+    const hidden = pickWrongOptionsToHide(planetQuiz.options, o => o.name === planetQuiz.answer).map(o => o.name);
+    setHint({ round: planetRound, index: planetQuestionIndex, hidden });
+  };
+  const revealNatureHint = () => {
+    const hidden = pickWrongOptionsToHide(natureQuiz.options, o => o.correct, 2, 1)
+      .map(o => String(natureQuiz.options.indexOf(o)));
+    setHint({ round: natureRound, index: natureQuestionIndex, hidden });
+  };
 
   useEffect(() => {
     if (selectedGame === 'nature') {
@@ -316,6 +361,16 @@ export default function ScienceScreen() {
 
       <QuestionTimer timeLeft={animalTimeLeft} totalTime={15} color="#4ECDC4" />
 
+      <View style={styles.hintSlot}>
+        <HintButton
+          used={animalHidden !== null}
+          disabled={selectedAnswer !== null}
+          onPause={pauseQuizTimer}
+          onResume={resumeQuizTimer}
+          onReveal={revealAnimalHint}
+        />
+      </View>
+
       <View style={styles.questionCard}>
         {/* <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
           <MaterialCommunityIcons name="paw" size={40} color="#4ECDC4" />
@@ -335,9 +390,10 @@ export default function ScienceScreen() {
             style={[
               styles.modernSoundButton,
               selectedAnswer === option && (option === animalQuiz.answer ? styles.correctSoundButton : styles.incorrectSoundButton),
+              animalHidden?.includes(option) && styles.hiddenOption,
             ]}
             onPress={() => handleAnimalAnswer(option)}
-            disabled={selectedAnswer !== null}
+            disabled={selectedAnswer !== null || !!animalHidden?.includes(option)}
           >
             <MaterialCommunityIcons 
               name="volume-high" 
@@ -371,6 +427,16 @@ export default function ScienceScreen() {
 
       <QuestionTimer timeLeft={planetTimeLeft} totalTime={12} color="#4ECDC4" />
 
+      <View style={styles.hintSlot}>
+        <HintButton
+          used={planetHidden !== null}
+          disabled={selectedAnswer !== null}
+          onPause={pauseQuizTimer}
+          onResume={resumeQuizTimer}
+          onReveal={revealPlanetHint}
+        />
+      </View>
+
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
           <MaterialCommunityIcons name="space-station" size={40} color="#4ECDC4" />
@@ -385,9 +451,10 @@ export default function ScienceScreen() {
               styles.planetButton,
               { backgroundColor: planet.color },
               selectedAnswer === planet.name && styles.selectedPlanetButton,
+              planetHidden?.includes(planet.name) && styles.hiddenOption,
             ]}
             onPress={() => handlePlanetAnswer(planet.name)}
-            disabled={selectedAnswer !== null}
+            disabled={selectedAnswer !== null || !!planetHidden?.includes(planet.name)}
           >
             <View style={styles.planetEmojiContainer}>
               <ThemedText style={styles.planetEmoji}>{planet.emoji}</ThemedText>
@@ -476,9 +543,22 @@ export default function ScienceScreen() {
             styles.timerProgressBar, 
             { backgroundColor: natureTimeLeft <= 3 ? "#F44336" : "#4ECDC4" },
             timerProgressStyle
-          ]} 
+          ]}
         />
       </View>
+
+      {natureHideCount > 0 && (
+        <View style={styles.hintSlot}>
+          <HintButton
+            used={natureHidden !== null}
+            disabled={natureQuestionDone}
+            description={natureHideCount === 1 ? 'One wrong answer will disappear!' : 'Two wrong answers will disappear!'}
+            onPause={pauseNatureTimer}
+            onResume={resumeNatureTimer}
+            onReveal={revealNatureHint}
+          />
+        </View>
+      )}
 
       <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8F5' }]}>
@@ -495,7 +575,8 @@ export default function ScienceScreen() {
         {natureQuiz.options.map((option, index) => {
           const isSelected = natureSelectedAnswers.has(index);
           const isCorrect = option.correct;
-          
+          const isHidden = !!natureHidden?.includes(String(index));
+
           return (
             <TouchableOpacity
               key={index}
@@ -503,9 +584,10 @@ export default function ScienceScreen() {
                 styles.natureButton,
                 isSelected && isCorrect && styles.correctNature,
                 isSelected && !isCorrect && styles.incorrectNature,
+                isHidden && styles.hiddenOption,
               ]}
               onPress={() => handleNatureAnswer(index, option.correct)}
-              disabled={natureSelectedAnswers.has(index)}
+              disabled={natureSelectedAnswers.has(index) || isHidden}
               activeOpacity={0.8}
             >
               <View style={styles.natureButtonContent}>
@@ -1423,5 +1505,11 @@ const styles = StyleSheet.create({
   timerProgressBar: {
     height: '100%',
     borderRadius: 5,
+  },
+  hintSlot: {
+    marginTop: 12,
+  },
+  hiddenOption: {
+    opacity: 0.25,
   },
 });

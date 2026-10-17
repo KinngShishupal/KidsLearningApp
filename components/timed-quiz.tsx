@@ -1,4 +1,6 @@
+import { HintButton } from '@/components/hint-button';
 import { ThemedText } from '@/components/themed-text';
+import { pickWrongOptionsToHide } from '@/utils/hints';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -22,13 +24,16 @@ interface TimedQuizProps {
   timePerQuestion?: number;
   onComplete: (score: number, correctAnswers: number) => void;
   color?: string;
+  /** Show the "💡 Hint" button above each question. Defaults to true. */
+  hintsEnabled?: boolean;
 }
 
-export function TimedQuiz({ 
-  questions, 
-  timePerQuestion = 15, 
+export function TimedQuiz({
+  questions,
+  timePerQuestion = 15,
   onComplete,
-  color = '#FF6B6B' 
+  color = '#FF6B6B',
+  hintsEnabled = true,
 }: TimedQuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -36,11 +41,16 @@ export function TimedQuiz({
   const [timeLeft, setTimeLeft] = useState(timePerQuestion);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  // True while the hint prompt / rewarded video is on screen; freezes the countdown.
+  const [paused, setPaused] = useState(false);
+  // The hint belongs to one question only: it is tagged with that question, so it
+  // can never carry over to the next one.
+  const [hint, setHint] = useState<{ key: string; hidden: string[] } | null>(null);
 
   const progressWidth = useSharedValue(100);
 
   useEffect(() => {
-    if (answered) return;
+    if (answered || paused) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -53,7 +63,7 @@ export function TimedQuiz({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex, answered]);
+  }, [currentQuestionIndex, answered, paused]);
 
   useEffect(() => {
     progressWidth.value = withTiming((timeLeft / timePerQuestion) * 100, { duration: 1000 });
@@ -106,6 +116,16 @@ export function TimedQuiz({
   };
 
   const currentQuestion = questions[currentQuestionIndex];
+  const hintKey = `${currentQuestionIndex}:${currentQuestion.question}`;
+  const hintUsed = hint?.key === hintKey;
+  const hiddenOptions = hint && hintUsed ? hint.hidden : [];
+
+  const revealHint = () => {
+    setHint({
+      key: hintKey,
+      hidden: pickWrongOptionsToHide(currentQuestion.options, (opt) => opt === currentQuestion.correctAnswer),
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -132,6 +152,16 @@ export function TimedQuiz({
         />
       </View>
 
+      {hintsEnabled && (
+        <HintButton
+          used={hintUsed}
+          disabled={answered}
+          onPause={() => setPaused(true)}
+          onResume={() => setPaused(false)}
+          onReveal={revealHint}
+        />
+      )}
+
       <View style={[styles.questionCard, { borderColor: color + '40' }]}>
         {currentQuestion.emoji && (
           <View style={[styles.emojiCircle, { backgroundColor: color + '15' }]}>
@@ -147,6 +177,10 @@ export function TimedQuiz({
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
           let buttonStyle: StyleProp<ViewStyle>[] = [styles.optionButton];
+          const isHidden = hiddenOptions.includes(option);
+          if (isHidden) {
+            buttonStyle.push(styles.hiddenOption);
+          }
           if (answered && option === currentQuestion.correctAnswer) {
             buttonStyle.push(styles.correctButton);
           } else if (answered && option === selectedAnswer && option !== currentQuestion.correctAnswer) {
@@ -158,7 +192,7 @@ export function TimedQuiz({
               key={index}
               style={buttonStyle}
               onPress={() => handleAnswer(option)}
-              disabled={answered}
+              disabled={answered || isHidden}
             >
               <ThemedText style={[
                 styles.optionText,
@@ -311,6 +345,9 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     maxWidth: '48%',
+  },
+  hiddenOption: {
+    opacity: 0.25,
   },
   correctButton: {
     backgroundColor: '#4CAF50',

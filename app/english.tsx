@@ -3,6 +3,7 @@ import { AnswerFeedback } from '@/components/answer-feedback';
 import { Celebration } from '@/components/celebration';
 import { Confetti } from '@/components/confetti';
 import { GameResultsModal } from '@/components/game-results-modal';
+import { HintButton } from '@/components/hint-button';
 import { MemoryGame } from '@/components/memory-game';
 import { QuestionTimer } from '@/components/question-timer';
 import { ThemedText } from '@/components/themed-text';
@@ -17,6 +18,7 @@ import {
   VOCABULARY_POOL,
   VOCABULARY_ROUND_LENGTH,
 } from '@/data/questions/english';
+import { pickWrongOptionsToHide } from '@/utils/hints';
 import { pickRandomQuestions } from '@/utils/question-pool';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -175,6 +177,27 @@ export default function EnglishScreen() {
   );
   const rhymingGame = rhymingRound[rhymeQuestionIndex];
 
+  // Rewarded "💡 Hint" state. Each hint remembers which question it belongs to
+  // (round array + index), so it resets automatically whenever the question changes:
+  // next question, restart / new round (fresh round array) or switching games.
+  type HintFor<T> = { round: readonly unknown[]; index: number; value: T } | null;
+  const [alphabetHint, setAlphabetHint] = useState<HintFor<string[]>>(null);
+  const [spellingHint, setSpellingHint] = useState<HintFor<true>>(null);
+  const [rhymeHint, setRhymeHint] = useState<HintFor<string[]>>(null);
+  // True while the hint prompt / video is on screen. Countdowns don't tick while it is set,
+  // and clearing it never re-activates a timer that stopped because the question ended.
+  const [hintPaused, setHintPaused] = useState(false);
+  const pauseForHint = () => setHintPaused(true);
+  const resumeAfterHint = () => setHintPaused(false);
+
+  const alphabetHintUsed =
+    alphabetHint?.round === alphabetQuizRound && alphabetHint.index === alphabetQuizIndex;
+  const alphabetHiddenOptions = alphabetHintUsed ? alphabetHint.value : [];
+  const spellingHintUsed =
+    spellingHint?.round === spellingRound && spellingHint.index === spellingQuestionIndex;
+  const rhymeHintUsed = rhymeHint?.round === rhymingRound && rhymeHint.index === rhymeQuestionIndex;
+  const rhymeHiddenOptions = rhymeHintUsed ? rhymeHint.value : [];
+
   // Draws a fresh random round for a game and resets its progress.
   const startNewRound = (gameId: string) => {
     if (gameId === 'alphabet') {
@@ -237,7 +260,7 @@ export default function EnglishScreen() {
   };
 
   useEffect(() => {
-    if (selectedGame === 'spelling' && spellingTimerActive && spellingGame && spellingInput.length < spellingGame.word.length) {
+    if (selectedGame === 'spelling' && spellingTimerActive && !hintPaused && spellingGame && spellingInput.length < spellingGame.word.length) {
       const timer = setInterval(() => {
         setSpellingTimeLeft((prev) => {
           if (prev <= 1) {
@@ -253,7 +276,7 @@ export default function EnglishScreen() {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [selectedGame, spellingQuestionIndex, spellingTimerActive, spellingInput, spellingGame]);
+  }, [selectedGame, spellingQuestionIndex, spellingTimerActive, hintPaused, spellingInput, spellingGame]);
 
   useEffect(() => {
     if (selectedGame === 'rhyming') {
@@ -264,7 +287,7 @@ export default function EnglishScreen() {
   }, [selectedGame, rhymeQuestionIndex]);
 
   useEffect(() => {
-    if (selectedGame === 'rhyming' && rhymeTimerActive && rhymingGame) {
+    if (selectedGame === 'rhyming' && rhymeTimerActive && !hintPaused && rhymingGame) {
       const timer = setInterval(() => {
         setRhymeTimeLeft((prev) => {
           if (prev <= 1) {
@@ -284,14 +307,15 @@ export default function EnglishScreen() {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [selectedGame, rhymeQuestionIndex, rhymeTimerActive, rhymeSelectedAnswers.size]);
+  }, [selectedGame, rhymeQuestionIndex, rhymeTimerActive, hintPaused, rhymeSelectedAnswers.size]);
 
-  const handleSpellingLetter = (letter: string) => {
-    if (spellingInput.length >= spellingGame.word.length) return;
-    
+  // `baseInput` lets the hint append to a corrected prefix; normal taps use the current input.
+  const handleSpellingLetter = (letter: string, baseInput: string[] = spellingInput) => {
+    if (baseInput.length >= spellingGame.word.length) return;
+
     soundManager.playSound('click');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const newInput = [...spellingInput, letter];
+    const newInput = [...baseInput, letter];
     setSpellingInput(newInput);
     
     if (newInput.join('') === spellingGame.word) {
@@ -323,6 +347,20 @@ export default function EnglishScreen() {
         setShowResultsModal(true);
       }, 1000);
     }
+  };
+
+  // Spelling hint: fill in the next correct letter, as if the child tapped the right tile.
+  // If the input already contains a wrong letter, it is trimmed back to the longest correct
+  // prefix first, so the hint always leaves the word on the right track.
+  const revealSpellingHint = () => {
+    const word = spellingGame.word;
+    let correctLength = 0;
+    while (correctLength < spellingInput.length && spellingInput[correctLength] === word[correctLength]) {
+      correctLength++;
+    }
+    if (correctLength >= word.length) return;
+    setSpellingHint({ round: spellingRound, index: spellingQuestionIndex, value: true });
+    handleSpellingLetter(word[correctLength], spellingInput.slice(0, correctLength));
   };
 
   const clearSpelling = () => {
@@ -392,7 +430,10 @@ export default function EnglishScreen() {
       <View style={styles.modeSelector}>
         <TouchableOpacity
           style={[styles.modeButton, alphabetMode === 'explore' && styles.modeButtonActive]}
-          onPress={() => setAlphabetMode('explore')}
+          onPress={() => {
+            setAlphabetHint(null);
+            setAlphabetMode('explore');
+          }}
         >
           <MaterialCommunityIcons name="book-open-page-variant" size={20} color={alphabetMode === 'explore' ? '#FFFFFF' : '#56C596'} />
           <ThemedText style={[styles.modeButtonText, alphabetMode === 'explore' && styles.modeButtonTextActive]}>
@@ -405,6 +446,7 @@ export default function EnglishScreen() {
             if (alphabetMode !== 'quiz' && alphabetQuizIndex === 0 && !alphabetQuizAnswered) {
               startNewRound('alphabet');
             }
+            setAlphabetHint(null);
             setAlphabetMode('quiz');
           }}
         >
@@ -473,6 +515,17 @@ export default function EnglishScreen() {
     
     return (
       <View style={styles.quizContentContainer}>
+        <HintButton
+          used={alphabetHintUsed}
+          disabled={alphabetQuizAnswered}
+          onReveal={() =>
+            setAlphabetHint({
+              round: alphabetQuizRound,
+              index: alphabetQuizIndex,
+              value: pickWrongOptionsToHide(currentQuestion.options, (emoji) => emoji === currentQuestion.answer, 2),
+            })
+          }
+        />
         <View style={styles.questionCard}>
           <ThemedText style={styles.gameQuestion}>Which picture starts with:</ThemedText>
           <View style={styles.quizLetterDisplay}>
@@ -486,25 +539,29 @@ export default function EnglishScreen() {
 
         <ThemedText style={styles.instructionText}>Tap the correct picture:</ThemedText>
         <View style={styles.quizOptionsGrid}>
-          {currentQuestion.options.map((emoji, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.emojiQuizButton,
-                alphabetQuizAnswered && emoji === currentQuestion.answer && styles.correctEmojiButton,
-                alphabetQuizAnswered && emoji !== currentQuestion.answer && styles.incorrectEmojiButton,
-              ]}
-              onPress={() => handleAlphabetQuizAnswer(emoji)}
-              disabled={alphabetQuizAnswered}
-            >
-              <ThemedText style={styles.quizEmoji}>{emoji}</ThemedText>
-              {alphabetQuizAnswered && emoji === currentQuestion.answer && (
-                <View style={styles.emojiCheckBadge}>
-                  <MaterialCommunityIcons name="check" size={20} color="#FFFFFF" />
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
+          {currentQuestion.options.map((emoji, index) => {
+            const isHidden = alphabetHiddenOptions.includes(emoji);
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.emojiQuizButton,
+                  alphabetQuizAnswered && emoji === currentQuestion.answer && styles.correctEmojiButton,
+                  alphabetQuizAnswered && emoji !== currentQuestion.answer && styles.incorrectEmojiButton,
+                  isHidden && styles.hintHiddenOption,
+                ]}
+                onPress={() => handleAlphabetQuizAnswer(emoji)}
+                disabled={alphabetQuizAnswered || isHidden}
+              >
+                <ThemedText style={styles.quizEmoji}>{emoji}</ThemedText>
+                {alphabetQuizAnswered && emoji === currentQuestion.answer && (
+                  <View style={styles.emojiCheckBadge}>
+                    <MaterialCommunityIcons name="check" size={20} color="#FFFFFF" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
     );
@@ -559,6 +616,15 @@ export default function EnglishScreen() {
       </View>
 
       <QuestionTimer timeLeft={spellingTimeLeft} totalTime={spellingGame.time} color="#56C596" />
+
+      <HintButton
+        used={spellingHintUsed}
+        disabled={!spellingTimerActive || spellingInput.length >= spellingGame.word.length}
+        description="The next letter will be filled in for you!"
+        onPause={pauseForHint}
+        onResume={resumeAfterHint}
+        onReveal={revealSpellingHint}
+      />
 
       <View style={styles.imageCard}>
         <View style={styles.emojiContainer}>
@@ -635,6 +701,12 @@ export default function EnglishScreen() {
     const selectedCorrectCount = Array.from(rhymeSelectedAnswers).filter(
       w => rhymingGame.options.find(o => o.word === w)?.rhymes
     ).length;
+    // Question is over once a wrong word was picked or every rhyme was found.
+    const rhymeAnswered =
+      selectedCorrectCount === rhymingCorrectCount ||
+      Array.from(rhymeSelectedAnswers).some(
+        w => rhymingGame.options.find(o => o.word === w)?.rhymes === false
+      );
 
     return (
       <View style={styles.gameContainer}>
@@ -652,6 +724,21 @@ export default function EnglishScreen() {
         </View>
 
         <QuestionTimer timeLeft={rhymeTimeLeft} totalTime={15} color="#56C596" />
+
+        <HintButton
+          used={rhymeHintUsed}
+          disabled={rhymeAnswered || !rhymeTimerActive}
+          description="One word that doesn't rhyme will disappear!"
+          onPause={pauseForHint}
+          onResume={resumeAfterHint}
+          onReveal={() =>
+            setRhymeHint({
+              round: rhymingRound,
+              index: rhymeQuestionIndex,
+              value: pickWrongOptionsToHide(rhymingGame.options, (o) => o.rhymes, 1).map((o) => o.word),
+            })
+          }
+        />
 
         <View style={styles.questionCard}>
         <View style={[styles.questionIconCircle, { backgroundColor: '#E8F8E8' }]}>
@@ -683,7 +770,8 @@ export default function EnglishScreen() {
         {rhymingGame.options.map((option) => {
           const isSelected = rhymeSelectedAnswers.has(option.word);
           const isCorrect = option.rhymes;
-          
+          const isHidden = rhymeHiddenOptions.includes(option.word);
+
           return (
             <TouchableOpacity
               key={option.word}
@@ -691,9 +779,10 @@ export default function EnglishScreen() {
                 styles.rhymeButton,
                 isSelected && isCorrect && styles.rhymeCorrectButton,
                 isSelected && !isCorrect && styles.rhymeIncorrectButton,
+                isHidden && styles.hintHiddenOption,
               ]}
               onPress={() => handleRhymeAnswer(option.word, option.rhymes)}
-              disabled={rhymeSelectedAnswers.has(option.word)}
+              disabled={rhymeSelectedAnswers.has(option.word) || isHidden}
               activeOpacity={0.8}
             >
               <View style={styles.rhymeButtonContent}>
@@ -865,6 +954,7 @@ export default function EnglishScreen() {
     setRhymeTimeLeft(15);
     setRhymeTimerActive(true);
     setQuizCompleted(false);
+    setHintPaused(false);
     setGameKey(gameKey + 1);
   };
 
@@ -878,6 +968,7 @@ export default function EnglishScreen() {
     setRhymeSelectedAnswers(new Set());
     setRhymeTimerActive(false);
     setQuizCompleted(false);
+    setHintPaused(false);
     setGameKey(0);
   };
 
@@ -1631,6 +1722,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     opacity: 0.6,
     borderColor: '#CCCCCC',
+  },
+  // Option removed by a hint: stays in place (no layout jump) but is faded out and untappable.
+  hintHiddenOption: {
+    opacity: 0.25,
   },
   quizEmoji: {
     fontSize: 64,
