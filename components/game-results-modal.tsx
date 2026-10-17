@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Modal, Share } from 'react-native';
+import { Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { PersonalBestBadge } from '@/components/personal-best-badge';
-import { GameTracker } from '@/utils/game-tracker';
 import { AdBanner } from '@/components/ad-banner';
+import { GameTracker } from '@/utils/game-tracker';
 import { recordGameCompleted, showInterstitialIfDue } from '@/utils/ads';
 import { soundManager } from '@/utils/sound-manager';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -28,6 +30,38 @@ interface GameResultsModalProps {
   subject?: 'math' | 'science' | 'english';
 }
 
+type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
+
+const easeOut = Easing.out(Easing.cubic);
+
+/** Headline, badge icon and encouragement for each star level (0–3). */
+const RESULT_LEVELS: { title: string; icon: IconName; message: string }[] = [
+  { title: 'Nice Try!', icon: 'heart', message: 'Every mistake helps you learn. Take your time and try again!' },
+  { title: 'Good Effort!', icon: 'thumb-up', message: "You're getting better! Play again to earn more stars." },
+  { title: 'Great Job!', icon: 'medal', message: 'Well done! One more round for all three stars?' },
+  { title: 'Amazing!', icon: 'trophy', message: "You're a superstar learner! Try the next challenge." },
+];
+
+function ResultStar({ earned, delay, size, visible }: { earned: boolean; delay: number; size: number; visible: boolean }) {
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = visible ? withDelay(delay, withTiming(1, { duration: 300, easing: easeOut })) : 0;
+  }, [visible]);
+
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View style={style}>
+      <MaterialCommunityIcons
+        name={earned ? 'star' : 'star-outline'}
+        size={size}
+        color={earned ? '#FFC93C' : '#D9D9E3'}
+      />
+    </Animated.View>
+  );
+}
+
 export function GameResultsModal({
   visible,
   score,
@@ -41,18 +75,17 @@ export function GameResultsModal({
   gameId = 'unknown',
   subject = 'math',
 }: GameResultsModalProps) {
-  const scale = useSharedValue(0);
-  const star1Scale = useSharedValue(0);
-  const star2Scale = useSharedValue(0);
-  const star3Scale = useSharedValue(0);
-  const buttonScale = useSharedValue(0);
+  const cardOpacity = useSharedValue(0);
+  const cardScale = useSharedValue(0.95);
+  const contentOpacity = useSharedValue(0);
 
   const [showPersonalBest, setShowPersonalBest] = useState(false);
   const [previousBest, setPreviousBest] = useState(0);
   const [dataSaved, setDataSaved] = useState(false);
 
-  const percentage = (correctAnswers / totalQuestions) * 100;
+  const percentage = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
   const stars = percentage >= 80 ? 3 : percentage >= 50 ? 2 : percentage >= 25 ? 1 : 0;
+  const level = RESULT_LEVELS[stars];
 
   useEffect(() => {
     if (visible && !dataSaved) {
@@ -69,11 +102,11 @@ export function GameResultsModal({
       recordGameCompleted();
       setDataSaved(true);
     }
-    
+
     if (!visible) {
       setDataSaved(false);
     }
-    
+
     if (visible && score > previousBest) {
       setShowPersonalBest(true);
       setPreviousBest(score);
@@ -85,55 +118,23 @@ export function GameResultsModal({
       const soundType = percentage >= 80 ? 'celebration' : percentage >= 50 ? 'achievement' : 'coin';
       soundManager.playSound(soundType);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
-      scale.value = withTiming(1, { duration: 200 });
 
-      star1Scale.value = withDelay(300, withTiming(1, { duration: 200 }));
-
-      if (stars >= 2) {
-        star2Scale.value = withDelay(500, withTiming(1, { duration: 200 }));
-      }
-
-      if (stars >= 3) {
-        star3Scale.value = withDelay(700, withTiming(1, { duration: 200 }));
-      }
-
-      buttonScale.value = withDelay(900, withTiming(1, { duration: 200 }));
+      cardOpacity.value = withTiming(1, { duration: 250, easing: easeOut });
+      cardScale.value = withTiming(1, { duration: 250, easing: easeOut });
+      contentOpacity.value = withDelay(700, withTiming(1, { duration: 300, easing: easeOut }));
     } else {
-      scale.value = 0;
-      star1Scale.value = 0;
-      star2Scale.value = 0;
-      star3Scale.value = 0;
-      buttonScale.value = 0;
+      cardOpacity.value = 0;
+      cardScale.value = 0.95;
+      contentOpacity.value = 0;
     }
   }, [visible, stars]);
 
-  const modalStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
   }));
 
-  const star1Style = useAnimatedStyle(() => ({
-    transform: [{ scale: star1Scale.value }],
-  }));
-
-  const star2Style = useAnimatedStyle(() => ({
-    transform: [{ scale: star2Scale.value }],
-  }));
-
-  const star3Style = useAnimatedStyle(() => ({
-    transform: [{ scale: star3Scale.value }],
-  }));
-
-  const buttonStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: buttonScale.value }],
-  }));
-
-  const getMessage = () => {
-    if (percentage >= 80) return '🎉 Amazing Work!';
-    if (percentage >= 50) return '👍 Good Job!';
-    if (percentage >= 25) return '💪 Keep Trying!';
-    return '🌟 Practice Makes Perfect!';
-  };
+  const contentStyle = useAnimatedStyle(() => ({ opacity: contentOpacity.value }));
 
   const handleShare = async () => {
     try {
@@ -146,82 +147,81 @@ export function GameResultsModal({
     }
   };
 
+  const showNext = !!onNextGame && percentage >= 50;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-    >
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
-        <Animated.View style={[styles.modalContainer, modalStyle]}>
-          <View style={[styles.modalHeader, { backgroundColor: color }]}>
-            <ThemedText style={styles.headerText}>{getMessage()}</ThemedText>
-          </View>
+        <Animated.View style={[styles.card, cardStyle]}>
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+            <LinearGradient
+              colors={[color, color + 'B3']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.header}
+            >
+              <View style={styles.headerShine} />
+              <MaterialCommunityIcons name="star-four-points" size={16} color="rgba(255, 255, 255, 0.7)" style={styles.sparkleLeft} />
+              <MaterialCommunityIcons name="star-four-points" size={12} color="rgba(255, 255, 255, 0.6)" style={styles.sparkleRight} />
 
-          <View style={styles.modalContent}>
-            <ThemedText style={styles.gameTitle}>{gameTitle}</ThemedText>
-            
-            <PersonalBestBadge show={showPersonalBest} score={score} color="#FFD93D" />
-            
-            <View style={[styles.starsCard, { backgroundColor: color + '10' }]}>
-              <View style={styles.starsContainer}>
-                <Animated.View style={star1Style}>
-                  <ThemedText style={[styles.starEmoji, stars >= 1 && styles.starEarned]}>
-                    {stars >= 1 ? '⭐' : '☆'}
-                  </ThemedText>
-                </Animated.View>
-                <Animated.View style={star2Style}>
-                  <ThemedText style={[styles.starEmoji, stars >= 2 && styles.starEarned]}>
-                    {stars >= 2 ? '⭐' : '☆'}
-                  </ThemedText>
-                </Animated.View>
-                <Animated.View style={star3Style}>
-                  <ThemedText style={[styles.starEmoji, stars >= 3 && styles.starEarned]}>
-                    {stars >= 3 ? '⭐' : '☆'}
-                  </ThemedText>
-                </Animated.View>
+              <View style={styles.badgeRing}>
+                <View style={styles.badge}>
+                  <MaterialCommunityIcons name={level.icon} size={40} color={color} />
+                </View>
               </View>
-              <ThemedText style={styles.performanceText}>
-                {percentage >= 80 ? 'Outstanding!' : 
-                 percentage >= 50 ? 'Well Done!' : 
-                 percentage >= 25 ? 'Good Effort!' : 
-                 'Keep Learning!'}
-              </ThemedText>
+              <ThemedText style={styles.title}>{level.title}</ThemedText>
+              <View style={styles.gamePill}>
+                <ThemedText style={styles.gamePillText} numberOfLines={1}>{gameTitle}</ThemedText>
+              </View>
+            </LinearGradient>
+
+            <View style={styles.starsCapsule}>
+              <ResultStar earned={stars >= 1} delay={250} size={38} visible={visible} />
+              <ResultStar earned={stars >= 2} delay={400} size={50} visible={visible} />
+              <ResultStar earned={stars >= 3} delay={550} size={38} visible={visible} />
             </View>
 
-            <View style={styles.statsContainer}>
-              <View style={[styles.statBox, { backgroundColor: color + '15' }]}>
-                <ThemedText style={styles.statEmoji}>🎯</ThemedText>
-                <ThemedText style={[styles.statValue, { color }]}>{score}</ThemedText>
-                <ThemedText style={styles.statLabel}>Points</ThemedText>
+            <Animated.View style={[styles.body, contentStyle]}>
+              <View style={styles.scoreBlock}>
+                <ThemedText style={[styles.scoreValue, { color }]}>{score}</ThemedText>
+                <ThemedText style={styles.scoreLabel}>points</ThemedText>
               </View>
-              <View style={[styles.statBox, { backgroundColor: color + '15' }]}>
-                <ThemedText style={styles.statEmoji}>✅</ThemedText>
-                <ThemedText style={[styles.statValue, { color }]}>
-                  {correctAnswers}/{totalQuestions}
-                </ThemedText>
-                <ThemedText style={styles.statLabel}>Correct</ThemedText>
-              </View>
-              <View style={[styles.statBox, { backgroundColor: color + '15' }]}>
-                <ThemedText style={styles.statEmoji}>📊</ThemedText>
-                <ThemedText style={[styles.statValue, { color }]}>{percentage.toFixed(0)}%</ThemedText>
-                <ThemedText style={styles.statLabel}>Accuracy</ThemedText>
-              </View>
-            </View>
 
-            <View style={styles.messageContainer}>
-              <ThemedText style={styles.encouragementText}>
-                {percentage >= 80 ? 'You\'re a superstar learner!' :
-                 percentage >= 50 ? 'Great effort! Keep learning!' :
-                 percentage >= 25 ? 'You\'re getting better!' :
-                 'Every mistake is a step to success!'}
-              </ThemedText>
-            </View>
+              {showPersonalBest && score > 0 && (
+                <View style={styles.bestPill}>
+                  <MaterialCommunityIcons name="trophy" size={16} color="#B07800" />
+                  <ThemedText style={styles.bestText}>New personal best!</ThemedText>
+                </View>
+              )}
 
-            <Animated.View style={[styles.buttonsContainer, buttonStyle]}>
+              <View style={styles.statsCard}>
+                <View style={styles.statsRow}>
+                  <View style={styles.stat}>
+                    <MaterialCommunityIcons name="check-circle" size={20} color="#2E9E62" />
+                    <ThemedText style={styles.statText}>
+                      {correctAnswers}/{totalQuestions} correct
+                    </ThemedText>
+                  </View>
+                  <View style={styles.stat}>
+                    <MaterialCommunityIcons name="bullseye-arrow" size={20} color={color} />
+                    <ThemedText style={styles.statText}>{percentage.toFixed(0)}%</ThemedText>
+                  </View>
+                </View>
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${Math.min(100, Math.max(0, percentage))}%`, backgroundColor: color },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <ThemedText style={styles.message}>{level.message}</ThemedText>
+
               <TouchableOpacity
-                style={[styles.button, styles.restartButton, { backgroundColor: color }]}
+                activeOpacity={0.85}
+                style={styles.primaryTouch}
                 onPress={() => {
                   soundManager.playSound('click');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -229,59 +229,56 @@ export function GameResultsModal({
                   onRestart();
                 }}
               >
-                <ThemedText style={styles.buttonIcon}>🔄</ThemedText>
-                <ThemedText style={styles.buttonText}>Play Again</ThemedText>
+                <LinearGradient
+                  colors={[color, color + 'CC']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.primaryButton}
+                >
+                  <MaterialCommunityIcons name="replay" size={24} color="#FFFFFF" />
+                  <ThemedText style={styles.primaryText}>Play Again</ThemedText>
+                </LinearGradient>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.button, styles.homeButton]}
-                onPress={() => {
-                  soundManager.playSound('whoosh');
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  showInterstitialIfDue();
-                  onHome();
-                }}
-              >
-                <ThemedText style={styles.buttonIcon}>🏠</ThemedText>
-                <ThemedText style={styles.buttonTextDark}>Home</ThemedText>
-              </TouchableOpacity>
-            </Animated.View>
-
-            <Animated.View style={[styles.secondaryButtonsContainer, buttonStyle]}>
-              {onNextGame && percentage >= 50 && (
+              <View style={styles.secondaryRow}>
                 <TouchableOpacity
-                  style={[styles.button, styles.nextButton, { borderColor: color }]}
+                  activeOpacity={0.85}
+                  style={[styles.secondaryButton, styles.homeButton]}
                   onPress={() => {
+                    soundManager.playSound('whoosh');
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     showInterstitialIfDue();
-                    onNextGame();
+                    onHome();
                   }}
                 >
-                  <ThemedText style={[styles.buttonTextDark, { color }]}>Next Challenge</ThemedText>
-                  <ThemedText style={styles.buttonIcon}>➡️</ThemedText>
+                  <MaterialCommunityIcons name="home" size={22} color="#5F5D7A" />
+                  <ThemedText style={styles.homeText}>Home</ThemedText>
                 </TouchableOpacity>
-              )}
 
-              <TouchableOpacity
-                style={[styles.button, styles.shareButton, { backgroundColor: color + '20', borderColor: color }]}
-                onPress={handleShare}
-              >
-                <ThemedText style={styles.buttonIcon}>📤</ThemedText>
-                <ThemedText style={[styles.buttonTextDark, { color }]}>Share</ThemedText>
+                {showNext && (
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    style={[styles.secondaryButton, styles.nextButton, { borderColor: color }]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      showInterstitialIfDue();
+                      onNextGame?.();
+                    }}
+                  >
+                    <ThemedText style={[styles.nextText, { color }]}>Next</ThemedText>
+                    <MaterialCommunityIcons name="arrow-right-circle" size={22} color={color} />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+                <MaterialCommunityIcons name="share-variant" size={18} color="#8B8AA3" />
+                <ThemedText style={styles.shareText}>Share my score</ThemedText>
               </TouchableOpacity>
+
+              <AdBanner variant="compact" style={styles.adBanner} />
             </Animated.View>
-
-            <View style={styles.tipsContainer}>
-              <ThemedText style={styles.tipsTitle}>💡 Quick Tip:</ThemedText>
-              <ThemedText style={styles.tipsText}>
-                {percentage >= 80 ? 'Try the next game to earn more stickers!' :
-                 percentage >= 50 ? 'Practice makes perfect! Try again for a higher score!' :
-                 'Take your time and read each question carefully!'}
-              </ThemedText>
-            </View>
-
-            <AdBanner variant="compact" style={styles.adBanner} />
-          </View>
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>
@@ -289,189 +286,247 @@ export function GameResultsModal({
 }
 
 const styles = StyleSheet.create({
-  adBanner: {
-    marginTop: 20,
-  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(20, 12, 50, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  modalContainer: {
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    maxHeight: '92%',
     backgroundColor: '#FFFFFF',
     borderRadius: 32,
-    width: '100%',
-    maxWidth: 400,
     overflow: 'hidden',
-    elevation: 10,
+    elevation: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
   },
-  modalHeader: {
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+  header: {
     alignItems: 'center',
+    paddingTop: 26,
+    paddingBottom: 44,
+    paddingHorizontal: 20,
+    overflow: 'hidden',
   },
-  headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  headerShine: {
+    position: 'absolute',
+    top: -60,
+    left: -40,
+    right: -40,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  sparkleLeft: {
+    position: 'absolute',
+    top: 24,
+    left: 34,
+  },
+  sparkleRight: {
+    position: 'absolute',
+    top: 58,
+    right: 40,
+  },
+  badgeRing: {
+    padding: 6,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+  },
+  badge: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 12,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  gamePill: {
+    marginTop: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    maxWidth: '90%',
+  },
+  gamePillText: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
-  modalContent: {
-    padding: 24,
+  starsCapsule: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    alignSelf: 'center',
+    gap: 6,
+    marginTop: -32,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 32,
+    backgroundColor: '#FFFFFF',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
-  gameTitle: {
-    fontSize: 20,
+  body: {
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 20,
+  },
+  scoreBlock: {
+    alignItems: 'center',
+  },
+  scoreValue: {
+    fontSize: 52,
+    fontWeight: '900',
+  },
+  scoreLabel: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#9A9AB0',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginTop: -4,
+  },
+  bestPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    backgroundColor: '#FFF4D6',
+  },
+  bestText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#B07800',
+  },
+  statsCard: {
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 18,
+    backgroundColor: '#F6F5FD',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  stat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#3D3A5C',
+  },
+  progressTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#E6E3FA',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  message: {
+    fontSize: 15,
     fontWeight: '600',
-    color: '#666',
+    color: '#6F6D8A',
     textAlign: 'center',
-    marginBottom: 20,
+    marginTop: 14,
+    lineHeight: 22,
   },
-  starsCard: {
+  primaryTouch: {
+    marginTop: 18,
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 12,
-  },
-  performanceText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666',
-  },
-  starEmoji: {
-    fontSize: 56,
-    opacity: 0.3,
-  },
-  starEarned: {
-    opacity: 1,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  statBox: {
-    alignItems: 'center',
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    elevation: 2,
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  statEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '600',
-  },
-  messageContainer: {
-    backgroundColor: '#FFF9E6',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFD93D',
-  },
-  encouragementText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  secondaryButtonsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  button: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: 6,
   },
-  restartButton: {
-    backgroundColor: '#FF6B6B',
+  primaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: 20,
+  },
+  primaryText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  secondaryRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
+  secondaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 18,
   },
   homeButton: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#F0EFF7',
+  },
+  homeText: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#5F5D7A',
   },
   nextButton: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 3,
-    flexDirection: 'row',
-    gap: 8,
-    flex: 1,
+    borderWidth: 2.5,
+  },
+  nextText: {
+    fontSize: 17,
+    fontWeight: '800',
   },
   shareButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 3,
     flexDirection: 'row',
-    gap: 8,
-    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
   },
-  buttonIcon: {
-    fontSize: 20,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  buttonTextDark: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  tipsContainer: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#2196F3',
-  },
-  tipsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1976D2',
-    marginBottom: 8,
-  },
-  tipsText: {
+  shareText: {
     fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+    fontWeight: '700',
+    color: '#8B8AA3',
+  },
+  adBanner: {
+    marginTop: 12,
   },
 });
