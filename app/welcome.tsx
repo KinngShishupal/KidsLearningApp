@@ -7,12 +7,11 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
-  withRepeat,
-  withSequence,
   withDelay,
+  withTiming,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 
@@ -23,56 +22,18 @@ export default function WelcomeScreen() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
 
-  const scale = useSharedValue(0);
-  const float1 = useSharedValue(0);
-  const float2 = useSharedValue(0);
-  const float3 = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.96);
 
   useEffect(() => {
-    scale.value = withDelay(200, withSpring(1, { damping: 12 }));
-    
-    float1.value = withRepeat(
-      withSequence(
-        withSpring(-15, { damping: 10 }),
-        withSpring(0, { damping: 10 })
-      ),
-      -1,
-      false
-    );
-
-    float2.value = withRepeat(
-      withSequence(
-        withSpring(-10, { damping: 8 }),
-        withSpring(0, { damping: 8 })
-      ),
-      -1,
-      false
-    );
-
-    float3.value = withRepeat(
-      withSequence(
-        withSpring(-20, { damping: 12 }),
-        withSpring(0, { damping: 12 })
-      ),
-      -1,
-      false
-    );
+    const easeOut = Easing.out(Easing.cubic);
+    opacity.value = withDelay(200, withTiming(1, { duration: 400, easing: easeOut }));
+    scale.value = withDelay(200, withTiming(1, { duration: 400, easing: easeOut }));
   }, []);
 
   const containerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
     transform: [{ scale: scale.value }],
-  }));
-
-  const float1Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: float1.value }],
-  }));
-
-  const float2Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: float2.value }],
-  }));
-
-  const float3Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: float3.value }],
   }));
 
   const handleSubmit = async () => {
@@ -118,9 +79,9 @@ export default function WelcomeScreen() {
         style={styles.gradient}
       >
         <View style={styles.decorativeElements}>
-          <Animated.View style={[styles.floatingCircle1, float1Style]} />
-          <Animated.View style={[styles.floatingCircle2, float2Style]} />
-          <Animated.View style={[styles.floatingCircle3, float3Style]} />
+          <View style={styles.floatingCircle1} />
+          <View style={styles.floatingCircle2} />
+          <View style={styles.floatingCircle3} />
         </View>
 
         <Animated.View style={[styles.content, containerStyle]}>

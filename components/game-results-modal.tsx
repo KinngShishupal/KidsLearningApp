@@ -7,9 +7,7 @@ import { soundManager } from '@/utils/sound-manager';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withDelay,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -85,28 +83,19 @@ export function GameResultsModal({
       soundManager.playSound(soundType);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
-      scale.value = withSpring(1, { damping: 12, stiffness: 100 });
-      
-      star1Scale.value = withDelay(300, withSequence(
-        withSpring(1.3, { damping: 8 }),
-        withSpring(1, { damping: 10 })
-      ));
-      
+      scale.value = withTiming(1, { duration: 200 });
+
+      star1Scale.value = withDelay(300, withTiming(1, { duration: 200 }));
+
       if (stars >= 2) {
-        star2Scale.value = withDelay(500, withSequence(
-          withSpring(1.3, { damping: 8 }),
-          withSpring(1, { damping: 10 })
-        ));
-      }
-      
-      if (stars >= 3) {
-        star3Scale.value = withDelay(700, withSequence(
-          withSpring(1.3, { damping: 8 }),
-          withSpring(1, { damping: 10 })
-        ));
+        star2Scale.value = withDelay(500, withTiming(1, { duration: 200 }));
       }
 
-      buttonScale.value = withDelay(900, withSpring(1, { damping: 10 }));
+      if (stars >= 3) {
+        star3Scale.value = withDelay(700, withTiming(1, { duration: 200 }));
+      }
+
+      buttonScale.value = withDelay(900, withTiming(1, { duration: 200 }));
     } else {
       scale.value = 0;
       star1Scale.value = 0;

@@ -4,16 +4,16 @@ import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router/react-navigation';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
+  withDelay,
   withTiming
 } from 'react-native-reanimated';
 
@@ -22,44 +22,18 @@ const USER_NAME_KEY = '@learn_with_fun_username';
 
 function AnimatedCard({ subject, index }: { subject: any; index: number }) {
   const router = useRouter();
-  const scale = useSharedValue(0);
-  const floatY = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.96);
 
   useEffect(() => {
-    scale.value = withSpring(1, { damping: 10, stiffness: 100 });
-    floatY.value = withRepeat(
-      withSequence(
-        withTiming(-8, { duration: 2000 }),
-        withTiming(0, { duration: 2000 })
-      ),
-      -1,
-      false
-    );
+    const easeOut = Easing.out(Easing.cubic);
+    opacity.value = withDelay(index * 100, withTiming(1, { duration: 400, easing: easeOut }));
+    scale.value = withDelay(index * 100, withTiming(1, { duration: 400, easing: easeOut }));
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { translateY: floatY.value },
-    ],
-  }));
-
-  const iconRotate = useSharedValue(0);
-
-  useEffect(() => {
-    iconRotate.value = withRepeat(
-      withSequence(
-        withSpring(15, { damping: 8 }),
-        withSpring(-15, { damping: 8 }),
-        withSpring(0, { damping: 8 })
-      ),
-      -1,
-      false
-    );
-  }, []);
-
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${iconRotate.value}deg` }],
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
   }));
 
   return (
@@ -81,13 +55,13 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
             <View style={styles.badgeContainer}>
               <ThemedText style={styles.badgeText}>{subject.gameCount} Games</ThemedText>
             </View>
-            <Animated.View style={[styles.iconContainer, iconStyle]}>
+            <View style={styles.iconContainer}>
               <MaterialCommunityIcons 
                 name={subject.icon} 
                 size={64} 
-                color="rgba(255, 255, 255, 0.9)" 
+                color="rgba(255, 255, 255, 0.9)"
               />
-            </Animated.View>
+            </View>
           </View>
 
           <View style={styles.cardBody}>
@@ -120,7 +94,7 @@ function AnimatedCard({ subject, index }: { subject: any; index: number }) {
 }
 
 export default function HomeScreen() {
-  const headerScale = useSharedValue(0);
+  const headerOpacity = useSharedValue(0);
   const [userName, setUserName] = useState('');
 
   const loadUserName = async () => {
@@ -135,7 +109,7 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    headerScale.value = withSpring(1, { damping: 8, stiffness: 80 });
+    headerOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) });
     loadUserName();
   }, []);
 
@@ -146,7 +120,7 @@ export default function HomeScreen() {
   );
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: headerScale.value }],
+    opacity: headerOpacity.value,
   }));
 
   const subjects = [
@@ -193,7 +167,11 @@ export default function HomeScreen() {
         >
           <View style={styles.headerContent}>
             <View style={styles.headerIconCircle}>
-              <MaterialCommunityIcons name="school" size={44} color="#FF6B6B" />
+              <Image
+                source={require('@/assets/images/icon.png')}
+                style={styles.headerLogo}
+                contentFit="cover"
+              />
             </View>
             <ThemedText style={styles.headerTitle}>
               {userName ? `Hi, ${userName}!` : 'Learn With Fun!'}
@@ -242,6 +220,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
     paddingVertical: 8,
+  },
+  headerLogo: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
   },
   headerIconCircle: {
     width: 90,

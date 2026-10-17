@@ -5,9 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
-  withSequence,
-  withDelay,
+  withTiming,
 } from 'react-native-reanimated';
 
 interface PatternCelebrationProps {
@@ -17,24 +15,17 @@ interface PatternCelebrationProps {
 }
 
 export function PatternCelebration({ show, isCorrect, patternType }: PatternCelebrationProps) {
-  const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (show) {
-      scale.value = withSequence(
-        withSpring(1.2, { damping: 10 }),
-        withSpring(1, { damping: 12 })
-      );
-      opacity.value = withSpring(1, { damping: 15 });
+      opacity.value = withTiming(1, { duration: 200 });
     } else {
-      scale.value = 0;
       opacity.value = 0;
     }
   }, [show]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 

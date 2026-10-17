@@ -9,7 +9,6 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming
 } from 'react-native-reanimated';
 
@@ -31,8 +30,6 @@ export function LearningBuddy({
   const [currentMood, setCurrentMood] = useState(mood);
   const [tapCount, setTapCount] = useState(0);
   const sound = useAudioPlayer(require('@/assets/sounds/no.mp3'));
-  
-  const bounce = useSharedValue(0);
   const rotate = useSharedValue(0);
   const scale = useSharedValue(1);
   const speechBubbleScale = useSharedValue(0);
@@ -67,7 +64,7 @@ export function LearningBuddy({
   const celebrationEmojis = ['✨', '🎉', '🌟', '💫', '🎊'];
 
   useEffect(() => {
-    speechBubbleScale.value = withSpring(1, { damping: 12, stiffness: 100 });
+    speechBubbleScale.value = withTiming(1, { duration: 300 });
     speechBubbleOpacity.value = withTiming(1, { duration: 400 });
   }, [message]);
 
@@ -77,15 +74,6 @@ export function LearningBuddy({
 
   useEffect(() => {
     if (currentMood === 'idle') {
-      bounce.value = withRepeat(
-        withSequence(
-          withSpring(-8, { damping: 10 }),
-          withSpring(0, { damping: 10 })
-        ),
-        -1,
-        false
-      );
-
       rotate.value = withRepeat(
         withSequence(
           withTiming(3, { duration: 800 }),
@@ -105,15 +93,6 @@ export function LearningBuddy({
         false
       );
     } else if (currentMood === 'excited') {
-      bounce.value = withRepeat(
-        withSequence(
-          withSpring(-20, { damping: 8 }),
-          withSpring(0, { damping: 8 })
-        ),
-        -1,
-        false
-      );
-
       rotate.value = withRepeat(
         withSequence(
           withTiming(15, { duration: 300 }),
@@ -126,8 +105,8 @@ export function LearningBuddy({
 
       scale.value = withRepeat(
         withSequence(
-          withSpring(1.2, { damping: 8 }),
-          withSpring(1, { damping: 8 })
+          withTiming(1.1, { duration: 400 }),
+          withTiming(1, { duration: 400 })
         ),
         -1,
         false
@@ -142,15 +121,6 @@ export function LearningBuddy({
         true
       );
 
-      bounce.value = withRepeat(
-        withSequence(
-          withTiming(-5, { duration: 800 }),
-          withTiming(5, { duration: 800 })
-        ),
-        -1,
-        true
-      );
-
       pulse.value = withRepeat(
         withSequence(
           withTiming(0.95, { duration: 700 }),
@@ -160,15 +130,6 @@ export function LearningBuddy({
         true
       );
     } else if (currentMood === 'celebrating') {
-      bounce.value = withRepeat(
-        withSequence(
-          withSpring(-30, { damping: 5 }),
-          withSpring(0, { damping: 5 })
-        ),
-        4,
-        false
-      );
-
       rotate.value = withRepeat(
         withSequence(
           withTiming(360, { duration: 800, easing: Easing.bezier(0.25, 0.1, 0.25, 1) }),
@@ -179,8 +140,8 @@ export function LearningBuddy({
       );
 
       scale.value = withSequence(
-        withSpring(1.5, { damping: 8 }),
-        withSpring(1, { damping: 10 })
+        withTiming(1.2, { duration: 300 }),
+        withTiming(1, { duration: 300 })
       );
 
       wiggle.value = withRepeat(
@@ -212,8 +173,8 @@ export function LearningBuddy({
     setTapCount(prev => prev + 1);
     
     scale.value = withSequence(
-      withSpring(1.3, { damping: 10 }),
-      withSpring(1, { damping: 8 })
+      withTiming(1.15, { duration: 150 }),
+      withTiming(1, { duration: 150 })
     );
     
     wiggle.value = withSequence(
@@ -221,11 +182,6 @@ export function LearningBuddy({
       withTiming(-15, { duration: 100 }),
       withTiming(15, { duration: 100 }),
       withTiming(0, { duration: 100 })
-    );
-
-    bounce.value = withSequence(
-      withSpring(-25, { damping: 8 }),
-      withSpring(0, { damping: 10 })
     );
 
     const moods: Array<'idle' | 'excited' | 'thinking' | 'celebrating'> = ['excited', 'thinking', 'celebrating', 'idle'];
@@ -239,7 +195,6 @@ export function LearningBuddy({
 
   const animatedBuddyStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: bounce.value },
       { rotate: `${rotate.value + wiggle.value}deg` },
       { scale: scale.value * pulse.value },
     ],
