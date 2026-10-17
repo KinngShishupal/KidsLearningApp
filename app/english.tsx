@@ -37,6 +37,7 @@ export default function EnglishScreen() {
   const [spellingInput, setSpellingInput] = useState<string[]>([]);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState('');
+  const [celebrationSubtitle, setCelebrationSubtitle] = useState<string | undefined>(undefined);
   const [showConfetti, setShowConfetti] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
@@ -52,7 +53,8 @@ export default function EnglishScreen() {
   const [rhymeTimeLeft, setRhymeTimeLeft] = useState(15);
   const [rhymeTimerActive, setRhymeTimerActive] = useState(true);
 
-  const showCelebrationWithMessage = (message: string) => {
+  const showCelebrationWithMessage = (message: string, subtitle?: string) => {
+    setCelebrationSubtitle(subtitle);
     setCelebrationMessage(message);
     setShowCelebration(true);
     setTimeout(() => setShowCelebration(false), 2000);
@@ -297,7 +299,7 @@ export default function EnglishScreen() {
       setSpellingTimerActive(false);
       const newScore = score + 15;
       setScore(newScore);
-      showCelebrationWithMessage('Perfect spelling!');
+      showCelebrationWithMessage('Perfect Spelling!', `You spelled ${spellingGame.word}!`);
       
       setTimeout(() => {
         if (spellingQuestionIndex < spellingRound.length - 1) {
@@ -915,7 +917,7 @@ export default function EnglishScreen() {
           subject="english"
         />
         <Confetti show={showConfetti} />
-        <Celebration message={celebrationMessage} show={showCelebration} />
+        <Celebration message={celebrationMessage} subtitle={celebrationSubtitle} show={showCelebration} />
         <LinearGradient
           colors={['#56C596', '#3AA76D']}
           start={{ x: 0, y: 0 }}
