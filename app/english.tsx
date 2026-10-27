@@ -176,14 +176,14 @@ export default function EnglishScreen() {
   );
   const rhymingGame = rhymingRound[rhymeQuestionIndex];
 
-  // Rewarded "💡 Hint" state. Each hint remembers which question it belongs to
+  // "💡 Hint" state. Each hint remembers which question it belongs to
   // (round array + index), so it resets automatically whenever the question changes:
   // next question, restart / new round (fresh round array) or switching games.
   type HintFor<T> = { round: readonly unknown[]; index: number; value: T } | null;
   const [alphabetHint, setAlphabetHint] = useState<HintFor<string[]>>(null);
   const [spellingHint, setSpellingHint] = useState<HintFor<true>>(null);
   const [rhymeHint, setRhymeHint] = useState<HintFor<string[]>>(null);
-  // True while the hint prompt / video is on screen. Countdowns don't tick while it is set,
+  // True while the hint prompt is on screen. Countdowns don't tick while it is set,
   // and clearing it never re-activates a timer that stopped because the question ended.
   const [hintPaused, setHintPaused] = useState(false);
   const pauseForHint = () => setHintPaused(true);

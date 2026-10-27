@@ -29,7 +29,7 @@ interface PatternGameProps {
   patterns: Pattern[];
   onComplete: (score: number, correctAnswers: number) => void;
   color?: string;
-  /** Show the "💡 Hint" (watch a video) button above each pattern. Defaults to true. */
+  /** Show the "💡 Hint" button above each pattern. Defaults to true. */
   hintsEnabled?: boolean;
 }
 
@@ -42,7 +42,7 @@ export function PatternGame({ patterns, onComplete, color = '#FF6B6B', hintsEnab
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
 
-  // Video hint for one pattern only: tagged with the pattern index it belongs to,
+  // Hint for one pattern only: tagged with the pattern index it belongs to,
   // so it never carries over to the next pattern.
   const [videoHint, setVideoHint] = useState<{ index: number; hidden: string[] } | null>(null);
 

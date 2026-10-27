@@ -59,7 +59,7 @@ export default function MathScreen() {
   const [matchingTimeLeft, setMatchingTimeLeft] = useState(12);
   const [timerActive, setTimerActive] = useState(true);
 
-  // Video hint for the counting / addition / matching games. It is tagged with the
+  // Hint for the counting / addition / matching games. It is tagged with the
   // question it belongs to (game + round + question index), so it never carries over.
   const [hint, setHint] = useState<{ key: string; hidden: (number | string)[] } | null>(null);
   // Whether opening the hint prompt actually stopped a running countdown.
@@ -155,7 +155,7 @@ export default function MathScreen() {
   const hintUsed = hint?.key === hintKey;
   const hiddenOptions = hint && hintUsed ? hint.hidden : [];
 
-  // Freeze the countdown while the hint prompt / video is up; the time left is kept.
+  // Freeze the countdown while the hint prompt is up; the time left is kept.
   const pauseForHint = () => {
     hintPausedTimer.current = timerActive;
     if (timerActive) setTimerActive(false);

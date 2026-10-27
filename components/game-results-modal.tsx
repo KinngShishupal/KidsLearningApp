@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { AdBanner } from '@/components/ad-banner';
 import { GameTracker } from '@/utils/game-tracker';
 import { recordGameCompleted, showInterstitialIfDue } from '@/utils/ads';
 import { soundManager } from '@/utils/sound-manager';
@@ -275,8 +274,6 @@ export function GameResultsModal({
                 <MaterialCommunityIcons name="share-variant" size={18} color="#8B8AA3" />
                 <ThemedText style={styles.shareText}>Share my score</ThemedText>
               </TouchableOpacity>
-
-              <AdBanner variant="compact" style={styles.adBanner} />
             </Animated.View>
           </ScrollView>
         </Animated.View>
@@ -525,8 +522,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#8B8AA3',
-  },
-  adBanner: {
-    marginTop: 12,
   },
 });

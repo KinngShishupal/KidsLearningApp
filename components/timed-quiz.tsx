@@ -41,7 +41,7 @@ export function TimedQuiz({
   const [timeLeft, setTimeLeft] = useState(timePerQuestion);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  // True while the hint prompt / rewarded video is on screen; freezes the countdown.
+  // True while the hint prompt is on screen; freezes the countdown.
   const [paused, setPaused] = useState(false);
   // The hint belongs to one question only: it is tagged with that question, so it
   // can never carry over to the next one.

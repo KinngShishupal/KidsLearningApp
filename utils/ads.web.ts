@@ -21,9 +21,3 @@ export async function initAds() {}
 export function recordGameCompleted() {}
 
 export function showInterstitialIfDue() {}
-
-export type HintAdResult = 'granted' | 'dismissed';
-
-export async function showRewardedAdForHint(): Promise<HintAdResult> {
-  return 'granted';
-}
