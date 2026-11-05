@@ -111,14 +111,20 @@ export function recordGameCompleted() {
   gamesSinceInterstitial += 1;
 }
 
+/** True when an interstitial is ready and the frequency cap allows one now. */
+export function isInterstitialDue(): boolean {
+  if (!interstitial || !interstitialLoaded) return false;
+  if (gamesSinceInterstitial < GAMES_BETWEEN_INTERSTITIALS) return false;
+  return Date.now() - lastInterstitialAt >= MIN_INTERSTITIAL_GAP_MS;
+}
+
 /**
  * Shows an interstitial if one is ready and the frequency cap allows it.
- * Only call this when the child is leaving a results screen.
+ * Only call this when the child is leaving a results screen, after the
+ * "Ad break" notice so the ad is clearly announced as an ad.
  */
 export function showInterstitialIfDue() {
-  if (!interstitial || !interstitialLoaded) return;
-  if (gamesSinceInterstitial < GAMES_BETWEEN_INTERSTITIALS) return;
-  if (Date.now() - lastInterstitialAt < MIN_INTERSTITIAL_GAP_MS) return;
+  if (!interstitial || !isInterstitialDue()) return;
 
   gamesSinceInterstitial = 0;
   lastInterstitialAt = Date.now();

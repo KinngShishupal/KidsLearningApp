@@ -20,4 +20,8 @@ export async function initAds() {}
 
 export function recordGameCompleted() {}
 
+export function isInterstitialDue(): boolean {
+  return false;
+}
+
 export function showInterstitialIfDue() {}

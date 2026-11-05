@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { GameTracker } from '@/utils/game-tracker';
-import { recordGameCompleted, showInterstitialIfDue } from '@/utils/ads';
+import { isInterstitialDue, recordGameCompleted, showInterstitialIfDue } from '@/utils/ads';
 import { soundManager } from '@/utils/sound-manager';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,6 +32,9 @@ interface GameResultsModalProps {
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 const easeOut = Easing.out(Easing.cubic);
+
+/** How long the "Ad break" notice shows before a full-screen ad. */
+const AD_BREAK_NOTICE_MS = 1500;
 
 /** Headline, badge icon and encouragement for each star level (0–3). */
 const RESULT_LEVELS: { title: string; icon: IconName; message: string }[] = [
@@ -148,6 +151,29 @@ export function GameResultsModal({
 
   const showNext = !!onNextGame && percentage >= 50;
 
+  // When a full-screen ad is due, announce it first with a plain "Ad break"
+  // notice so the ad is clearly separate from the game (Families policy).
+  const [adBreak, setAdBreak] = useState(false);
+  const adBreakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (adBreakTimer.current) clearTimeout(adBreakTimer.current);
+  }, []);
+
+  const leaveWith = (action: () => void) => {
+    if (adBreak) return;
+    if (!isInterstitialDue()) {
+      action();
+      return;
+    }
+    setAdBreak(true);
+    adBreakTimer.current = setTimeout(() => {
+      setAdBreak(false);
+      showInterstitialIfDue();
+      action();
+    }, AD_BREAK_NOTICE_MS);
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
@@ -224,8 +250,7 @@ export function GameResultsModal({
                 onPress={() => {
                   soundManager.playSound('click');
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  showInterstitialIfDue();
-                  onRestart();
+                  leaveWith(onRestart);
                 }}
               >
                 <LinearGradient
@@ -246,8 +271,7 @@ export function GameResultsModal({
                   onPress={() => {
                     soundManager.playSound('whoosh');
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    showInterstitialIfDue();
-                    onHome();
+                    leaveWith(onHome);
                   }}
                 >
                   <MaterialCommunityIcons name="home" size={22} color="#5F5D7A" />
@@ -260,8 +284,7 @@ export function GameResultsModal({
                     style={[styles.secondaryButton, styles.nextButton, { borderColor: color }]}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      showInterstitialIfDue();
-                      onNextGame?.();
+                      leaveWith(() => onNextGame?.());
                     }}
                   >
                     <ThemedText style={[styles.nextText, { color }]}>Next</ThemedText>
@@ -276,6 +299,13 @@ export function GameResultsModal({
               </TouchableOpacity>
             </Animated.View>
           </ScrollView>
+
+          {adBreak && (
+            <View style={styles.adBreak}>
+              <ThemedText style={styles.adBreakTitle}>Ad break</ThemedText>
+              <ThemedText style={styles.adBreakText}>An advertisement is coming up next.</ThemedText>
+            </View>
+          )}
         </Animated.View>
       </View>
     </Modal>
@@ -283,6 +313,25 @@ export function GameResultsModal({
 }
 
 const styles = StyleSheet.create({
+  adBreak: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: '#EDEDF0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  adBreakTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: '#3A3A44',
+  },
+  adBreakText: {
+    fontSize: 15,
+    color: '#5F5F6B',
+    marginTop: 6,
+    textAlign: 'center',
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(20, 12, 50, 0.6)',
